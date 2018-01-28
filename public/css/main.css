@@ -1,0 +1,424 @@
+﻿	html {
+		font-family: "微軟正黑體";
+	}
+	body {
+		background-color: #F7F3E5;
+		height: 100%;
+		font-family: "微軟正黑體";
+		color: #1A1A1A;
+		font-size: 14px;
+	}
+	select, label, input {
+		font-family: "微軟正黑體";
+	}
+	select {
+		border: 1px #EED6B4 solid;
+	}
+	#top {
+		background-color: white;
+		height: 50px;
+		border-bottom: 1px #B4B5B5 solid;
+		position: fixed;
+		top: 0px;
+		width: 100%;
+		z-index: 3;
+		line-height: 50px;
+	}
+	#top input {
+		margin-left: 10px;
+		height: 25px;
+		min-width: 230px;
+		width: 19%;
+		float: left;
+	}
+	#top_search {
+		display: inline-block;
+		height: 25px;
+		position: absolute;
+		margin-top: 10px;
+	}
+	#glass_div {
+		width: 50px;
+		background-color: #EED6B4;
+		display: inline-block;
+		height: 29px;
+		text-align: center;
+		position: relative;
+		cursor: pointer;
+		float: left;
+		z-index: 2;
+	}
+	#glass_div img {
+		text-align: center;
+		height: 25px;
+		vertical-align: top;
+		margin-top: 2px;
+	}
+	.top_search {
+		display: inline-block;
+		height: 25px;
+		position: absolute;
+		z-index: 2;
+		width: auto !important;
+	}
+	.top_search .input_field {
+		height: 25px;
+		width: 250px;
+	}
+	.glass_div {
+		width: 50px !important;
+		background-color: #EED6B4;
+		display: inline-block;
+		height: 29px;
+		text-align: center;
+		position: relative;
+		cursor: pointer;
+		float: left;
+		z-index: 2;
+		margin-top: 4px;
+	}
+	.glass_div img {
+		text-align: center;
+		height: 25px;
+		vertical-align: top;
+		margin-top: 2px;
+	}
+	.insert_bt_d {
+		width: 100%;
+		margin-top: -33px;
+		text-align: center;
+	}
+	#menu {
+		float: right;
+		display: inline-block;
+		margin-right: 50px;
+	}
+	ul#navigation {
+		float: left;
+		margin-right: 10px;
+	}
+	ul#navigation, ul#navigation li, ul#navigation ul a{
+		font-size: 16px;
+		list-style: none;
+		position: relative;
+	}
+	ul#navigation li {
+		position: relative;
+		float: left;
+		height: 50px;
+	}
+	ul#navigation li a{
+		display: block;
+		background-color: white;
+		color: #1A1A1A;
+		width: 100px;
+		text-align: center;
+		text-decoration: none;
+	}
+	ul#navigation > li > a:hover {
+		background-color: #FCE3CE;
+	}
+	ul#navigation li ul {
+		display: none;
+		float: left;
+		position: absolute;
+		left: 0;
+		margin: 0;
+	}
+	ul#navigation li:hover > ul {
+		display: block;
+	}
+	ul#navigation ul li {
+		border-bottom: 0.5px #B4B4B5 solid;
+		border-left: 0.5px #B4B4B5 solid;
+		border-right: 0.5px #B4B4B5 solid;
+		height: 35px;
+		line-height: 35px;
+	}
+	ul#navigation ul a{
+		color: #1A1A1A;
+		background-color: white;
+		padding-left: 7px;
+		text-align: left;
+	}
+	ul#navigation .ex a{
+		width: 155px !important;
+	}
+	ul#navigation .te a{
+		width: 105px !important;
+	}
+	ul#navigation ul a:hover {
+		background-color: #FCE3CE;
+	}
+	ul#navigation ul li:hover > ul {
+		display: block;
+		position: absolute;
+		top: 0px;
+		left: 100%;
+	}
+	.top_per {
+		width: 100px;
+		display: inline-block;
+		text-align: center;
+	}
+	#top_id {
+		background-color: #FCE3CE;
+		width: 150px;
+	}
+	/* 箭頭向下 */
+	.arrow-bottom {
+	    display: inline-block;
+	    /*margin-left: 5px;
+	    border-top: 4px solid #000;
+	    border-right: 4px solid transparent;    
+	    border-left: 4px solid transparent;        
+	    width: 1px;
+	    height: 3px;*/
+	    float: right;
+	    margin: 5px 0px 0px -15px;
+	}
+	/* 箭頭向右 */
+	.arrow-right {
+	    display: inline-block;
+	    /*margin-left: 25px;    
+	    border-top: 3px solid transparent;
+	    border-bottom: 3px solid transparent;
+	    border-left: 3px solid #666;        
+	    width: 1px;
+	    height: 1px;*/
+	    float: right;
+	    margin: 5px 0px 0px -15px;
+	}
+	#all {
+		width: 90%;
+		height: 100% !important;
+		position: relative;
+		margin: 100px auto;
+	}
+	#title, .title {
+		height: 40px;
+		background-color: #F2D9B6;
+		width: 100%;
+		margin-bottom: 5px;
+		line-height: 40px;
+		border-bottom: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+	}
+	#title label, .title label {
+		margin-left: 20px;
+	}
+	.content {
+		width: 100%;
+		margin-bottom: 5px;
+		border-bottom: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+		background-color: white;
+		float: left;
+	}
+	.input_field {
+		margin-left: 5px;
+		border: 1px #EED6B4 solid;
+		padding-left: 2px;
+	}
+	.btn {
+		border: 1px #EED6B4 solid;
+		background-color: #EED6B4;
+		cursor: pointer;
+		font-family: "微軟正黑體";
+		font-size: 14px;
+	}
+	.btn:active {
+		border: 0.5px gray dashed;
+	}
+	#bottom {
+		bottom: 0px;
+		height: 50px;
+		position: relative;
+		float: left;
+		width: 100%;
+		z-index: 1;
+	}
+	#help {
+		width: 100%;
+		text-align: center;
+		margin-top: 5px;
+	}
+	.small_title {
+		float: left;
+		width: 100%;
+		margin-bottom: 5px;	
+		background-color: #F2D9B6;	
+		border-bottom: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+	}
+	#help label{
+		padding: 0px 5px 0px 5px;
+		font-size: 13px;
+	}
+	#contact {
+		width: 100%;
+		text-align: center;
+		margin-top: 5px;
+	}
+	#contact label {
+		font-size: 13px;
+	}
+	.title_intro {
+		background-color: white;
+		width: 100%;
+		float: left;
+		margin-bottom: 5px;
+		border-bottom: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+		font-family: "微軟正黑體";
+	}
+	.oans_btn {
+		margin-left: 10px;
+		margin-bottom: 5px;
+	}
+	.oans {
+		height: 25px !important;
+		margin-bottom: 10px !important;
+		margin-left: 5px;
+	}
+	.oans_pic, .atten_pic {
+		width: 25px;
+		height: 25px;
+		margin-right: 5px;
+	}
+	.oans_gold {
+		height: 20px;
+		margin-right: 5px;
+	}
+	.oans_goldplu {
+		height: 38px;
+		float: right;
+		margin-top: -5px;
+		margin-left: 5px;
+	}
+	.list tr td {
+		padding: 1px;
+	}
+	a {
+		text-decoration: none;
+		position: relative;
+		z-index: 2;
+	}
+	a:hover {
+		text-decoration: underline;
+	}
+	.f17 { font-size: 17px; }
+	.f16 { font-size: 16px; }
+	.f15 { font-size: 15px; }
+	.f14 { font-size: 14px; }
+	.f13 { font-size: 13px; }
+	.f12 { font-size: 12px; }
+	.f10 { font-size: 10px; }
+	.w450 { width: 450px; }
+	.w350 { width: 350px; }
+	.w320 { width: 320px; }
+	.w240 { width: 240px; }
+	.w250 { width: 250px; }
+	.w160 { width: 160px; }
+	.w150 { width: 150px; }
+	.w100 { width: 100px; }
+	.w80 { width: 80px; }
+	.w75 { width: 75px; }
+	.w70 { width: 70px; }
+	.w50 { width: 50px; }
+	.w40 { width: 40px; }
+	.h30 { height: 30px; line-height: 28px;}
+	.h25 { height: 25px; line-height: 23px;}
+	.h20 { height: 20px; line-height: 20px;}
+	.bg_pay {
+		background-color: #F1AB3F;
+		color: white;
+	}
+	.bg_draw {
+		background-color: #87BD43;
+		color: white;
+	}
+	.bg_sets {
+		background-color: #C1996B;
+		color: white;
+	}
+	.bg_ques {
+		background-color: #B1C59D;
+		color: white;
+	}
+	/*選擇欄位*/
+	.list_set{
+		display: none;
+		position: fixed;
+		width: 100%;
+		background-color: rgba(255,255,255,.7);
+		height: 100%;
+		top: 0px;
+		z-index: 2;
+		_opacity=70;
+		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF,endColorstr=#FFFFFF);
+		/*border: black solid thin;*/
+	}
+	.set_all{
+		margin: 15% auto;
+		width: 800px;
+	}
+	.set_title {
+		height: 40px;
+		background-color: #F2D9B6;
+		width: 100%;
+		margin-bottom: 5px;
+		line-height: 40px;
+		border-bottom: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+	}
+	.set_title label {
+		margin-left: 20px;
+	}
+	.set_content {
+		width: 100%;
+		margin-bottom: 5px;
+		border-bottom: 1px #B4B5B5 solid;
+		border-left: 1px #B4B5B5 solid;
+		border-right: 1px #B4B5B5 solid;
+		background-color: white;
+		float: left;
+	}
+	.set_cen {
+		padding: 20px 0px 50px 0px;
+		margin: 0px 20px 0px 20px;
+	}
+	.set_btn {
+		margin-bottom: 10px;
+	}
+	.set_btn input {
+		margin-right: 5px;
+	}
+	.set_main {
+		margin-bottom: 20px;
+	}
+	.set_chk {
+		margin-bottom: 20px;
+	}
+	.set_chk input{
+		margin-bottom: 5px;
+		width: 15px;
+		height: 15px;
+	}
+	.set_chk input, .set_chk label {
+		margin-left: 5px;
+	}
+	.profile_pay {
+		margin-left: 20px;
+		color: white;
+		background-color: #F1AB3F;
+		border: 1px #F1AB3F solid;
+	}
+	.profile_pay:active {
+		border: 1px gray dashed;
+	}

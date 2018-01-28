@@ -1,0 +1,212 @@
+#all{
+    min-width:1152px
+}
+#title, .title{
+    height:30px;
+    line-height:30px
+}
+#cen{
+    width:100%
+}
+.hover{
+    background-color:#fce3ce
+}
+.select{
+    background-color:#f8cd89
+}
+.content{
+    float:left;
+    width:100%
+}
+.btn{
+    height:25px;
+    margin-bottom:5px;
+    border:.5px #eed6b4 solid
+}
+.each_bottom{
+    width:100%;
+    float:left;
+    padding-bottom:20px;
+    margin-left:5px
+}
+#page{
+    margin-bottom:60px;
+    height:40px;
+    line-height:40px;
+    padding:10px 0 10px 0;
+    position:relative
+}
+#page .each{
+    padding:0;
+    text-align:center;
+    position:absolute;
+    width:100%
+}
+.btn_page{
+    height:20px
+}
+#prev{
+    margin-right:20px
+}
+#next{
+    margin-left:20px
+}
+.title_intro{
+    position:relative;
+    width:100%;
+    height:50px;
+    line-height:50px
+}
+.title_intro div{
+    position:absolute;
+    text-align:center;
+    width:100%
+}
+.title_intro.btn{
+    height:25px
+}
+#choice_fie{
+    float:right;
+    margin-right:10px
+}
+.list tr th{
+    height:40px
+}
+.list tr td{
+    height:85px
+}
+.list tr td,.list tr th{
+    vertical-align:middle;
+    border-right:1px #b4b5b5 solid;
+    border-bottom:1px #b4b5b5 solid;
+}
+.list .deep{
+    background-color:#efefee
+}
+.list .shallow{
+    background-color:#fcfcfc
+}
+.list tr.shallow:hover,.list tr.deep:hover{
+    background-color:#fce3ce
+}
+.list th.last{
+    text-align:center;
+    border-right:0
+}
+.list td.last{
+    text-align:left;
+    border-right:0
+}
+.list .duty{
+    text-align:left;
+    padding-left:5px
+}
+.last div.edit{
+    width:70px;
+    height:25px;
+    background-color:#c84146;
+    color:white;
+    margin-left:5px;
+    margin-right:7px;
+    cursor:pointer;
+    text-align:center;
+    line-height:25px
+}
+.last div.ok{
+    background-color:#29abe2
+}
+.last div input{
+    margin-top:5px
+}
+.class_examed{
+    color:#29abe2
+}
+.class_notexam{
+    color:#c1272d
+}
+.class_examing{
+    color:#f15a24
+}
+.edit_group{
+    height:25px;
+    width:70px;
+    cursor:pointer;
+    text-align:center;
+    line-height:25px;
+    margin:10px 7px 0 5px
+}
+.edit_func{
+    background-color:white;
+    border:1px #b4b5b5 solid;
+    width:70px;
+    margin-left:5px;
+    position:absolute;
+    z-index:2;
+    display:none
+}
+.edit_func div{
+    height:20px;
+    line-height:20px;
+    position:relative;
+    text-align:center;
+    background-color:white
+}
+#tiphelp{
+    width:auto;
+    text-align:left;
+    margin-left:5px;
+    float:left;
+    line-height:18px;
+    margin-top:30px;
+    color:red;
+    cursor:help
+}
+.all_rows{
+    position:absolute;
+    margin-left:20px
+}
+hr{
+    margin:5px auto
+}
+.clas{
+    height:25px
+}
+.tip{
+    margin-left:35px;
+    padding:5px;
+    border:1px #b4b4b5 solid;
+    color:#1a1a1a!important;
+    width:auto!important;
+    position:absolute;
+    text-align:left!important;
+    margin-top:47px;
+    line-height:15px;
+    background-color:#f7f3e5;
+    z-index:2;
+    display:none
+}
+#website_intro{
+    text-align:center;
+    position:fixed;
+    padding:7px 0 7px 0;
+    background-color:white;
+    border-right:.5px gray solid;
+    border-top:.5px gray solid;
+    border-bottom:.5px gray solid;
+    border-radius:5px;
+    font-size:16px;
+    color:blue;
+    cursor:pointer;
+    width:38px
+}
+#intro_icon{
+    display:none
+}
+.show{
+    display:block
+}
+@media screen and (min-width:1500px){
+    #all{
+        min-width:1644px
+    }
+}
