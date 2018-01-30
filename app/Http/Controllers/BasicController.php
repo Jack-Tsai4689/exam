@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Gscs;
-use Session;
 
 class BasicController extends TopController
 {
@@ -17,7 +16,7 @@ class BasicController extends TopController
      */
     public function index()
     {
-        $grade_data = Gscs::where('g_graid',0)->where('g_subjid', 0)->get();
+        $grade_data = $this->grade();
         return view('basic.index', [
             'menu_user' => $this->menu_user,
             'title' => '基本設定',
@@ -48,6 +47,10 @@ class BasicController extends TopController
         $type = ($req->has('type')) ? $req->input('type'):'';
         if (empty($type))$error = true;
         if ($error)abort(400);
+        $data = new Gscs;
+        $data->g_owner = $this->login_user;
+        $data->created_at = time();
+        $data->updated_at = time();
         switch ($type) {
             case 'gra':
                 $gra_name = ($req->has('graname')) ? $req->input('graname'):'';
@@ -55,11 +58,8 @@ class BasicController extends TopController
                 if ($error)abort(400);
                 $data = new Gscs;
                 $data->g_name = $gra_name;
-                $data->g_owner = session('epno');
-                $data->created_at = time();
-                $data->updated_at = time();
                 $data->save();
-                $grade_data = Gscs::where('g_graid',0)->where('g_subjid', 0)->get();
+                $grade_data = $this->grade();
                 $rs_data = array();
                 foreach ($grade_data as $v) {
                     $tmp = new \stdClass;
@@ -76,14 +76,10 @@ class BasicController extends TopController
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if (empty($subj_name) || $g===0)$error = true;
                 if ($error)abort(400);
-                $data = new Gscs;
                 $data->g_name = $subj_name;
                 $data->g_graid = $g;
-                $data->g_owner = session('epno');
-                $data->created_at = time();
-                $data->updated_at = time();
                 $data->save();
-                $subj_data = Gscs::where('g_graid',$g)->where('g_subjid', 0)->get();
+                $subj_data = $this->subject($g);
                 $rs_data = array();
                 foreach ($subj_data as $v) {
                     $tmp = new \stdClass;
@@ -101,15 +97,11 @@ class BasicController extends TopController
                 $s = ($req->has('s')) ? (int)$req->input('s'):0;
                 if (empty($chap_name) || $g===0 || $s===0)$error = true;
                 if ($error)abort(400);
-                $data = new Gscs;
                 $data->g_name = $chap_name;
                 $data->g_graid = $g;
                 $data->g_subjid = $s;
-                $data->g_owner = session('epno');
-                $data->created_at = time();
-                $data->updated_at = time();
                 $data->save();
-                $chap_data = Gscs::where('g_graid',$g)->where('g_subjid', $s)->get();
+                $chap_data = $this->chapter($g, $s);
                 $rs_data = array();
                 foreach ($chap_data as $v) {
                     $tmp = new \stdClass;
@@ -132,7 +124,7 @@ class BasicController extends TopController
             case 'subj':
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if ($g===0)abort(400);
-                $subj_data = Gscs::where('g_graid',$g)->where('g_subjid',0)->get();
+                $subj_data = $this->subject($g);
                 $rs_data = array();
                 foreach ($subj_data as $v) {
                     $tmp = new \stdClass;
@@ -148,7 +140,7 @@ class BasicController extends TopController
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 $s = ($req->has('s')) ? (int)$req->input('s'):0;
                 if ($g===0 || $s===0)abort(400);
-                $chap_data = Gscs::where('g_graid',$g)->where('g_subjid',$s)->get();
+                $chap_data = $this->chapter($g, $s);
                 $rs_data = array();
                 foreach ($chap_data as $v) {
                     $tmp = new \stdClass;

@@ -360,7 +360,7 @@ function getsubj(v){
 	g = $(v).data("id");
 	$.ajax({
 		type:"GET",
-		url:"basic/detail",
+		url:"{{ url('basic/detail') }}",
 		data:{'type':'subj', g:g},
 		dataType:"JSON",
 		success: function(rs){
@@ -388,7 +388,7 @@ function getchap(v){
 	s = $(v).data("id");
 	$.ajax({
 		type:"GET",
-		url:"basic/detail",
+		url:"{{ url('basic/detail') }}",
 		data:{'type':'chap', 'g':g, 's':s},
 		dataType:"JSON",
 		success: function(rs){

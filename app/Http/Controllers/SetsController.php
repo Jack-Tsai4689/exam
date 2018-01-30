@@ -5,9 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
-use App\Gscs;
 use App\Sets;
-use Session;
 use Input;
 
 class SetsController extends TopController
@@ -31,7 +29,7 @@ class SetsController extends TopController
         if ($gra_id>0)$sets = $sets->where('s_gra', $gra_id);
         if ($subj_id>0)$sets = $sets->where('s_subj', $subj_id);
         $sets_data = $sets->get();
-        $gra = Gscs::where('g_graid',0)->where('g_subjid',0)->get();
+        $gra = $this->grade();
         $grade_data = '';
         $subj_data = '';
         $g_data = false;
@@ -49,7 +47,7 @@ class SetsController extends TopController
         }
         if ($g_data){
             $ssel = '';
-            $subj = Gscs::where('g_graid',$gra_id)->where('g_subjid',0)->get();
+            $subj = $this->subject($gra_id);
             foreach ($subj as $v) {
                 $ssel = ($subj_id===$v->g_id) ? 'selected':'';
                 $subj_data.= '<option '.$ssel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
@@ -187,13 +185,13 @@ class SetsController extends TopController
         }
         $gra_html = '';
         $subj_html = '';
-        $grade_data = Gscs::where('g_graid',0)->where('g_subjid',0)->get();
+        $grade_data = $this->grade();
         $subject_data = array();
         if (!empty($grade_data)){
             foreach ($grade_data as $v) {
                 $gra_html.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
-            $subject_data = Gscs::where('g_graid',$grade_data[0]->g_id)->where('g_subjid',0)->get();
+            $subject_data = $this->subject($grade_data[0]->g_id);
         }
         if (!empty($subject_data)){
                 foreach ($subject_data as $v) {
@@ -267,7 +265,7 @@ class SetsController extends TopController
         $p_again = ($req->has('f_times')) ? (int)$req->input('f_times'):2;
         $data['s_again'] = ($p_again===2) ? 0:1;
         
-        $data['s_owner'] = $this->login_user->e_epno;
+        $data['s_owner'] = $this->login_user;
         $data['created_at'] = time();
         $data['updated_at'] = time();
         //主體
@@ -364,13 +362,13 @@ class SetsController extends TopController
 
         $gra_html = '';
         $subj_html = '';
-        $grade_data = Gscs::where('g_graid',0)->where('g_subjid',0)->get();
+        $grade_data = $this->grade();
         foreach ($grade_data as $v) {
             $g_sel = ($data->s_gra===$v->g_id) ? 'selected':'';
             $gra_html.= '<option '.$g_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
         }
 
-        $subject_data = Gscs::where('g_graid',$data->s_gra)->where('g_subjid',0)->get();
+        $subject_data = $this->subject($data->s_gra);
         foreach ($subject_data as $v) {
             $s_sel = ($data->s_subj===$v->g_id) ? 'selected':'';
             $subj_html.= '<option '.$s_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
@@ -447,7 +445,7 @@ class SetsController extends TopController
         $p_again = ($req->has('f_times')) ? (int)$req->input('f_times'):2;
         $data['s_again'] = ($p_again===2) ? 0:1;
         
-        $data['s_owner'] = session::get('epno');
+        $data['s_owner'] = $this->login_user;
         $data['updated_at'] = time();
         
         Sets::where('s_id', $sid)

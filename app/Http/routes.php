@@ -34,9 +34,9 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::put('{id}', "SetsController@update");
 });
 
-Route::get('/que', "QueController@index");
-Route::get('/que/create', "QueController@create");
-Route::post('/que', "QueController@store");
+Route::get('/ques', "QueController@index");
+Route::get('/ques/create', "QueController@create");
+Route::post('/ques', "QueController@store");
 
 Route::get('/know', "KnowledgeController@index");
 Route::get('/know/create', "KnowledgeController@create");
