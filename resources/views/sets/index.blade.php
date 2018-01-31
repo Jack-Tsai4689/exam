@@ -83,7 +83,7 @@
 						<th id="exam_time" name="exam_time">考試時間</th>
 						<th id="createtime" name="createtime">發表時間</th>
 						<th id="lime" name="lime">考試限時</th>
-						<th id="sets_view">試卷預覽</th>
+						<th id="sets_view">題目預覽</th>
 						<th class="last" style="width:82px;">編輯</th>
 					</tr>
 				</thead>
@@ -99,7 +99,7 @@
 					<td name="exam_time">{{ $v->time }}</td>
 					<td name="createtime">{{ $v->updated_at }}</td>
 					<td name="lime">{{ $v->s_limtime }}</td>
-					<td><a id="sets_link" href="sets/{{ $v->s_id }}/review">試卷預覽</a></td>
+					<td><a id="sets_link" href="sets/{{ $v->s_id }}/review">題目預覽</a></td>
 					<td class="last">
 						<form action="{{ url('/sets/'.$v->s_id) }}" method="post" onsubmit="return delcheck()">
 							{{ csrf_field() }}

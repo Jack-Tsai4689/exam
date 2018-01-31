@@ -190,7 +190,7 @@
 <div id="all">
     {{ $Sets_msg }}
 	<div class="title"><label class="f17">{{ $title }}</label></div>
-	<FORM name="form1" id="form1" method="POST" enctype="multipart/form-data">
+	<FORM name="form1" id="form1" method="POST" enctype="multipart/form-data" action="{{ url('ques') }}">
     <div class="content" id="first">
 		<div class="cen">
 			<table class="list" id="que_main" border="0" width="100%" cellpadding="0" cellspacing="0">
@@ -384,8 +384,9 @@
     <div class="content" style="margin-bottom:50px;">
         <div class="cen" style="padding-bottom:50px;">
             <div style="text-align:left;">
-                    <input type="submit" class="btn w150 h30" value="存檔，出下一題" name="save_next" id="save_next" onclick="check('n')">
-                    <input type="button" class="btn w150 h30" value="存檔，離開" name="save_close" id="save_close" onclick="check('c')">
+                    {{ csrf_field() }}
+                    <input type="submit" class="btn w150 h30" value="存檔，出下一題" name="save_next" id="save_next">
+                    <input type="submit" class="btn w150 h30" value="存檔，離開" name="save_close" id="save_close">
             </div>
         </div>
     </div>
@@ -1074,61 +1075,4 @@ function oc(id){
         $('#'+id+'oc_pic').prop('src','open.png');
     }
 }
-function more_one(){
-    $('input[name="default_f_ansopt[]"]')[0].checked = true;
-    $('input[name="default_f_degree"]')[0].checked = true;
-    $('input[name="default_correct_ans[]"]')[0].checked = true;
-    $('#more').append(
-        $('<div>').prop({class:'title',id:'nq'+no}).append(
-            $('<input>').prop({type:'hidden',name:'no[]',value:no}),
-            $('<input>').prop({type:'hidden',name:'sub_qid[]'}),
-            $('<label>').prop({class:'f17 no'}).html('<a href="javascript:void(0)" onClick="oc('+no+')">第'+num+'小題</a>'),
-            $('<img>').attr({id:no+'oc_pic',class:'title_pic',src:'open.png',height:'20'}),
-            $('<label>').prop({class:'f15',style:'margin-right:10px; float:right;'}).html('<a href="javascript:void(0);" onclick="remove_q('+no+')">移除(X)</a>')
-        )
-    );
-    $('#add').clone(true).attr('id','q'+no).appendTo($('#more'));
-    var newq = $('#q'+no);
-    newq.css('display','block');
-    newq.find('.content').attr('id',no+'content');
-    newq.find('#default_qus_type').prop({name:'qus_type[]',id:'qus_type'+no}).end()
-        //設定區
-        .find('tr[name="default_ans_type"]').attr('name','ans_type'+no).end()
-        .find('input[name="default_f_ansopt[]"]').prop('name','f_ansopt'+no).end()
-        .find('#default_option_num').prop({name:'option_num[]',id:'option_num'+no}).end()
-        .find('#default_ans_group').prop('id','ans_group'+no).end()
-        .find('input[name="default_correct_ans[]"]').prop('name','correct_ans'+no+'[]').end()
-        .find('input[name="default_f_degree"]').prop('name','f_degree'+no).end()
-        //題目區
-        .find('#default_imgsrc_btn_qus').prop({id:'imgsrc_btn_qus'+no}).end()
-        .find('#default_imgsrc_btn_prequs').prop({id:'imgsrc_btn_prequs'+no}).end()
-        .find('#default_f_quetxt').prop({name:'f_quetxt[]',id:'f_quetxt'+no}).end()
-        .find('#default_f_imgsrc').prop({name:'f_imgsrc[]',id:'f_imgsrc'+no}).end()
-        //編輯區
-        .find('#default_imgsrc_content').prop({id:'q'+no+'_imgsrc_content'}).end()
-        .find('#default_imgsol_content').prop({id:'q'+no+'_imgsol_content'}).end()
-        .find('#default_imgsols_content').prop({id:'q'+no+'_imgsols_content'}).end()
-        .find('#default_imgsolv_content').prop({id:'q'+no+'_imgsolv_content'}).end()
-        //詳解區
-        .find('#default_f_anstxt').prop({name:'f_anstxt[]',id:'f_anstxt'+no}).end()
-        .find('#default_imgsol_btn_ans').prop({id:'imgsol_btn_ans'+no}).end()
-        .find('#default_imgsol_btn_preans').prop({id:'imgsol_btn_preans'+no}).end()
-		.find('#default_imgsols_btn').prop({id:'imgsols_btn'+no}).end()
-		.find('#default_imgsolv_btn').prop({id:'imgsolv_btn'+no}).end()
-        .find('#default_f_imgsol').prop({name:'f_imgsol[]',id:'f_imgsol'+no}).end()
-        .find('#default_f_imgsols').prop({name:'f_imgsols[]',id:'f_imgsols'+no}).end()
-        .find('#default_f_imgsolv').prop({name:'f_imgsolv[]',id:'f_imgsolv'+no}).end()
-        .find('#default_oans').prop({id:'oans'+no}).end()
-        .find('#default_pic_oans').prop({id:'pic_oans'+no}).end()
-        .find('#default_oans_control').attr({id:'oans_control'+no,onclick:"show_oans('oans"+no+"')"});
-    for (var i=1;i<=4;i++){
-        newq.find('#default_ans_'+i).prop('id','ans'+no+'_'+i).end();
-    }
-    if (num==10){
-        $('#more_btn').hide();
-    }
-    no++;
-    num++;
-}
-
 </SCRIPT>
