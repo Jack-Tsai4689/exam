@@ -20,7 +20,7 @@
 				<ul>
 					<li><div class="ex"><a href="{{ url('sets') }}">我的考卷</a></div></li>
 					<li><div class="ex"><a href="{{ url('ques') }}">題庫</a></div></li>
-					<li><div class="ex"><a href="knowledge">知識點管理</a></div></li>
+					<li><div class="ex"><a href="{{ url('know') }}">知識點管理</a></div></li>
 				</ul>
 			</li>
 			<li>

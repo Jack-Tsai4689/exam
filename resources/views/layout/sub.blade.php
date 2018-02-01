@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html lang="zh-Hant-TW">
-<head>
 	<title>{{ $title }}  金牌教師</title>
 	<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=9; IE=8; IE=7" />
@@ -18,4 +15,3 @@
 		    return value.replace(/^\s+|\s+$/g, '');
 		}
     </script>
-</head>

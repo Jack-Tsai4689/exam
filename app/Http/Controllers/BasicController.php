@@ -134,6 +134,7 @@ class BasicController extends TopController
                     $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
                     array_push($rs_data, $tmp);
                 }
+                if (empty($rs_data))abort(400);
                 unset($subj_data);
                 break;
             case 'chap':
@@ -150,6 +151,7 @@ class BasicController extends TopController
                     $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
                     array_push($rs_data, $tmp);
                 }
+                if (empty($rs_data))abort(400);
                 unset($chap_data);
                 break;
         }

@@ -263,8 +263,11 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
     );
 
     public static $classMap = array (
+        'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
+        'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
         'BasicTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172034_basic_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+        'CreateQuesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_163833_create_ques_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'EmployesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_173056_employes_table.php',
@@ -340,6 +343,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'Hamcrest\\Util' => __DIR__ . '/..' . '/hamcrest/hamcrest-php/hamcrest/Hamcrest/Util.php',
         'Hamcrest\\Xml\\HasXPath' => __DIR__ . '/..' . '/hamcrest/hamcrest-php/hamcrest/Hamcrest/Xml/HasXPath.php',
         'IlluminateQueueClosure' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/IlluminateQueueClosure.php',
+        'KnowsTable' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_114435_knows_table.php',
         'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/Assert.php',
         'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/AssertionFailedError.php',
         'PHPUnit\\Framework\\BaseTestListener' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/BaseTestListener.php',
@@ -745,6 +749,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'PHP_Token_XOR_EQUAL' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_YIELD' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_YIELD_FROM' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'QuesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_163833_ques_table.php',
         'SebastianBergmann\\Comparator\\ArrayComparator' => __DIR__ . '/..' . '/sebastian/comparator/src/ArrayComparator.php',
         'SebastianBergmann\\Comparator\\Comparator' => __DIR__ . '/..' . '/sebastian/comparator/src/Comparator.php',
         'SebastianBergmann\\Comparator\\ComparisonFailure' => __DIR__ . '/..' . '/sebastian/comparator/src/ComparisonFailure.php',
@@ -782,6 +787,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'SebastianBergmann\\RecursionContext\\InvalidArgumentException' => __DIR__ . '/..' . '/sebastian/recursion-context/src/InvalidArgumentException.php',
         'SebastianBergmann\\Version' => __DIR__ . '/..' . '/sebastian/version/src/Version.php',
         'SetsTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172402_sets_table.php',
+        'SetsqueTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_162841_setsque_table.php',
         'TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
         'Text_Template' => __DIR__ . '/..' . '/phpunit/php-text-template/src/Template.php',
     );

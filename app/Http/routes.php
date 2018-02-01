@@ -18,13 +18,6 @@ Route::get('/login', "HomeController@index");
 Route::post('/login', 'HomeController@login');
 
 //Route::resource('/sets', "SetsController");
-// Route::get('/sets', "SetsController@index");
-// Route::get('/sets/create', "SetsController@create");
-// Route::post('/sets', "SetsController@store");
-// Route::get('/sets/{id}/edit', "SetsController@edit");
-// Route::delete('/sets/{id}', "SetsController@destroy");
-// Route::put('/sets/{id}', "SetsController@update");
-
 Route::group(['prefix'=>'sets'], function(){
 	Route::get('/', "SetsController@index");
 	Route::get('create', "SetsController@create");
@@ -34,13 +27,23 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::put('{id}', "SetsController@update");
 });
 
-Route::get('/ques', "QueController@index");
-Route::get('/ques/create', "QueController@create");
-Route::post('/ques', "QueController@store");
+Route::group(['prefix'=>'ques'], function(){
+	Route::get('/', "QueController@index");
+	Route::get('/create', "QueController@create");
+	Route::post('/', "QueController@store");
+	Route::get('{id}/edit', "QueController@edit");
+	Route::put('{id}',"QueController@update");
+});
 
-Route::get('/know', "KnowledgeController@index");
-Route::get('/know/create', "KnowledgeController@create");
-Route::post('/know', "KnowledgeController@store");
+Route::group(['prefix'=>'know'], function(){
+	Route::get('/', "KnowledgeController@index");
+	Route::get('create', "KnowledgeController@create");
+	Route::post('/', "KnowledgeController@store");
+	Route::get('{id}/edit', "KnowledgeController@edit");
+	Route::delete('{id}', "KnowledgeController@destroy");
+	Route::put('{id}', "KnowledgeController@update");
+	Route::get('join', "KnowledgeController@join");
+});
 
 Route::get('basic', "BasicController@index");
 Route::post('basic', "BasicController@store");

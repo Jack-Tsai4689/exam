@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Ques;
-
+use Auth;
 class QueController extends TopController
 {
     /**
@@ -423,28 +423,31 @@ class QueController extends TopController
                 }
             }           
         }
-
+        $save = [
+            'q_quetype' => $que_type,
+            'q_quetxt' => $quetxt,
+            'q_qm_src' => '',
+            'q_qm_name' => '',
+            'q_qs_src' => $qs_src,
+            'q_qs_name' => $qs_name,
+            'q_num' => $num,
+            'q_ans' => $all_ans,
+            'q_anstxt' => $anstxt,
+            'q_as_src' => $as_src,
+            'q_as_name' => $as_name,
+            'q_av_src' => $av_src,
+            'q_av_name' => $av_name,
+            'q_owner' => $this->login_user,
+            'q_degree' => $degree,
+            'q_gra' => $graid,
+            'q_subj' => $subjid,
+            'q_chap' => $chapid,
+            'q_created_at' => time(),
+            'q_updated_at' => time(),
+            'q_keyword' => $keyword
+        ];
         $que_data = new Ques;
-        $que_data->q_quetype = $que_type;
-        $que_data->q_quetxt = $quetxt;
-        $que_data->q_qm_src = '';
-        $que_data->q_qm_name = '';
-        $que_data->q_qs_src = $qs_src;
-        $que_data->q_qs_name = $qs_name;
-        $que_data->q_ans = $all_ans;
-        $que_data->q_anstxt = $anstxt;
-        $que_data->q_as_src = $as_src;
-        $que_data->q_as_name = $as_name;
-        $que_data->q_av_src = $av_src;
-        $que_data->q_av_name = $av_name;
-        $que_data->q_owner = $this->login_user;
-        $que_data->q_degree = $degree;
-        $que_data->q_gra = $graid;
-        $que_data->q_subj = $subjid;
-        $que_data->q_chap = $chapid;
-        $que_data->q_created_at = time();
-        $que_data->q_updated_at = time();
-        $que_data->q_keyword = $keyword;
+        $que_data->fill($save);
         $que_data->save();
         echo '<script>opener.location.reload();window.close();</script>';
     }
@@ -466,9 +469,265 @@ class QueController extends TopController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit($qid)
     {
-        //
+        if (!is_numeric($qid))abort(400);
+        $qid = (int)$qid;
+        if ($qid<=0)abort(400);
+        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
+            die('很抱歉，權限不足');
+            return;
+        }
+
+        $que = Ques::find($qid);
+        if ($que==null)die('無此資料');
+
+        $data = array();
+        $que_type = new \stdClass;
+        $que_type->S = '';
+        $que_type->D = '';
+        $que_type->R = '';
+        $que_type->M = '';
+        $que_type->G = '';
+        $ans_html = '';
+        $option_num = '';
+        $num = '';
+        $data['now_type'] = '';
+        $data['Num'] = '';
+        $data['Rtype'] = '';
+        $data['Correct_ans_math'] = '';
+        switch ($que->q_quetype) {
+            case 'S': 
+            case 'D': 
+                //選項個數
+                $num_i = 2;
+                while ($num_i<=12) {
+                    $num_sel = ($num_i===$que->q_num) ? 'selected':'';
+                    $option_num.= '<option '.$num_sel.' value="'.$num_i.'">'.$num_i.'</option>';
+                    $num_i++;
+                }
+                //正確答案
+                $ans_i = 1;
+                if ($que->q_quetype==="S"){
+                    $que_type->S = 'checked';
+                    while ($ans_i<=$que->q_num) {
+                        $ans_sel = ($ans_i===(int)$que->q_ans) ? 'checked':'';
+                        $ans_html.= '<label><input name="ans[]" '.$ans_sel.' type="radio" value="'.$ans_i.'"><font id="ans_'.$ans_i.'">'.chr($ans_i+64).'</font></label>';
+                        $ans_i++;
+                    }
+                }else{
+                    $que_type->D = 'checked';
+                    $ans = explode(',', $que->q_ans);
+                    while ($ans_i<=$que->q_num) {
+                        $ans_sel = '';
+                        foreach ($ans as $v) {
+                            if ((int)$v==$ans_i){
+                                $ans_sel = 'checked';
+                                break;
+                            }
+                        }
+                        $ans_html.= '<label><input name="ans[]" '.$ans_sel.' type="checkbox" value="'.$ans_i.'"><font id="ans_'.$ans_i.'">'.chr($ans_i+64).'</font></label>';
+                        $ans_i++;
+                    }
+                }
+                break;
+            case 'R': 
+                $que_type->R = 'checked';
+                $data['Rtype'] = 'style="display:none;"';
+                $ans_html = '<label><input type="radio" '.(($que->q_ans==="1") ? 'checked':'').' name="ans[]" value="1">O</label>  ';
+                $ans_html.= '<label><input type="radio" '.(($que->q_ans==="2") ? 'checked':'').' name="ans[]" value="2">X</label>';
+                break;
+            case 'M': 
+                $que_type->M = 'checked';
+                $data['now_type'] = "change_type('M');";
+                $num_i = 1;
+                while ($num_i<=12) {
+                    $num_sel = ($num_i===$que->q_num) ? 'selected':'';
+                    $num.= '<option '.$num_sel.' value="'.$num_i.'">'.$num_i.'</option>';
+                    $num_i++;
+                }
+                $ans = explode(',', $que->q_ans);
+                $ans_math = '';
+                foreach ($ans as $i => $o) {
+                    $ans_math.= '<div id="a'.($i+1).'"><span>No.'.($i+1).'</span>';
+
+                    if (preg_match("/^[0-9]*$/", $o)){
+                        $now = (int)$o;
+                    }else{
+                        if ($o==="a")$now = 10;
+                        if ($o==="b")$now = 11;
+                    }
+                    $each = 1;
+                    while($each<=9){
+                        $sel = ($each===$now) ? 'checked':'';
+                        $ans_math.= '<label><input type="radio" '.$sel.' name="ans'.($i+1).'" value="'.$each.'">'.$each.'</label>';
+                        $each++;
+                    }
+                    $ans_math.= '<label><input type="radio" '.(($now===0) ? 'checked':'').' name="ans'.($i+1).'" value="0">0</label>';
+                    $ans_math.= '<label><input type="radio" '.(($now===10) ? 'checked':'').' name="ans'.($i+1).'" value="a">-</label>';
+                    $ans_math.= '<label><input type="radio" '.(($now===11) ? 'checked':'').' name="ans'.($i+1).'" value="b">±</label>';
+                    $ans_math.= '</div>';
+                }
+                $data['Correct_ans_math'] = $ans_math;
+                break;
+        }
+        //單複選 選項個數 初始化
+        if ($que->q_quetype!=="S" && $que->q_quetype!=="D"){
+            $num_i = 2;
+            while ($num_i<=12) {
+                $num_sel = ($num_i===$que->q_num) ? 'selected':'';
+                $option_num.= '<option '.$num_sel.' value="'.$num_i.'">'.$num_i.'</option>';
+                $num_i++;
+            }
+        }       
+        //選填 選項、題數個數 初始化
+        if ($que->q_quetype!=="M"){
+            $num_i = 1;
+            while ($num_i<=12) {
+                $num.= '<option value="'.$num_i.'">'.$num_i.'</option>';
+                $num_i++;
+            }
+            $ans_math = '<div id="a1"><span>No.1</span>';
+            $each = 1;
+            while($each<=9){
+                $ans_math.= '<label><input type="radio" name="ans1" value="'.$each.'">'.$each.'</label>';
+                $each++;
+            }
+            $ans_math.= '<label><input type="radio" name="ans1" value="0">0</label>';
+            $ans_math.= '<label><input type="radio" name="ans1" value="a">-</label>';
+            $ans_math.= '<label><input type="radio" name="ans1" value="b">±</label>';
+            $ans_math.= '</div>';
+            $data['Correct_ans_math'] = $ans_math;
+        }
+        $Q_Grade = '';
+        $Q_Subject = '';
+        $Q_Chapter = '';
+        $grade_data = $this->grade();
+        $subject_data = array();
+        $chap_data = array();
+        if (!empty($grade_data)){
+            foreach ($grade_data as $v) {
+                $g_sel = ($que->q_gra===$v->g_id) ? 'selected':'';
+                $Q_Grade.= '<option '.$g_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+            $subject_data = $this->subject($que->q_gra);
+        }
+        if (!empty($subject_data)){
+            foreach ($subject_data as $v) {
+                $s_sel = ($que->q_subj===$v->g_id) ? 'selected':'';
+                $Q_Subject.= '<option '.$s_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+            $chap_data = $this->chapter($que->q_gra, $que->q_subj);
+        }
+        if (!empty($chap_data)){
+            foreach ($chap_data as $v) {
+                $c_sel = ($que->q_chap===$v->g_id) ? 'selected':'';
+                $Q_Chapter.= '<option '.$c_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+
+
+        //題目圖片
+        $qimg_html = '';
+        $del_qimg = '';
+        $data['Qimg'] = '';
+        // if (!empty($que->QIMGSRC)){
+        //     if (is_file($que->QIMGSRC)){
+        //         $data['Qimg'] = base_url($que->QIMGSRC);
+        //         $del_qimg = '<input type="button" value="刪除圖檔" id="deque" class="btn w100 h25" onClick="uque(this.id)" >   ';
+        //     }
+        // }
+        // $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        // $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        // $qimg_html.= $del_qimg;
+        
+        //題目音訊
+        $qsound_html = '';
+        if (!empty($que->q_qs_src)){
+            if (is_file($que->q_qs_src)){
+                $qsound_html.= '檔名：'.$que->q_qs_name;
+                $qsound_html.= '<br><input type="button" value="刪除聲音檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsrc_s","")">';
+            }else{
+                $qsound_html.= '<font color="red">檔案遺失</font>';
+            }
+            $qsound_html.='<br>';
+        }
+        //詳解圖片
+        $aimg_html = '';
+        $del_aimg = '';
+        $data['Aimg'] = '';
+        // if (!empty($que->AIMGSRC)){
+        //     if (is_file($que->AIMGSRC)){
+        //         $data['Aimg'] = base_url($que->AIMGSRC);
+        //         $del_aimg = '<input type="button" value="刪除圖檔" id="deans" class="btn w100 h25" onClick="uans(this.id)" >   ';
+        //     }
+        // }
+        // $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        // $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        // $aimg_html.= $del_aimg;
+
+        //詳解音訊
+        $asound_html = '';
+        if (!empty($que->q_as_src)){
+            if (is_file($que->q_as_src)){
+                $asound_html.= '檔名：'.$que->q_as_name;
+                $asound_html.= '<br><input type="button" value="刪除聲音檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsrc_s","")">';
+            }else{
+                $asound_html.= '<font color="red">檔案遺失</font>';
+            }
+            $asound_html.= '<br>';
+        }
+        //詳解視訊
+        $avideo_html = '';
+        if (!empty($que->q_av_src)){
+            if (is_file($que->q_av_src)){
+                $avideo_html.= '檔名：'.$que->q_as_name;
+                $avideo_html.= '<br><input type="button" value="刪除影片檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsolv","")">';
+            }else{
+                $avideo_html.= '<font color="red">檔案遺失</font>';
+            }
+        }else{
+            $avideo_html.= '<br>';
+        }
+
+        $data['Qid'] = $qid;
+        $data['Qimgsrc'] = $que->QIMGSRC;
+        $data['Qimg_html'] = $qimg_html;
+        $data['Quetxt'] = $que->q_quetxt;
+        $data['Qsoundsrc'] = $que->q_qs_src;
+        $data['Qsound_html'] = $qsound_html;
+        $data['Keyword'] = $que->q_keyword;
+        
+        $data['Anstxt'] = $que->q_anstxt;
+        $data['Aimgsrc'] = $que->q_am_src;
+        $data['Aimg_html'] = $aimg_html;
+        $data['Asoundsrc'] = $que->q_as_src;
+        $data['Asound_html'] = $asound_html;
+        $data['Avideosrc'] = $que->q_av_src;
+        $data['Avideo_html'] = $avideo_html;
+        
+        $data['Option_num'] = $option_num;
+        $data['Num'] = $num;
+        $data['Ans'] = $ans_html;
+        $data['Que_type'] = $que_type;
+        $data['Q_Grade'] = $Q_Grade;
+        $data['Q_Subject'] = $Q_Subject;
+        $data['Q_Chapter'] = $Q_Chapter;
+
+        //難度
+        $degree = new \stdClass;
+        $degree->E = '';
+        $degree->M = '';
+        $degree->H = '';
+        switch ($que->q_degree) {
+            case 'M': $degree->M = 'checked'; break;
+            case 'H': $degree->H = 'checked'; break;
+            case 'E': $degree->E = 'checked'; break;
+            default: $degree->E = 'checked'; break;
+        }
+        $data['title'] = "編輯題庫";
+        $data['Degree'] = $degree;
+        return view('que.edit', $data);
     }
 
     /**
@@ -478,9 +737,93 @@ class QueController extends TopController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $req, $qid)
     {
-        //
+        if (!is_numeric($qid))abort(400);
+        $qid = (int)$qid;
+        if ($qid<=0)abort(400);
+        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
+            die('很抱歉，權限不足');
+            return;
+        }
+        $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
+        $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
+        $keyword = ($req->has('f_keyword') && !empty($req->input('f_keyword'))) ? trim($req->input('f_keyword')):'';
+        $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
+        $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
+        $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
+        $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
+        $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
+
+        switch ($que_type) {
+            case 'S'://單選
+            case 'D'://複選
+            case 'R'://是非
+                if ($que_type==="R"){
+                    $num = 2;
+                }else{
+                    $num = ($req->has('option_num') && (int)$req->input('option_num')>1) ? (int)$req->input('option_num'):2;  
+                }
+                $ans = ($req->has('ans') && is_array($req->input('ans'))) ? $req->input('ans'):array();
+                //複選 => 1↑
+                //單選 or 是非 => only 1
+                if (($que_type==="D" && count($ans)<2) || ($que_type!=="D" && count($ans)!==1)){
+                    abort(400);
+                    return;
+                }
+                $error = false;
+                foreach ($ans as $v) {
+                    $e = (int)$v;
+                    if ($e<=0){
+                        $error = true;
+                        break;
+                    }
+                }
+                if ($error){
+                    abort(400);
+                    return;
+                }
+                $all_ans = implode(",", $ans);
+                break;
+            case 'M'://選填
+                $num = ($req->has('num') && (int)$req->input('num')>0) ? (int)$req->input('num'):1;
+                $i = 1;
+                $ans = array();
+                while ($i<=$num) {
+                    $each_ans = ($req->has('ans'.$i)) ? $req->input('ans'.$i):-1;
+                    if ($each_ans===-1 || !preg_match("/^[0-9ab]*$/", $each_ans)){
+                        abort(400);
+                        return;
+                    }
+                    $ans[] = $each_ans;
+                    $i++;
+                }
+                //數量不對
+                if ($num!==count($ans)){
+                    abort(400);
+                    return;
+                }
+                $all_ans = implode(",", $ans);
+                break;
+            default:
+                abort(400);
+                return;
+                break;
+        }
+        
+        $que = Ques::find($qid);
+        $que->q_quetype = $que_type;
+        $que->q_quetxt = $quetxt;
+        $que->q_keyword = $keyword;
+        $que->q_gra = $graid;
+        $que->q_subj = $subjid;
+        $que->q_chap = $chapid;
+        $que->q_degree = $degree;
+        $que->q_anstxt = $anstxt;
+        $que->q_ans = $all_ans;
+        $que->q_updated_at = time();
+        $que->save();
+        echo '<script>opener.location.reload();window.close();</script>';
     }
 
     /**

@@ -63,14 +63,14 @@
 						<th name="deg" style="width:4%; min-width:39px;">難度</th>
 						<th style="width:100px;">Qrcode</th>
 						<th name="pub" style="width:10%; min-width:109px;">發表時間</th>
-						<th class="last" style="max-width:82px; min-width:82px;">編輯</th>
+						<th class="last" style="width:82px;">編輯</th>
 					</tr>
 				</thead>
 				<tbody>
 				@foreach ($Data as $k => $v)
 					@php $class = (($k+1)%2==0) ? 'shallow':'deep' @endphp
 					<tr class="{{ $class }}">
-						<td name="qno">{{ $v->q_qid }}</td>
+						<td name="qno">{{ $v->q_id }}</td>
 						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->q_acont !!}</td>
 						<td>{{ $v->q_quetype }}</td>
 						<td name="ans">{{ $v->q_ans }}</td>
@@ -80,7 +80,7 @@
 						<td name="deg">{{ $v->q_degree }}</td>
 						<td></td>
 						<td>{{ $v->q_update }}</td>
-						<td class="last"><input type="button" class="btn w80" onclick="editq({{ $v->q_id }})" value="編輯no"></td>
+						<td class="last"><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/edit') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="編輯"></td>
 					</tr>
 				@endforeach
 				</tbody>
