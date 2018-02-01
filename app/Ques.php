@@ -39,6 +39,6 @@ class Ques extends Model
 		return $this->belongsto('App\Gscs', 'q_subj')->select('g_name as name');
 	}
 	public function chap(){
-		return $this->belongsto('App\Gscs', 'q_chap')->selet('g_name as name');
+		return $this->belongsto('App\Gscs', 'q_chap')->select('g_name as name');
 	}
 }

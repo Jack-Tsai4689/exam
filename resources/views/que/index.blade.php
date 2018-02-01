@@ -71,7 +71,7 @@
 					@php $class = (($k+1)%2==0) ? 'shallow':'deep' @endphp
 					<tr class="{{ $class }}">
 						<td name="qno">{{ $v->q_qid }}</td>
-						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->a_cont !!}</td>
+						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->q_acont !!}</td>
 						<td>{{ $v->q_quetype }}</td>
 						<td name="ans">{{ $v->q_ans }}</td>
 						<td name="gra">{{ $v->gra->name }}</td>
@@ -82,7 +82,7 @@
 						<td>{{ $v->q_update }}</td>
 						<td class="last"><input type="button" class="btn w80" onclick="editq({{ $v->q_id }})" value="編輯no"></td>
 					</tr>
-				<?php endforeach; ?>
+				@endforeach
 				</tbody>
 			</table>
 		</div>
@@ -191,61 +191,7 @@ function search_confirm(){
   } 
   if (search.trim()!=''){form1.submit();}
 }
-function ans(value){//其他详解
-    $('#oans_list').css('display','block');
-    var c = $('#list_oans');
-    c.html('讀取中...');
-    $.getJSON("queans.php", {'value':value, 'me':false}, function(json){
-        c.html('');
-        var all = json.length;
-        for (var i = 0; i <= all; i++) {
-            c.append(
-                $('<a>').attr({title:json[i].u, onclick:'window.open ("oanswer.php?oqid='+value+'&owner='+json[i].link+'","_blank","width=1100,height=700,top=300,left=100,resizable=yes,scrollbars=yes,location=no");'})
-                		.append(
-                    $('<img>').attr({class:'oans_pic',src:'profilepics/'+json[i].p+'.jpg'})
-                ),
-                $('<img>').attr({class:'oans_gold',src:'images/icon_op_gold.png'}),
-                $('<font>').attr({class:'oans_num'}).append(
-                	$('<a>').attr({name:value+json[i].link,onclick:"ans_g("+value+",'"+json[i].link+"')",title:'金牌數'})
-                			.text(json[i].c)
-                )
-            );
-        }
-    });
-}
 function close_oans(){ $('#oans_list').css('display','none');}
-function like(no){//按赞
-    var url = "goldlike.php";
-    var data = {'type': 'Q','no':no};
-    $('#list_title').text('按讚');
-    showdialog(url, data);
-}
-function showdialog(url, data){
-    $('#status_list').css('display','block');
-    var c = $('#list_main');
-    c.html('讀取中...');
-    $.getJSON( url, data, function(json){
-      c.html('');
-      var all = json.length;
-      for (var i = 0; i <= all; i++) {
-        c.append(
-          $('<div>').addClass('eachone').append(
-            $('<div>').addClass('person_pic').append(
-              $('<a>').attr('href','profile.php?f_userid='+json[i].link).append(
-                $('<img>').attr({src:'profilepics/'+json[i].p+'.jpg', title: json[i].uname})
-              )
-            ),
-            $('<div>').addClass('person_dep').append(
-              $('<div>').addClass('f16').append(
-                $('<a>').attr('href','profile.php?f_userid='+json[i].link).text(json[i].uname)
-              )
-              ,$('<div>').addClass('f12').text(json[i].sch_name)
-            )
-          )
-        );
-      }
-    });
-}
 function close_list(){ $('#status_list').css('display','none'); }
   function open_point(ele){
   	var elem = document.getElementById(ele);
