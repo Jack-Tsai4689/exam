@@ -237,7 +237,10 @@
                 <tr class="shallow">
                     <td align="right">知識點</td>
                     <td>
-                        <div id="point_content"><input type="hidden" id="f_pid" name="f_pid" value=""/>
+                        <div id="point_content">
+                            <input type="button" name="" onclick="addpoint()" value="選擇知識點">
+                            <input type="hidden" id="f_pid" name="f_pid" value="{{ $Kid }}"/>
+                            <div style="display: inline-block;" id="pid_name">{{ $Kname }}</div>
                         </div>
                         <font color="green">*「知識點」有助於學生在看診斷報告時，對題目的解答較易於融會貫通噢~</font>
                     </td>
@@ -628,10 +631,7 @@ function uans(v){
         $('#que_pic').show();
     });
 }
-function close_pic(){
-    $('#sets_filed').hide();
-    $('#que_pic').hide();
-}
+
 function select_point(){//知識點
     document.getElementById('que_pic').src="";
     document.getElementById('que_pic').src="ex_point.php?fkey=6";
@@ -952,6 +952,27 @@ function opt_num(n, v){//選項數擷取
     //var type = $('#form1 > #q'+newn+' #qus_type'+newn).val();
     //alert(newn+','+type);
     change_ans_type('qus_type'+newn,type);
+}
+function addpoint(){
+    document.getElementById('que_pic').src="{{ url('/know/join') }}";
+    openframe();
+}
+function openframe(){
+    gb("que_pic").style.width = '100%';
+    gb("que_pic").style.height = screen.height*0.8;
+    // $('#que_pic').attr('width','100%');
+    // $('#que_pic').attr('height',screen.height*0.8);
+    $('#sets_filed .set_all').css('width','90%');
+    $('#sets_filed').show();
+    $('#loading_status').show();
+    $("#que_pic").load(function(){
+        $('#loading_status').hide();
+        $('#que_pic').show();
+    });
+}
+function close_pic(){
+    $('#sets_filed').hide();
+    $('#que_pic').hide();
 }
 function remove_point(){
     var point = document.getElementById('point_content');

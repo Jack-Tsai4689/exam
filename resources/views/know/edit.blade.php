@@ -212,3 +212,4 @@ function close_pic(){
     $('#que_pic').hide();
 }
 </script>
+@stop

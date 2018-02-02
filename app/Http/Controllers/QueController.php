@@ -127,6 +127,11 @@ class QueController extends TopController
                 default: $que_data[$k]->q_degree = "容易"; break;
             }
             $que_data[$k]->q_update = date('Y/m/d H:i:s', $v->q_updated_at);
+            $que_data[$k]->q_know = ($v->q_know!==0) ? '知識點：'.$v->knows->name:'';
+
+            $que_data[$k]->q_gra = $v->gra->name;
+            $que_data[$k]->q_subj = $v->subj->name;
+            $que_data[$k]->q_chap = $v->chap->name;
         }
         return view('que.index', [
             'menu_user' => $this->menu_user,
@@ -299,7 +304,7 @@ class QueController extends TopController
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
         $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
-
+        $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
         $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
         $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
         $qimg = ($req->has('f_qimg') && !empty($req->input('f_qimg'))) ? trim($req->input('f_qimg')):'';
@@ -442,6 +447,7 @@ class QueController extends TopController
             'q_gra' => $graid,
             'q_subj' => $subjid,
             'q_chap' => $chapid,
+            'q_know' => $know_id,
             'q_created_at' => time(),
             'q_updated_at' => time(),
             'q_keyword' => $keyword
@@ -706,6 +712,9 @@ class QueController extends TopController
         $data['Avideosrc'] = $que->q_av_src;
         $data['Avideo_html'] = $avideo_html;
         
+        $data['Kid'] = $que->q_know;
+        $data['Kname'] = ($que->q_know>0) ? $que->knows->name:'';
+
         $data['Option_num'] = $option_num;
         $data['Num'] = $num;
         $data['Ans'] = $ans_html;
@@ -749,6 +758,7 @@ class QueController extends TopController
         $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
         $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
         $keyword = ($req->has('f_keyword') && !empty($req->input('f_keyword'))) ? trim($req->input('f_keyword')):'';
+        $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
         $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
@@ -821,6 +831,8 @@ class QueController extends TopController
         $que->q_degree = $degree;
         $que->q_anstxt = $anstxt;
         $que->q_ans = $all_ans;
+        $que->q_num = $num;
+        $que->q_know = $know_id;
         $que->q_updated_at = time();
         $que->save();
         echo '<script>opener.location.reload();window.close();</script>';

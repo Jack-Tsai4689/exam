@@ -16,6 +16,7 @@ class Knows extends Model
 		'k_subj',
 		'k_chap',
 		'k_content',
+		'k_keyword',
 		'k_owner',
 		'created_at',
 		'updated_at',

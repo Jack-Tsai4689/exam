@@ -29,7 +29,8 @@ class Ques extends Model
 		'q_chap',
 		'q_created_at',
 		'q_updated_at',
-		'q_keyword'
+		'q_keyword',
+		'q_know'
 	];
 
 	public function gra(){
@@ -40,5 +41,8 @@ class Ques extends Model
 	}
 	public function chap(){
 		return $this->belongsto('App\Gscs', 'q_chap')->select('g_name as name');
+	}
+	public function knows(){
+		return $this->belongsto('App\Knows', 'q_know')->select('k_name as name');
 	}
 }

@@ -71,12 +71,12 @@
 					@php $class = (($k+1)%2==0) ? 'shallow':'deep' @endphp
 					<tr class="{{ $class }}">
 						<td name="qno">{{ $v->q_id }}</td>
-						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->q_acont !!}</td>
+						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->q_acont !!}<br>{{ $v->q_know }}</td>
 						<td>{{ $v->q_quetype }}</td>
 						<td name="ans">{{ $v->q_ans }}</td>
-						<td name="gra">{{ $v->gra->name }}</td>
-						<td name="sub">{{ $v->subj->name }}</td>
-						<td name="chp">{{ $v->chap->name }}</td>
+						<td name="gra">{{ $v->q_gra }}</td>
+						<td name="sub">{{ $v->q_subj }}</td>
+						<td name="chp">{{ $v->q_chap }}</td>
 						<td name="deg">{{ $v->q_degree }}</td>
 						<td></td>
 						<td>{{ $v->q_update }}</td>

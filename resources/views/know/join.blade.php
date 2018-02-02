@@ -259,7 +259,7 @@
 					<tr class="{{ $class }}">
 						<td><input type="radio" class="chk_select" name="radbox" value="{{ $v->k_id }}"></td>
 						<td>{{ $v->k_owner }}</td>
-						<td class="kcont">{!! $v->k_content !!}</td>
+						<td class="kcont"><input type="hidden" id="kname{{ $v->k_id}}" value="{{ $v->k_name }}"> {!! $v->k_content !!}</td>
 						<td>{{ $v->gra->name }}</td>
 						<td>{{ $v->subj->name }}</td>
 						<td>{{ $v->chap->name }}</td>
@@ -323,22 +323,10 @@ function check_choice(){//知識點編號回傳給題目
     if (check==null){
     	alert('尚未選擇');
     }else{
-    	// self.opener.document.getElementById('f_pid').value=check;//編號
-	    // self.opener.document.forms[0].submit();//全部都能用
-	    //self.opener.document.getElementById('pid_check').innerHTML="已選擇";//編號
-	    //opener.window.document.getElementById('pid_pic').innerHTML=check;
-	    // window.close();
 	    parent.document.getElementById('f_pid').value = check;
-	    parent.document.getElementById('pid_name').innerHTML = '';
-	 //    var point = $('#point_content', parent.document);
-	 //    point.html('');
-		// point.append(
-		// 	$('<div>').html(document.getElementById('np_'+check).innerHTML),
-		// 	$('<input>').attr({type:'button',value:'選擇知識點',class:'btn w160 h25',name:'upd_point',onClick:'select_point()'}),
-		// 	$('<input>').attr({type:'button',value:'取消知識點',class:'btn w160 h25',name:'upd_point',onClick:'remove_point()'}),
-		// 	$('<input>').attr({type:'hidden',name:'f_pid',id:'f_pid',value:check})
-  //   	);
+	    parent.document.getElementById('pid_name').innerHTML = gb('kname'+check).value;
     	$('#sets_filed', parent.document).hide();
+    	parent.document.getElementById('que_pic').src = '';
 	}
 }
 </SCRIPT>

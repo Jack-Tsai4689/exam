@@ -167,7 +167,7 @@ class KnowledgeController extends TopController
             'k_chap' => $chapid,
             'k_content' => $k_content,
             'k_owner' => Auth::user()->e_epno,
-            //'k_keyword' => $k_keyword,
+            'k_keyword' => $k_keyword,
             'created_at' => time(),
             'updated_at' => time()
         ];
@@ -255,7 +255,7 @@ class KnowledgeController extends TopController
         $data['Owner'] = $know->k_owner;
         $data['Kname'] = $know->k_name;
         $data['Kcontent'] = $know->k_content;
-        $data['Kkeword'] = '';//$know->K_KEYWORD;
+        $data['Kkeword'] = $know->k_keyword;
         $data['Grade'] = $grade_html;
         $data['Subject'] = $subject_html;
         $data['Chapter'] = $chapter_html;
@@ -327,6 +327,7 @@ class KnowledgeController extends TopController
         $know->k_subj = $subjid;
         $know->k_chap = $chapid;
         $know->k_content = $k_content;
+        $know->k_keyword = $k_keyword;
         $know->updated_at = time();
         $know->save();
         return redirect('/know');
