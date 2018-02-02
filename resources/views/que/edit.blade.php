@@ -236,13 +236,12 @@
                 </tr>
                 <tr class="shallow">
                     <td align="right">知識點</td>
-                    <td>
-                        <div id="point_content">
-                            <input type="button" name="" onclick="addpoint()" value="選擇知識點">
-                            <input type="hidden" id="f_pid" name="f_pid" value="{{ $Kid }}"/>
-                            <div style="display: inline-block;" id="pid_name">{{ $Kname }}</div>
-                        </div>
-                        <font color="green">*「知識點」有助於學生在看診斷報告時，對題目的解答較易於融會貫通噢~</font>
+                    <td id="know_div">
+                        <input type="button" name="" id="addpoint" value="選擇知識點">
+                        <input type="hidden" id="f_pid" name="f_pid" value="{{ $Kid }}"/>
+                        <div style="display: inline-block;" id="pid_name">{{ $Kname }}</div>
+                        <div style="display: inline-block;" id="pid_cancell">{!! $Know_cancell !!}</div>
+                        {{-- <font color="green">*「知識點」有助於學生在看診斷報告時，對題目的解答較易於融會貫通噢~</font> --}}
                     </td>
                 </tr>
                 <tr>
@@ -953,10 +952,16 @@ function opt_num(n, v){//選項數擷取
     //alert(newn+','+type);
     change_ans_type('qus_type'+newn,type);
 }
-function addpoint(){
+$("#addpoint").on('click', function(){
     document.getElementById('que_pic').src="{{ url('/know/join') }}";
     openframe();
-}
+});
+$("#know_div").on("click", "#pcancell", function(){
+    gb('f_pid').value = '';
+    gb('pid_name').innerHTML = '';
+    gb('pid_cancell').innerHTML = '';
+});
+
 function openframe(){
     gb("que_pic").style.width = '100%';
     gb("que_pic").style.height = screen.height*0.8;
@@ -974,15 +979,15 @@ function close_pic(){
     $('#sets_filed').hide();
     $('#que_pic').hide();
 }
-function remove_point(){
-    var point = document.getElementById('point_content');
-    point.innerHTML = '<input type="button" value="選擇知識點" class="btn w100 h25" name="f_btn" onClick="select_point()">';
+// function remove_point(){
+//     var point = document.getElementById('point_content');
+//     point.innerHTML = '<input type="button" value="選擇知識點" class="btn w100 h25" name="f_btn" onClick="select_point()">';
     // var point = $('#point_content');
     // point.html('');
     // point.append($('<input>').attr({type:'button',value:'選擇知識點',class:'btn w100 h25',name:'f_btn',onClick:'select_point()'}));
     // document.getElementById('f_pid').value = 't';
     // document.forms[0].submit();
-}
+//}
 function rem(elem,no){
     if (confirm('檔案無法復原，確定?')){
         var obj = $('#f_'+elem+no).val();

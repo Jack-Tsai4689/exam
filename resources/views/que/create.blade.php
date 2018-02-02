@@ -234,13 +234,12 @@
                 </tr>
                 <tr class="shallow">
                     <td align="right">知識點</td>
-                    <td>
-                        <div id="point_content">
-                            <input type="button" name="" onclick="addpoint()" value="選擇知識點">
-                            <input type="hidden" id="f_pid" name="f_pid" value=""/>
-                            <div style="display: inline-block;" id="pid_name"></div>
-                        </div>
-                        <font color="green">*「知識點」有助於學生在看診斷報告時，對題目的解答較易於融會貫通噢~</font>
+                    <td id="know_div">
+                        <input type="button" name="" id="addpoint" value="選擇知識點">
+                        <input type="hidden" id="f_pid" name="f_pid" value=""/>
+                        <div style="display: inline-block;" id="pid_name"></div>
+                        <div style="display: inline-block;" id="pid_cancell"></div>
+                        {{-- <font color="green">*「知識點」有助於學生在看診斷報告時，對題目的解答較易於融會貫通噢~</font> --}}
                     </td>
                 </tr>
                 <tr>
@@ -666,15 +665,15 @@ function uans(v){
     });
 }
 
-function select_point(){//知識點
-    document.getElementById('que_pic').src="";
-    document.getElementById('que_pic').src="ex_point.php?fkey=6";
-    $('#que_pic').attr('width','100%');
-    $('#que_pic').attr('height',screen.height*0.8);
-    $('#sets_filed .set_all').css('width','90%');
-    $('#sets_filed').show();
-    //var point = window.open("ex_point.php?fkey=6","ex_point","width=1240px,height=600px,resizable=yes,scrollbars=yes,status=yes");
-}
+// function select_point(){//知識點
+//     document.getElementById('que_pic').src="";
+//     document.getElementById('que_pic').src="ex_point.php?fkey=6";
+//     $('#que_pic').attr('width','100%');
+//     $('#que_pic').attr('height',screen.height*0.8);
+//     $('#sets_filed .set_all').css('width','90%');
+//     $('#sets_filed').show();
+//     //var point = window.open("ex_point.php?fkey=6","ex_point","width=1240px,height=600px,resizable=yes,scrollbars=yes,status=yes");
+// }
 // document.onkeydown = function(event){//鎖特定按鍵 116 F15  123 F12
 //     if (event.keyCode == 116){
 //         if (confirm('確定要重新整理?未存檔資料將可能遺失!')){
@@ -1018,10 +1017,16 @@ function opt_num(n, v){//選項數擷取
     //alert(newn+','+type);
     change_ans_type('qus_type'+newn,type);
 }
-function addpoint(){
+$("#addpoint").on('click', function(){
     document.getElementById('que_pic').src="{{ url('/know/join') }}";
     openframe();
-}
+});
+$("#know_div").on("click", "#pcancell", function(){
+    gb('f_pid').value = '';
+    gb('pid_name').innerHTML = '';
+    gb('pid_cancell').innerHTML = '';
+});
+
 function openframe(){
     gb("que_pic").style.width = '100%';
     gb("que_pic").style.height = screen.height*0.8;
@@ -1040,15 +1045,15 @@ function close_pic(){
     $('#que_pic').hide();
     gb('que_pic').src = '';
 }
-function remove_point(){
-    var point = document.getElementById('point_content');
-    point.innerHTML = '<input type="button" value="選擇知識點" class="btn w100 h25" name="f_btn" onClick="select_point()">';
+// function remove_point(){
+//     var point = document.getElementById('point_content');
+//     point.innerHTML = '<input type="button" value="選擇知識點" class="btn w100 h25" name="f_btn" onClick="select_point()">';
     // var point = $('#point_content');
     // point.html('');
     // point.append($('<input>').attr({type:'button',value:'選擇知識點',class:'btn w100 h25',name:'f_btn',onClick:'select_point()'}));
     // document.getElementById('f_pid').value = 't';
     // document.forms[0].submit();
-}
+//}
 function rem(elem,no){
     if (confirm('檔案無法復原，確定?')){
         var obj = $('#f_'+elem+no).val();

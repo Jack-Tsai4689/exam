@@ -25,6 +25,9 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::get('{id}/edit', "SetsController@edit");
 	Route::delete('{id}', "SetsController@destroy");
 	Route::put('{id}', "SetsController@update");
+	Route::get('{id}/show', "SetsController@show");
+	Route::post('{id}/subu', "SetsController@ajpart");
+	
 });
 
 Route::group(['prefix'=>'ques'], function(){

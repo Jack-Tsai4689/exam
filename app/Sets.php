@@ -37,4 +37,7 @@ class Sets extends Model
     public function subj(){
         return $this->belongsto('App\Gscs', 's_subj')->select('g_name as name');
     }
+    public function sub(){
+        return $this->belongsto('App\Sets', 's_pid');
+    }
 }

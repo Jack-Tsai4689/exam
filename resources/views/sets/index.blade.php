@@ -99,7 +99,7 @@
 					<td name="exam_time">{{ $v->time }}</td>
 					<td name="createtime">{{ $v->updated_at }}</td>
 					<td name="lime">{{ $v->s_limtime }}</td>
-					<td><a id="sets_link" href="sets/{{ $v->s_id }}/review">題目預覽</a></td>
+					<td><a id="sets_link" href="sets/{{ $v->s_id }}/show">題目預覽</a></td>
 					<td class="last">
 						<form action="{{ url('/sets/'.$v->s_id) }}" method="post" onsubmit="return delcheck()">
 							{{ csrf_field() }}

@@ -325,6 +325,8 @@ function check_choice(){//知識點編號回傳給題目
     }else{
 	    parent.document.getElementById('f_pid').value = check;
 	    parent.document.getElementById('pid_name').innerHTML = gb('kname'+check).value;
+	    parent.document.getElementById('pid_cancell').innerHTML = '<input type="button" class="" name="pcancell" id="pcancell" value="取消知識點">';
+	    
     	$('#sets_filed', parent.document).hide();
     	parent.document.getElementById('que_pic').src = '';
 	}

@@ -1,6 +1,5 @@
 @extends('layout.default')
 @section('style')
-    <script type="text/javascript" src="{{ URL::asset('/js/jquery-ui.js') }}"></script>
 	<style type="text/css">
     	#all {
     		margin: 20px auto;
@@ -279,7 +278,18 @@
         </span>
         <font color="red">*刪除大題，底下的題目將移至其他大題內</font>
         <br>
-        <div id="part_section">{{ $Part_cont }}</div>
+        <div id="part_section">
+        @foreach($Part as $i => $v)
+            @php $print_control = ($v->s_page=='Y') ? '可回上頁修改':'不可回上頁修改'; @endphp
+            <div name="node" id="{{ $v->s_id }}">
+            <div class="part_sort">: :</div>
+            <div style="display:inline-block;">
+            第{{ ($i+1) }}大題({{ $v->s_percen }}%)　{{ $print_control }}
+            </div>
+            <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $SETID }},{{ $v->s_id }}, {{ ($i+1) }})">
+            </div>
+        @endforeach
+        </div>
     </div>
 
     <div name="part" id="part">
@@ -299,7 +309,7 @@
         <form id="form1" name="form1" method="post">
         	<div class="content">
         		<div id="cen">
-                    <label id="nowpart">{{ $Part_now }}</label>
+                    <label id="nowpart"></label>
         			<table class="list" cellpadding="0" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -331,7 +341,7 @@
         <div class="set_content">
             <div class="set_cen">
                 <div class="cen last">
-                    <form name="form2" id="form2" method="post">
+                    <form name="form2" id="form2">
                     <input type="button" name="" id="" onclick="moreone()" class="btn w100 h25" value="增加">
                     <div style="max-height:490px; overflow:auto; overflow-x:hidden; margin:10px 0px 10px 0px;">
                         <input type="hidden" name="setid" value="{{ $SETID }}">
@@ -389,8 +399,9 @@
         <div><input type="button" style="float:right;" name="" id="" value="關閉" class="btn w100" onclick="close_pic()"></div>        
     </div>
 </div>
-</body>
-</html>
+@stop
+@section('script')
+<script type="text/javascript" src="{{ URL::asset('/js/jquery-ui.js') }}"></script>
 <script type="text/javascript" src="{{ URL::asset('/jsfunc/sets_review.js') }}"></script>
 <script type="text/javascript">
 
@@ -702,11 +713,11 @@ function check_data(){
     $('#intro_all').show();
     $.ajax({
         type:'POST',
-        url:'{{ url('/sets/subu') }}',
+        url:'{{ url('/sets/'.$SETID.'/subu') }}',
         dataType:'json',
         data:$('#form2').serialize(),
         success: function(){
-            location.reload();
+            //location.reload();
         }
     });
 }
@@ -734,3 +745,4 @@ function close_pic(){
     $('#que_pic').hide();
 }
 </script>
+@stop

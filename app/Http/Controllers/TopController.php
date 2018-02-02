@@ -12,6 +12,7 @@ class TopController extends Controller
 {
     protected $menu_user = null;
     protected $login_user = null;
+    protected $login_type = null;
 
     public function __construct(){
     	$this->middleware('auth');
@@ -20,6 +21,7 @@ class TopController extends Controller
 	    	$this->login_user = $user->e_epno;
 			$log_dpname = ($user->e_ident==="T") ? "老師":"學生";
 			$this->menu_user = $user->e_epname.$log_dpname;	
+            $this->login_type = $user->e_ident;
 		}
     }
     //取得類別

@@ -288,9 +288,79 @@ class SetsController extends TopController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($sid)
     {
-        //
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        if ($this->login_type==="S"){
+            echo('很抱歉，權限不足以瀏覽');
+            return;
+        }
+        $data = Sets::find($sid);
+        //限時
+        $lime = explode(":", $data->s_limtime);
+        //大題
+        if ($data->s_sub){
+            $sub = Sets::select('s_id','s_intro','s_percen','s_page')
+                    ->where('s_pid', $sid)
+                    ->orderby('s_part')->get()->all();    
+        }else{
+            $sub = array();
+        }
+        
+
+        $part_button = '';
+        $part = '';
+        $part_que = '';
+        //題目排序用
+        $part_array = array();
+        // foreach ($sub as $i => $v) {
+        //     $j = $i+1;
+        //     $now = ($j==1) ? 'now':'';
+        //     $print_control = ($v->s_page=='Y')? '可回上頁修改':'不可回上頁修改';
+        //     //if ($parent_control!='S')$print_control.= '(考卷控制)';
+        //     $sub_intro[] = trim($v->s_intro);
+        //     $display_no = ($j>1) ? 'style="display:none;"':'';
+        //     $part_button.='<input type="button" class="btn w150 h25 bpart_div '.$now.'>" onclick="view('.$j.')" name="bpart" id="bpart'.$j.'" value="第'.$j.'大題('.$v->s_percen.'%)">';
+        //     $part.= '<div name="node" id="'.$v->s_id.'">';
+        //     $part.= '<div class="part_sort">: :</div>';
+        //     $part.= '<div style="display:inline-block;">';
+        //     $part.= '第'.$j.'大題('.$v->s_percen.'%)　'.$print_control;
+        //     $part.= '</div>';
+        //     $part.= '<img title="刪除" class="sub_del" src="'.URL::asset('img/icon_op_f.png').'" width="15" onclick="del_ask('.$sid.','.$v->ID.','.$j.')">';
+        //     $part.= '<div class="sub_intro" name="intro" id="intro'.$i.'">'.nl2br($v->INTRO).'</div>';
+        //     $part.= '</div>';
+        //     //按扭
+        //     $part_que.= '<input type="button" class="btn w100 partq" data-id="'.$v->ID.'" value="第'.$j.'大題">';
+        //     //題目排序
+        //     $part_array[] = $v->ID;
+        // }
+        // $qdata = array();
+        // $FirstPart = 0;
+        // //有大題，先loading
+        // if (!empty($sub)){
+        //     $FirstPart = $sub[0]->ID;
+        // }else{
+        //     $que = $this->SetsModel->sub_que(array($sid, 0));
+        //     $qdata = $this->_part_que($que);
+        // }
+        return view('sets.review', [
+            'menu_user' => $this->menu_user,
+            'title' => $data->s_name.' - 題目預覽',
+            'SETID' => $sid,
+            'Set_name' => $data->s_name,
+            'Sum' => $data->s_sum,
+            'Pass' => $data->s_pass_score,
+            'Limtime' => (int)$lime[0].'時'.(int)$lime[1].'分'.(int)$lime[2].'秒',
+            'Sub' => $data->SUB,
+            'Part_btn' => $part_que,
+            'Part_cont' => $part,
+            'Part' => $sub,
+            // 'FirstPart' => $FirstPart,
+            // 'Part_ar' => $part_array,
+            'Qdata' => array()//$qdata
+        ]);
     }
 
     /**
@@ -464,5 +534,9 @@ class SetsController extends TopController
         Sets::where('s_pid', $id)->delete();
         Sets::find($id)->delete();
         return redirect('/sets');
+    }
+    //ajax更新大題
+    public function ajpart(Request $req){
+        dd($req->all());
     }
 }

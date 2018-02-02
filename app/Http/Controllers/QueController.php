@@ -502,6 +502,7 @@ class QueController extends TopController
         $data['Num'] = '';
         $data['Rtype'] = '';
         $data['Correct_ans_math'] = '';
+        
         switch ($que->q_quetype) {
             case 'S': 
             case 'D': 
@@ -576,6 +577,11 @@ class QueController extends TopController
                 }
                 $data['Correct_ans_math'] = $ans_math;
                 break;
+        }
+        if ($que->q_know>0){
+            $data['Know_cancell'] = '<input type="button" class="" name="pcancell" id="pcancell" value="取消知識點">';
+        }else{
+            $data['Know_cancell'] = '';
         }
         //單複選 選項個數 初始化
         if ($que->q_quetype!=="S" && $que->q_quetype!=="D"){
