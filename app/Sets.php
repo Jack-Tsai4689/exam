@@ -3,7 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Gscs;
+use App\Setsque;
+use App\Ques;
 class Sets extends Model
 {
     public $timestamps = false;
@@ -30,14 +32,23 @@ class Sets extends Model
     	'created_at',
     	'updated_at'
     ];
-
+    //類型
     public function gra(){
-        return $this->belongsto('App\Gscs','s_gra')->select('g_name as name');
+        return $this->belongsto(Gscs::class,'s_gra')->select('g_name as name');
     }
+    //科目
     public function subj(){
-        return $this->belongsto('App\Gscs', 's_subj')->select('g_name as name');
+        return $this->belongsto(Gscs::class, 's_subj')->select('g_name as name');
     }
+    //大題
     public function sub(){
-        return $this->belongsto('App\Sets', 's_pid');
+        return $this->hasMany($this, 's_pid')->select('s_id','s_part','s_intro','s_percen','s_page');
+    }
+    //大題題目
+    public function subque(){
+        return $this->hasMany(Setsque::class, 'sq_part')
+                    ->join('ques', 'ques.q_id','=','setsque.sq_qid')
+                    ->select('ques.*','sq_sort')
+                    ->orderby('sq_sort');
     }
 }

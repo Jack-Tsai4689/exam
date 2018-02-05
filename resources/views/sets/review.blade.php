@@ -276,8 +276,6 @@
         <span id="part_func"><input type="button" onclick="close_part()" class="btn w100 h25" name="" id="" value="關閉排序">　
         <input type="button" onclick="save_part()" class="btn w100 h25" name="" id="" value="儲存排序">　
         </span>
-        <font color="red">*刪除大題，底下的題目將移至其他大題內</font>
-        <br>
         <div id="part_section">
         @foreach($Part as $i => $v)
             @php $print_control = ($v->s_page=='Y') ? '可回上頁修改':'不可回上頁修改'; @endphp
@@ -286,16 +284,19 @@
             <div style="display:inline-block;">
             第{{ ($i+1) }}大題({{ $v->s_percen }}%)　{{ $print_control }}
             </div>
-            <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $SETID }},{{ $v->s_id }}, {{ ($i+1) }})">
+            {{-- <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $SETID }},{{ $v->s_id }}, {{ ($i+1) }})"> --}}
             </div>
         @endforeach
         </div>
+        @foreach($Part as $i => $v)
+            <input type="button" class="btn w100 h25 part" data-id="{{ $v->s_id }}" value="第{{ $v->s_part }}大題">&nbsp;
+        @endforeach
     </div>
 
     <div name="part" id="part">
-        <div class="title"><label class="f17">題目</label></div>
+        <div id="part{{ $FirstPart->s_id }}" class="partq">
+        <div class="title"><label class="f17">題目{{ $FirstPart->s_part }}</label></div>
         <div class="title_intro">
-            <div id="part_que">{{ $Part_btn}}</div>
             <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
             <!-- <input type="button" class="btn w150" onclick="open_s(0)" name="esort" id="esort0" value="開啟排序">
             <div class="tip" id="tip_esort0">※開啟排序，按住每題題號可以拖曳喔</div>
@@ -319,13 +320,13 @@
                                 <th>題目</th>
                             </tr>
                         </thead>
-                        <tbody id="sort0">
-                        @foreach ($Qdata as $k => $v)
-                            <tr align="center" name="node" id="{{ $v->SQ_SORT }}">
+                        <tbody id="sort{{ $FirstPart->s_id }}">
+                        @foreach($FirstPart->que as $q)
+                            <tr align="center" name="node" id="{{ $q->sq_sort }}">
                                 <td class="handle">: :</td>
-                                <td class="qno">{{ $v->SQ_SORT }}</td>
-                                <td class="qno_ans">{{ $v->ANS }}</td>
-                                <td width="1000" align="left" class="que">{{ $v->QCONT }}</td>
+                                <td class="qno">{{ $q->sq_sort }}</td>
+                                <td class="qno_ans">{{ $q->q_ans }}</td>
+                                <td width="1000" align="left" class="que">{!! $q->q_qcont !!}</td>
             				</tr>
                         @endforeach
                         </tbody>
@@ -333,6 +334,48 @@
         		</div>
         	</div>
         </form>
+        </div>
+        @foreach ($OtherPart as $k => $v)
+        <div id="part{{ $v->s_id }}" class="hidden partq">
+        <div class="title"><label class="f17">題目(第{{ $v->s_part }}大題)</label></div>
+        <div class="title_intro">
+            <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
+            <!-- <input type="button" class="btn w150" onclick="open_s(0)" name="esort" id="esort0" value="開啟排序">
+            <div class="tip" id="tip_esort0">※開啟排序，按住每題題號可以拖曳喔</div>
+            <input type="button" class="btn w150 hidden" onclick="close_s(0)" name="csort" id="csort0" value="關閉排序">
+            <div class="tip" id="tip_csort0">※關閉排序，但不儲存</div>
+            <input type="button" class="btn w150 hidden" onclick="save_s(0)" name="usort" id="usort0" value="儲存排序">
+            <div class="tip" id="tip_usort0">※儲存並關閉排序</div>
+            <input type="button" class="btn w150 hidden" name="rsort" id="rsort0" onclick="rand_sort(0)" value="隨機排序">
+            <input type="button" class="btn w150 hidden" name="nsort" id="nsort0" onclick="recover_sort(0);" value="回復排序"> -->
+        </div>
+        <form id="form1" name="form1" method="post">
+            <div class="content">
+                <div id="cen">
+                    <label id="nowpart"></label>
+                    <table class="list" cellpadding="0" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>題號</th>
+                                <th>答案</th>
+                                <th>題目</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sort{{ $v->s_id }}">
+                            <tr align="center" name="node" id="">
+                                <td class="handle">: :</td>
+                                <td class="qno"></td>
+                                <td class="qno_ans"></td>
+                                <td width="1000" align="left" class="que"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+        </div>
+        @endforeach
     </div>
 </div>
 <div id="sub_title" class="list_set">
@@ -342,9 +385,8 @@
             <div class="set_cen">
                 <div class="cen last">
                     <form name="form2" id="form2">
-                    <input type="button" name="" id="" onclick="moreone()" class="btn w100 h25" value="增加">
+                    <input type="button" name="" id="" onclick="moreone()" class="btn w100 h25" value="增加">　<font color="red">*有題目的大題無法刪除</font>
                     <div style="max-height:490px; overflow:auto; overflow-x:hidden; margin:10px 0px 10px 0px;">
-                        <input type="hidden" name="setid" value="{{ $SETID }}">
                         <table class="list" id="more" border="0" width="100%" cellpadding="0" cellspacing="0">
                             <tr>
                                 <td align="left"><label class="f17">大題</label></td>
@@ -372,6 +414,7 @@
                         </table>
                     </div>
                     <div>
+                        {{ csrf_field() }}
                         <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="儲存" onclick="check_data()" name="update" id="update"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" onclick="cancel('u')"><font class="f15">取消</font></a></div>
                     </div>
@@ -391,6 +434,11 @@
     <input type="hidden" name="node" id="node">
     <input type="hidden" name="s" id="s" value="{{ $SETID }}">
     <input type="hidden" name="t" id="t" value="p">
+</form>
+<form id="joinq">
+    <input type="hidden" name="ques" id="ques">
+    <input type="hidden" name="npart" id="npart">
+    {{ csrf_field() }}
 </form>
 <div id="sets_filed" class="list_set">
     <div class="set_all">
@@ -625,8 +673,11 @@ function view(i){
 }
 var add = 0;
 function update_recover(i){
-    var sub = document.getElementsByName('nsub'+i);
-    $(sub).remove();
+    //var sub = document.getElementsByName('nsub'+i);
+    $(".sub"+i).remove();
+}
+function nrem(i){
+    $(".nsub"+i).remove();
 }
 function moreone(){
     add++;
@@ -652,14 +703,14 @@ function moreone(){
     //         $('<td>').append( $('<textarea>').attr({name:'sub_intro[]',placeholder:'選擇題，'}) )
     //     )
     // );
-    var html = '<tr name="nsub'+add+'"><td align="left"><label class="f17">新大題</label></td><td><img src="{{ URL::asset('img/icon_op_f.png') }}" onclick="update_recover('+add+')" width="15" height="15" class="sub_update_del"><input type="hidden" name="sub[]" value=""></td></tr><tr name="nsub'+add+'" class="deep"><td align="right">分數比重</td><td><input type="text" name="sub_score[]" maxlength="4" style="width:40px; text-align:center;" class="input_field">%</td></tr><tr name="nsub'+add+'" class="shallow"><td align="right">翻頁控制</td><td><select name="sub_control[]"><option value="Y">可回上題修改</option><option value="N">不可回上題修改</option></select></td></tr><tr name="nsub'+add+'" class="deep"><td align="right" style="vertical-align:top;">大題說明</td><td><textarea name="sub_intro[]" placeholder="選擇題"></textarea></td></tr>';
+    var html = '<tr class="nsub'+add+'"><td align="left"><label class="f17">新大題</label></td><td><img src="{{ URL::asset('img/icon_op_f.png') }}" onclick="nrem('+add+')" width="15" height="15" class="sub_update_del"><input type="hidden" name="sub[]" value=""></td></tr><tr class="nsub'+add+'" class="deep"><td align="right">分數比重</td><td><input type="text" name="sub_score[]" maxlength="4" style="width:40px; text-align:center;" class="input_field">%</td></tr><tr class="nsub'+add+'" class="shallow"><td align="right">翻頁控制</td><td><select name="sub_control[]"><option value="Y">可回上題修改</option><option value="N">不可回上題修改</option></select></td></tr><tr class="nsub'+add+'" class="deep"><td align="right" style="vertical-align:top;">大題說明</td><td><textarea name="sub_intro[]" placeholder="選擇題"></textarea></td></tr>';
     $(gb('more')).append(html);
 }
 function edit_sub(){
     $(gb('more')).html('');
     $.ajax({
         type:'GET',
-        url:'{{ url('sets/ajsub'.'/'.$SETID) }}',
+        url:'{{ url('sets/'.$SETID.'/subshow') }}',
         dataType:'json',
         success: function(data, textStatus, jqXHR){
             var html = '';
@@ -667,7 +718,7 @@ function edit_sub(){
                 var con_Y = (data[i].control==="Y") ? 'selected':'';
                 var con_N = (data[i].control==="N") ? 'selected':'';
                 var j = Number(i)+1;
-                html+= '<tr name="sub'+data[i].sid+'"><td align="left"><label class="f17">大題'+j+'</label></td><td><img src="{{ URL::asset('img/icon_op_f.png') }}" onclick="update_recover('+data[i].sid+')" width="15" height="15" class="sub_update_del"><input type="hidden" name="sub[]" value="'+data[i].sid+'"></td></tr><tr name="sub'+data[i].sid+'" class="deep"><td align="right">分數比重</td><td><input type="text" name="sub_score[]" value="'+data[i].percen+'" maxlength="4" style="width:40px; text-align:center;" class="input_field">%</td></tr><tr name="sub'+data[i].sid+'" class="shallow"><td align="right">翻頁控制</td><td><select name="sub_control[]"><option '+con_Y+' value="Y">可回上題修改</option><option '+con_N+' value="N">不可回上題修改</option></select></td></tr><tr name="sub'+data[i].sid+'" class="deep"><td align="right" style="vertical-align:top;">大題說明</td><td><textarea name="sub_intro[]" placeholder="選擇題" value='+data[i].intro+'>'+data[i].intro+'</textarea></td></tr>';
+                html+= '<tr class="sub'+data[i].sid+'"><td align="left"><label class="f17">大題'+j+'</label></td><td><img src="{{ URL::asset('img/icon_op_f.png') }}" onclick="update_recover('+data[i].sid+')" width="15" height="15" class="sub_update_del"><input type="hidden" name="sub[]" value="'+data[i].sid+'"></td></tr><tr class="deep sub'+data[i].sid+'"><td align="right">分數比重</td><td><input type="text" name="sub_score[]" value="'+data[i].percen+'" maxlength="4" style="width:40px; text-align:center;" class="input_field">%</td></tr><tr class="shallow sub'+data[i].sid+'"><td align="right">翻頁控制</td><td><select name="sub_control[]"><option '+con_Y+' value="Y">可回上題修改</option><option '+con_N+' value="N">不可回上題修改</option></select></td></tr><tr class="deep sub'+data[i].sid+'"><td align="right" style="vertical-align:top;">大題說明</td><td><textarea name="sub_intro[]" placeholder="選擇題" value='+data[i].intro+'>'+data[i].intro+'</textarea></td></tr>';
             };
             $(gb('more')).html(html);
         }
@@ -686,29 +737,32 @@ function cancel(c){
 }
 
 function check_data(){
-    var error = false;
-    var percen = 0;
-    $('input[name="sub_score[]"]').each(function(){
-        if (isNaN(this.value)){
-            error = true; alert('分數比重只能數字'); return false;
+    let part_rows = gb('more').rows.length;
+    if (part_rows>0){
+        var error = false;
+        var percen = 0;
+        $('input[name="sub_score[]"]').each(function(){
+            if (isNaN(this.value)){
+                error = true; alert('分數比重只能數字'); return false;
+            }
+            if (this.value=='' || this.value<1){
+                error = true; alert('分數比重至少為1'); return false;
+            }
+            percen+=Number(this.value);
+        });
+        if (error)return false;
+        if (percen!=100){
+            alert('分數比重總和需為100'); return false;
         }
-        if (this.value=='' || this.value<1){
-            error = true; alert('分數比重至少為1'); return false;
-        }
-        percen+=Number(this.value);
-    });
-    if (error)return false;
-    if (percen!=100){
-        alert('分數比重總和需為100'); return false;
+        $('textarea[name="sub_intro[]"]').each(function(){
+            if (this.value==''){
+                error = true;
+                alert('大題說明請確實填寫');
+                return false;
+            }
+        });
+        if (error)return false;
     }
-    $('textarea[name="sub_intro[]"]').each(function(){
-        if (this.value==''){
-            error = true;
-            alert('大題說明請確實填寫');
-            return false;
-        }
-    });
-    if (error)return false;
     $('#intro_open').show();
     $('#intro_all').show();
     $.ajax({
@@ -718,6 +772,11 @@ function check_data(){
         data:$('#form2').serialize(),
         success: function(){
             //location.reload();
+        },
+        error: function(){
+            alert('大題有題目，無法刪除');
+            $('#intro_open').hide();
+            $('#intro_all').hide();
         }
     });
 }
@@ -731,7 +790,11 @@ function zoom(){
     }
 }
 $(".ware").on('click', function(){
-    document.getElementById('que_pic').src="{{ url('/question/join') }}";
+    if (gb('npart').value==""){
+        let ele = $(".part").get(0);
+        gb('npart').value = $(ele).data('id');
+    }
+    document.getElementById('que_pic').src="{{ url('/ques/imp') }}";
     $('#sets_filed').show();
     $('#loading_status').show();
     $("#que_pic").load(function(){
@@ -739,7 +802,35 @@ $(".ware").on('click', function(){
         $('#que_pic').show();
     });
 });
-
+function importque(){
+    $.ajax({
+        type: "POST",
+        url: "{{ url('/sets/'.$SETID.'/joinq') }}",
+        data: $("#joinq").serialize(),
+        dataType: "JSON",
+        success: function(){
+            showque(gb('npart').value);
+        }
+    });
+}
+$(".part").on('click', function(){
+    let id = $(this).data('id');
+    showque(id);
+});
+function showque(id){
+    $.ajax({
+        type: "GET",
+        url: "{{ url('/sets/'.$SETID.'/part') }}",
+        data: {part:id},
+        dataType: "JSON",
+        success: function(rs){
+            $("#sort"+id).html(rs.html);
+            $(".partq").hide();
+            $("#part"+id).show();
+        }
+    });
+    gb('npart').value = id;
+}
 function close_pic(){
     $('#sets_filed').hide();
     $('#que_pic').hide();

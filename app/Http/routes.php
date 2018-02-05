@@ -25,9 +25,16 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::get('{id}/edit', "SetsController@edit");
 	Route::delete('{id}', "SetsController@destroy");
 	Route::put('{id}', "SetsController@update");
+	//預覽
 	Route::get('{id}/show', "SetsController@show");
-	Route::post('{id}/subu', "SetsController@ajpart");
-	
+	//ajax更新大題
+	Route::post('{id}/subu', "SetsController@ajstore_part");
+	//ajax編題大題
+	Route::get('{id}/subshow', "SetsController@ajedit_part");
+	//ajax加入題目
+	Route::post('{id}/joinq', "SetsController@partjoinque");
+	//ajax讀取大題目題
+	Route::get("{id}/part", "SetsController@ajshow_que");
 });
 
 Route::group(['prefix'=>'ques'], function(){
@@ -36,6 +43,7 @@ Route::group(['prefix'=>'ques'], function(){
 	Route::post('/', "QueController@store");
 	Route::get('{id}/edit', "QueController@edit");
 	Route::put('{id}',"QueController@update");
+	Route::get('/imp', "QueController@join");
 });
 
 Route::group(['prefix'=>'know'], function(){

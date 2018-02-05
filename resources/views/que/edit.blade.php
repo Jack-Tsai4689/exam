@@ -225,9 +225,9 @@
                 </tr>
                 <tr class="shallow">
                     <TD align="right">題目聲音檔</TD>
-                    <td>{!! $Qsound_html !!}
-                        <input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3
-                        <input type="hidden" name="qs_src" value="{{ $Qsoundsrc }}">
+                    <td><div id="qsold" {!! $Qsold !!}>{!! $Qsound_html !!}</div>
+                        <div id="qup" {!! $Qs_upload !!}><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3
+                        <input type="hidden" name="qs_src" id="qs_src" value="{{ $Qsoundsrc }}"></div>
                     </TD>
                 </TR>
                 <tr class="deep">
@@ -340,21 +340,22 @@
                     <td>
                         <IMG id="aimg" src="{{ $Aimg }}" width="98%"><br>
                         <div id="aimg_content">{!! $Aimg_html !!}</div>
-                        <input type="hidden" id="f_aimg" name="f_aimg" value="{{ $Aimgsrc }}">
+                        <input type="hidden" id="am_src" name="am_src" value="{{ $Aimgsrc }}">
                         格式：JPG/PNG
                     </td>
                 </tr>
                 <tr class="deep">
                     <TD align="right">聲音檔</TD>
-                    <td>{!! $Asound_html !!}
-                        <input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3
-                        <input type="hidden" name="qs_src" value="{{ $Asoundsrc }}">
+                    <td><div id="asold" {!! $Asold !!}>{!! $Asound_html !!}</div>
+                        <div id="aup" {!! $As_upload !!}><input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3
+                        <input type="hidden" name="as_src" id="as_src" value="{{ $Asoundsrc }}"></div>
                     </TD>
                 </TR>
                 <tr class="shallow">
                     <td align="right">影片檔</td>
-                    <td>{!! $Avideo_html !!}
-                        <input type="file" name="avideo" id="avideo" accept="video/mp4">格式：MP4
+                    <td><div id="avold" {!! $Avold !!}>{!! $Avideo_html !!}</div>
+                        <div id="avup" {!! $Av_upload !!}><input type="file" name="avideo" id="avideo" accept="video/mp4">格式：MP4
+                        <input type="hidden" name="av_src" id="av_src" value="{{ $Avideosrc }}"></div>
                     </TD>
                 </tr>
             </table>
@@ -396,39 +397,35 @@ function gb(v){
     return document.getElementById(v);
 }
 {!! $now_type !!}
-function show_oans(elem){
-    var oans = $('#'+elem);
-    if (oans.css('display')=='none'){
-        oans.css('display','table');
-        $('#pic_'+elem).prop('src','{{ URL::asset('img/open.png') }}');
-    }else{
-        oans.css('display','none');
-        $('#pic_'+elem).prop('src','{{ URL::asset('img/close.png') }}');
+
+function rem(v){
+    if (confirm('確定刪除?')){
+        switch(v){
+            case "delqs":
+                gb('qs_src').value = '';
+                $("#qup").removeClass("hiden");
+                gb("qsold").innerHTML = '';
+                $("#qsold").hide();
+                break;
+            case "delas":
+                gb('as_src').value = '';
+                $("#aup").removeClass("hiden");
+                gb("asold").innerHTML = '';
+                $("#asold").hide();
+                break;
+            case 'delav':
+                gb('av_src').value = '';
+                $("#avup").removeClass("hiden");
+                gb("avold").innerHTML = '';
+                $("#avold").hide();
+                break;
+        }        
     }
 }
-function view_part(v){
-    if(v>''){
-        var part = $('#part');
-        $.getJSON("exsets_part.php", {main:v}, function(data){
-            part.empty();
-            var len = data.data.length;
-            for(var i=0;i<len;i++){
-                part.append(
-                    $('<option>').attr('value', data.data[i]['l']).text(data.data[i]['p'])
-                );
-            }
-        });
-        document.getElementById('partd').style.display = 'inline-block';
-    }else{
-        document.getElementById('partd').style.display = 'none';
-    }
-}
+
 window.moveTo(0,0);
 window.resizeTo(screen.width,screen.height);
 window.focus();
-// function get_data2(f_qid,f_type) {
-//     window.open("upvs_2.php?f_qid="+f_qid+"&f_type="+f_type,null,'width=700px,height=500px,resizable=yes,scrollbars=yes,status=yes');
-// }
 (function( $ ) {
     $.widget( "custom.combobox", {
         _create: function() {
@@ -514,17 +511,9 @@ window.focus();
         }
     });
 })( jQuery );
-    
 $(function() {
     $( "#f_chapterui" ).combobox();
 });
-// function delete_que(){//刪除
-//     if (confirm('刪除後以上您輸入的資料都會消失，您確定要刪除嗎?')){
-//         location.href="ex_md.php?act=delete";
-//     }
-// }
-//var rows_m = 1;
-
 function subj_c(v){
     $.ajax({
         type:"GET",
@@ -566,7 +555,6 @@ function chap_c(v){
         }
     });
 }
-
 function num_change(v){//選填用
     var math = $('#form1 #correct_ans_math');
     var html = '';
@@ -584,120 +572,6 @@ function num_change(v){//選填用
     }
     math.html(html);
 }
-function uque(v){
-    if (v==="deque"){
-        $.ajax({
-            type:"POST",
-            url:"{{ url('/ques/rmpic') }}",
-            data:{'type':v},
-            dataType:"JSON",
-            success: function(rs){
-                gb('qimg_content').innerHTML = rs.html;
-                gb('qimg').src = '';
-                gb('f_qimg').value = '';
-            }
-        });
-        return;
-    }
-    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
-    $('#sets_filed').show();
-    $('#loading_status').show();
-    $("#que_pic").load(function(){
-        $('#loading_status').hide();
-        $('#que_pic').show();
-    });
-}
-function uans(v){
-    if (v==="deans"){
-        $.ajax({
-            type:"POST",
-            url:"{{ url('/ques/rmpic') }}",
-            data:{'type':v},
-            dataType:"JSON",
-            success: function(rs){
-                gb('aimg_content').innerHTML = rs.html;
-                gb('aimg').src = '';
-                gb('f_aimg').value = '';
-            }
-        });
-        return;
-    }
-    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
-    $('#sets_filed').show();
-    $('#loading_status').show();
-    $("#que_pic").load(function(){
-        $('#loading_status').hide();
-        $('#que_pic').show();
-    });
-}
-
-function select_point(){//知識點
-    document.getElementById('que_pic').src="";
-    document.getElementById('que_pic').src="ex_point.php?fkey=6";
-    $('#que_pic').attr('width','100%');
-    $('#que_pic').attr('height',screen.height*0.8);
-    $('#sets_filed .set_all').css('width','90%');
-    $('#sets_filed').show();
-    //var point = window.open("ex_point.php?fkey=6","ex_point","width=1240px,height=600px,resizable=yes,scrollbars=yes,status=yes");
-}
-// document.onkeydown = function(event){//鎖特定按鍵 116 F15  123 F12
-//     if (event.keyCode == 116){
-//         if (confirm('確定要重新整理?未存檔資料將可能遺失!')){
-//         }else{
-//             event.keyCode = 0;
-//             event.returnValue = false;
-//         }
-//     }
-// }
-function trim(value){
-    return value.replace(/^\s+|\s+$/g, '');
-}
-var action = false;
-function done(){
-    action = true;
-}
-function form_check(obj){
-    if (data_check()){
-        alert('請確認無誤');
-        return false;
-    }
-}
-function data_check(){
-    var no = '';
-    var error = false;
-    var i = 0;
-    $('#form1 input[name="f_imgsrc[]"]').each(function(){
-        no = this.id;
-        no = no.substring(8);
-        var quetxt = $('#f_quetxt'+no).val();
-        var img = $(this).val();
-        i++;
-        if (quetxt=='' && img==''){
-            error = true;
-        }
-    });
-    var correct_ans = $('input[name="ans[]"]:checked').val();
-    if (correct_ans==null){
-        document.getElementById('ans_group_error').innerHTML = '(X) 設定答案';
-    }else{
-        document.getElementById('ans_group_error').innerHTML = '';
-    }
-    var chapter = document.getElementById('f_chapter').value;
-    if (trim(chapter)==''){
-        error = true;
-        document.getElementById('chapter_error').innerHTML = '(X) 章節勿空白';
-    }else{
-        document.getElementById('chapter_error').innerHTML = '';
-    }
-    if ($('input[name=f_qus_type]:checked').val()==4){
-        if (i<2){
-            error = true;
-            alert('請增加小題');
-        }
-    }
-    return error;
-}
-var originurl = opener.location.href;
 function no_display(num){//編號切換
     var j ='';
     for (var i=0; i <num; i++) {
@@ -863,6 +737,199 @@ function optnum(v){//選項數擷取
     var type = $('input[name="f_qus_type"]:checked').val();
     change_type(type);
 }
+function opt_num(n, v){//選項數擷取
+    var l = n.length;
+    var newn = n.substring(10);
+    var type = $('#form1').find('#q'+newn).find('#qus_type'+newn).val();
+    //var type = $('#form1 > #q'+newn+' #qus_type'+newn).val();
+    //alert(newn+','+type);
+    change_ans_type('qus_type'+newn,type);
+}
+$("#addpoint").on('click', function(){
+    document.getElementById('que_pic').src="{{ url('/know/join') }}";
+    openframe();
+});
+$("#know_div").on("click", "#pcancell", function(){
+    gb('f_pid').value = '';
+    gb('pid_name').innerHTML = '';
+    gb('pid_cancell').innerHTML = '';
+});
+
+function openframe(){
+    gb("que_pic").style.width = '100%';
+    gb("que_pic").style.height = screen.height*0.8;
+    // $('#que_pic').attr('width','100%');
+    // $('#que_pic').attr('height',screen.height*0.8);
+    $('#sets_filed .set_all').css('width','90%');
+    $('#sets_filed').show();
+    $('#loading_status').show();
+    $("#que_pic").load(function(){
+        $('#loading_status').hide();
+        $('#que_pic').show();
+    });
+}
+function close_pic(){
+    $('#sets_filed').hide();
+    $('#que_pic').hide();
+}
+
+
+
+
+function show_oans(elem){
+    var oans = $('#'+elem);
+    if (oans.css('display')=='none'){
+        oans.css('display','table');
+        $('#pic_'+elem).prop('src','{{ URL::asset('img/open.png') }}');
+    }else{
+        oans.css('display','none');
+        $('#pic_'+elem).prop('src','{{ URL::asset('img/close.png') }}');
+    }
+}
+
+function view_part(v){
+    if(v>''){
+        var part = $('#part');
+        $.getJSON("exsets_part.php", {main:v}, function(data){
+            part.empty();
+            var len = data.data.length;
+            for(var i=0;i<len;i++){
+                part.append(
+                    $('<option>').attr('value', data.data[i]['l']).text(data.data[i]['p'])
+                );
+            }
+        });
+        document.getElementById('partd').style.display = 'inline-block';
+    }else{
+        document.getElementById('partd').style.display = 'none';
+    }
+}
+// function get_data2(f_qid,f_type) {
+//     window.open("upvs_2.php?f_qid="+f_qid+"&f_type="+f_type,null,'width=700px,height=500px,resizable=yes,scrollbars=yes,status=yes');
+// }
+
+    
+
+// function delete_que(){//刪除
+//     if (confirm('刪除後以上您輸入的資料都會消失，您確定要刪除嗎?')){
+//         location.href="ex_md.php?act=delete";
+//     }
+// }
+//var rows_m = 1;
+
+
+function uque(v){
+    if (v==="deque"){
+        $.ajax({
+            type:"POST",
+            url:"{{ url('/ques/rmpic') }}",
+            data:{'type':v},
+            dataType:"JSON",
+            success: function(rs){
+                gb('qimg_content').innerHTML = rs.html;
+                gb('qimg').src = '';
+                gb('f_qimg').value = '';
+            }
+        });
+        return;
+    }
+    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
+    $('#sets_filed').show();
+    $('#loading_status').show();
+    $("#que_pic").load(function(){
+        $('#loading_status').hide();
+        $('#que_pic').show();
+    });
+}
+function uans(v){
+    if (v==="deans"){
+        $.ajax({
+            type:"POST",
+            url:"{{ url('/ques/rmpic') }}",
+            data:{'type':v},
+            dataType:"JSON",
+            success: function(rs){
+                gb('aimg_content').innerHTML = rs.html;
+                gb('aimg').src = '';
+                gb('f_aimg').value = '';
+            }
+        });
+        return;
+    }
+    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
+    $('#sets_filed').show();
+    $('#loading_status').show();
+    $("#que_pic").load(function(){
+        $('#loading_status').hide();
+        $('#que_pic').show();
+    });
+}
+
+function select_point(){//知識點
+    document.getElementById('que_pic').src="";
+    document.getElementById('que_pic').src="ex_point.php?fkey=6";
+    $('#que_pic').attr('width','100%');
+    $('#que_pic').attr('height',screen.height*0.8);
+    $('#sets_filed .set_all').css('width','90%');
+    $('#sets_filed').show();
+    //var point = window.open("ex_point.php?fkey=6","ex_point","width=1240px,height=600px,resizable=yes,scrollbars=yes,status=yes");
+}
+// document.onkeydown = function(event){//鎖特定按鍵 116 F15  123 F12
+//     if (event.keyCode == 116){
+//         if (confirm('確定要重新整理?未存檔資料將可能遺失!')){
+//         }else{
+//             event.keyCode = 0;
+//             event.returnValue = false;
+//         }
+//     }
+// }
+var action = false;
+function done(){
+    action = true;
+}
+function form_check(obj){
+    if (data_check()){
+        alert('請確認無誤');
+        return false;
+    }
+}
+function data_check(){
+    var no = '';
+    var error = false;
+    var i = 0;
+    $('#form1 input[name="f_imgsrc[]"]').each(function(){
+        no = this.id;
+        no = no.substring(8);
+        var quetxt = $('#f_quetxt'+no).val();
+        var img = $(this).val();
+        i++;
+        if (quetxt=='' && img==''){
+            error = true;
+        }
+    });
+    var correct_ans = $('input[name="ans[]"]:checked').val();
+    if (correct_ans==null){
+        document.getElementById('ans_group_error').innerHTML = '(X) 設定答案';
+    }else{
+        document.getElementById('ans_group_error').innerHTML = '';
+    }
+    var chapter = document.getElementById('f_chapter').value;
+    if (trim(chapter)==''){
+        error = true;
+        document.getElementById('chapter_error').innerHTML = '(X) 章節勿空白';
+    }else{
+        document.getElementById('chapter_error').innerHTML = '';
+    }
+    if ($('input[name=f_qus_type]:checked').val()==4){
+        if (i<2){
+            error = true;
+            alert('請增加小題');
+        }
+    }
+    return error;
+}
+var originurl = opener.location.href;
+
 function ao_display(n, v){//編號切換
     var j ='';
     var l =n.length;
@@ -944,41 +1011,7 @@ function change_ans_type(ans_q,ans_t){//選項設定
         }
     }
 }
-function opt_num(n, v){//選項數擷取
-    var l = n.length;
-    var newn = n.substring(10);
-    var type = $('#form1').find('#q'+newn).find('#qus_type'+newn).val();
-    //var type = $('#form1 > #q'+newn+' #qus_type'+newn).val();
-    //alert(newn+','+type);
-    change_ans_type('qus_type'+newn,type);
-}
-$("#addpoint").on('click', function(){
-    document.getElementById('que_pic').src="{{ url('/know/join') }}";
-    openframe();
-});
-$("#know_div").on("click", "#pcancell", function(){
-    gb('f_pid').value = '';
-    gb('pid_name').innerHTML = '';
-    gb('pid_cancell').innerHTML = '';
-});
 
-function openframe(){
-    gb("que_pic").style.width = '100%';
-    gb("que_pic").style.height = screen.height*0.8;
-    // $('#que_pic').attr('width','100%');
-    // $('#que_pic').attr('height',screen.height*0.8);
-    $('#sets_filed .set_all').css('width','90%');
-    $('#sets_filed').show();
-    $('#loading_status').show();
-    $("#que_pic").load(function(){
-        $('#loading_status').hide();
-        $('#que_pic').show();
-    });
-}
-function close_pic(){
-    $('#sets_filed').hide();
-    $('#que_pic').hide();
-}
 // function remove_point(){
 //     var point = document.getElementById('point_content');
 //     point.innerHTML = '<input type="button" value="選擇知識點" class="btn w100 h25" name="f_btn" onClick="select_point()">';
@@ -988,18 +1021,19 @@ function close_pic(){
     // document.getElementById('f_pid').value = 't';
     // document.forms[0].submit();
 //}
-function rem(elem,no){
-    if (confirm('檔案無法復原，確定?')){
-        var obj = $('#f_'+elem+no).val();
-        $.getJSON("rem_file.php", {type:elem,file:obj,no:no}, function(data){
-            if (no==''){
-                $('#'+elem+'_content').html(data);
-            }else{
-                $('#q'+no+'_'+elem+'_content').html(data);
-            }
-        });
-    }
-}
+
+// function rem(elem,no){
+//     if (confirm('檔案無法復原，確定?')){
+//         var obj = $('#f_'+elem+no).val();
+//         $.getJSON("rem_file.php", {type:elem,file:obj,no:no}, function(data){
+//             if (no==''){
+//                 $('#'+elem+'_content').html(data);
+//             }else{
+//                 $('#q'+no+'_'+elem+'_content').html(data);
+//             }
+//         });
+//     }
+// }
 function remove_q(no){
     if (confirm('確定移除?')){
         $('#nq'+no).remove();

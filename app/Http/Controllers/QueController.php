@@ -120,7 +120,7 @@ class QueController extends TopController
             $acont[] = implode(' | ', $amedia);
             $que_data[$k]->q_acont = '<br>'.implode("<br>", $acont);
             //難度
-            switch ($v->DEGREE) {
+            switch ($v->q_degree) {
                 case "M": $que_data[$k]->q_degree = "中等"; break;
                 case "H": $que_data[$k]->q_degree = "困難"; break;
                 case "E": $que_data[$k]->q_degree = "容易"; break;
@@ -278,7 +278,7 @@ class QueController extends TopController
         $degree->H = '';
         $data['Degree'] = $degree;
         $data['que_type'] = '';
-        $data['title'] = '建立題庫';
+        $data['title'] = '建立題目';
         return view('que.create', $data);
     }
 
@@ -617,6 +617,8 @@ class QueController extends TopController
         $grade_data = $this->grade();
         $subject_data = array();
         $chap_data = array();
+        
+        
         if (!empty($grade_data)){
             foreach ($grade_data as $v) {
                 $g_sel = ($que->q_gra===$v->g_id) ? 'selected':'';
@@ -624,6 +626,7 @@ class QueController extends TopController
             }
             $subject_data = $this->subject($que->q_gra);
         }
+        $data['Q_Grade'] = $Q_Grade;
         if (!empty($subject_data)){
             foreach ($subject_data as $v) {
                 $s_sel = ($que->q_subj===$v->g_id) ? 'selected':'';
@@ -631,13 +634,14 @@ class QueController extends TopController
             }
             $chap_data = $this->chapter($que->q_gra, $que->q_subj);
         }
+        $data['Q_Subject'] = $Q_Subject;
         if (!empty($chap_data)){
             foreach ($chap_data as $v) {
                 $c_sel = ($que->q_chap===$v->g_id) ? 'selected':'';
                 $Q_Chapter.= '<option '.$c_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
         }
-
+        $data['Q_Chapter'] = $Q_Chapter;
 
         //題目圖片
         $qimg_html = '';
@@ -655,10 +659,11 @@ class QueController extends TopController
         
         //題目音訊
         $qsound_html = '';
+        $qs_upload = true;
         if (!empty($que->q_qs_src)){
             if (is_file($que->q_qs_src)){
-                $qsound_html.= '檔名：'.$que->q_qs_name;
-                $qsound_html.= '<br><input type="button" value="刪除聲音檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsrc_s","")">';
+                $qsound_html.= '檔名：'.$que->q_qs_name.'　<input type="button" value="刪除聲音檔"  class="btn w100" id="delqs" onclick="rem(this.id)">';
+                $qs_upload = false;
             }else{
                 $qsound_html.= '<font color="red">檔案遺失</font>';
             }
@@ -680,10 +685,11 @@ class QueController extends TopController
 
         //詳解音訊
         $asound_html = '';
+        $as_upload = true;
         if (!empty($que->q_as_src)){
             if (is_file($que->q_as_src)){
-                $asound_html.= '檔名：'.$que->q_as_name;
-                $asound_html.= '<br><input type="button" value="刪除聲音檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsrc_s","")">';
+                $asound_html.= '檔名：'.$que->q_as_name.'　<input type="button" value="刪除聲音檔"  class="btn w100" id="delas" onclick="rem(this.id)">';
+                $as_upload = false;
             }else{
                 $asound_html.= '<font color="red">檔案遺失</font>';
             }
@@ -691,10 +697,11 @@ class QueController extends TopController
         }
         //詳解視訊
         $avideo_html = '';
+        $av_upload = true;
         if (!empty($que->q_av_src)){
             if (is_file($que->q_av_src)){
-                $avideo_html.= '檔名：'.$que->q_as_name;
-                $avideo_html.= '<br><input type="button" value="刪除影片檔"  class="btn w100" name="delsaudio" id="delsaudio" onclick="rem("imgsolv","")">';
+                $avideo_html.= '檔名：'.$que->q_av_name.'　<input type="button" value="刪除影片檔"  class="btn w100" id="delav" onclick="rem(this.id)">';
+                $av_upload = false;
             }else{
                 $avideo_html.= '<font color="red">檔案遺失</font>';
             }
@@ -703,11 +710,13 @@ class QueController extends TopController
         }
 
         $data['Qid'] = $qid;
-        $data['Qimgsrc'] = $que->QIMGSRC;
+        $data['Qimgsrc'] = $que->q_qm_src;
         $data['Qimg_html'] = $qimg_html;
         $data['Quetxt'] = $que->q_quetxt;
         $data['Qsoundsrc'] = $que->q_qs_src;
         $data['Qsound_html'] = $qsound_html;
+        $data['Qsold'] = ($qs_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['Qs_upload'] = (!$qs_upload) ? 'class="hiden"':'';
         $data['Keyword'] = $que->q_keyword;
         
         $data['Anstxt'] = $que->q_anstxt;
@@ -715,9 +724,13 @@ class QueController extends TopController
         $data['Aimg_html'] = $aimg_html;
         $data['Asoundsrc'] = $que->q_as_src;
         $data['Asound_html'] = $asound_html;
+        $data['Asold'] = ($as_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['As_upload'] = (!$as_upload) ? 'class="hiden"':'';
         $data['Avideosrc'] = $que->q_av_src;
         $data['Avideo_html'] = $avideo_html;
-        
+        $data['Avold'] = ($av_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['Av_upload'] = (!$av_upload) ? 'class="hiden"':'';
+
         $data['Kid'] = $que->q_know;
         $data['Kname'] = ($que->q_know>0) ? $que->knows->name:'';
 
@@ -725,9 +738,7 @@ class QueController extends TopController
         $data['Num'] = $num;
         $data['Ans'] = $ans_html;
         $data['Que_type'] = $que_type;
-        $data['Q_Grade'] = $Q_Grade;
-        $data['Q_Subject'] = $Q_Subject;
-        $data['Q_Chapter'] = $Q_Chapter;
+        
 
         //難度
         $degree = new \stdClass;
@@ -740,7 +751,7 @@ class QueController extends TopController
             case 'E': $degree->E = 'checked'; break;
             default: $degree->E = 'checked'; break;
         }
-        $data['title'] = "編輯題庫";
+        $data['title'] = "編輯題目";
         $data['Degree'] = $degree;
         return view('que.edit', $data);
     }
@@ -827,6 +838,64 @@ class QueController extends TopController
                 break;
         }
         
+        $qsold_src = ($req->has('qs_src') && !empty($req->input('qs_src'))) ? trim($req->input('qs_src')):'';
+        $asold_src = ($req->has('as_src') && !empty($req->input('as_src'))) ? trim($req->input('as_src')):'';
+        $avold_src = ($req->has('av_src') && !empty($req->input('av_src'))) ? trim($req->input('av_src')):'';
+
+        $qs_src = '';
+        $qs_name = '';
+        $qs_file = $req->file('qsound');
+        if ($qs_file!=null){
+            $file_error = false;
+            if ($req->hasFile('qsound')) {
+                $mime = $qs_file->getMimeType();
+                if ($mime!='audio/mpeg')$file_error = true;
+                if (!$file_error){
+                    $uuid = md5(uniqid(rand(), true));
+                    //上傳
+                    $qs_file->move('uploads/que', $uuid.'.'.$qs_file->getClientOriginalExtension());
+                    $qs_src = 'uploads/que/'.$uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $qs_name = $qs_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解聲音
+        $as_src = '';
+        $as_name = '';
+        $as_file = $req->file('asound');
+        if ($as_file!=null){
+            $file_error = false;
+            if ($req->hasFile('asound')) {
+                $mime = $as_file->getMimeType();
+                if ($mime!='audio/mpeg')$file_error = true;
+                if (!$file_error){
+                    $uuid = md5(uniqid(rand(), true));
+                    //上傳
+                    $as_file->move('uploads/que', $uuid.'.'.$as_file->getClientOriginalExtension());
+                    $as_src = 'uploads/que/'.$uuid.'.'.$as_file->getClientOriginalExtension();
+                    $as_name = $as_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解影片
+        $av_src = '';
+        $av_name = '';
+        $av_file = $req->file('avideo');
+        if ($av_file!=null){
+            $file_error = false;
+            if ($req->hasFile('avideo')) {
+                $mime = $av_file->getMimeType();
+                if ($mime!='video/mpeg')$file_error = true;
+                if (!$file_error){
+                    $uuid = md5(uniqid(rand(), true));
+                    //上傳
+                    $av_file->move('uploads/que', $uuid.'.'.$av_file->getClientOriginalExtension());
+                    $av_src = 'uploads/que/'.$uuid.'.'.$av_file->getClientOriginalExtension();
+                    $av_name = $av_file->getClientOriginalName();
+                }
+            }           
+        }
+
         $que = Ques::find($qid);
         $que->q_quetype = $que_type;
         $que->q_quetxt = $quetxt;
@@ -840,6 +909,35 @@ class QueController extends TopController
         $que->q_num = $num;
         $que->q_know = $know_id;
         $que->q_updated_at = time();
+
+        //刪舊的或本來就沒有
+        if (empty($qsold_src)){
+            if (!empty($que->q_qs_src)){
+                if (is_file($que->q_qs_src)){
+                    if (unlink($que->q_qs_src)){}
+                }
+            }
+            $que->q_qs_src = $qs_src;
+            $que->q_qs_name = $qs_name;
+        }
+        if (empty($asold_src)){
+            if (!empty($que->q_as_src)){
+                if (is_file($que->q_as_src)){
+                    if (unlink($que->q_as_src)){}
+                }
+            }
+            $que->q_as_src = $as_src;
+            $que->q_as_name = $as_name;
+        }
+        if (empty($avold_src)){
+            if (!empty($que->q_av_src)){
+                if (is_file($que->q_av_src)){
+                    if (unlink($que->q_av_src)){}
+                }
+            }
+            $que->q_av_src = $av_src;
+            $que->q_av_name = $av_name;
+        }
         $que->save();
         echo '<script>opener.location.reload();window.close();</script>';
     }
@@ -854,4 +952,136 @@ class QueController extends TopController
     {
         //
     }
+    public function join(){
+        $search = array();
+        $p_gra = 0;
+        $p_subj = 0;
+        $p_chap = 0;
+        $p_degree = '';
+
+        $sel_Degree = new \stdClass;
+        $sel_Degree->A = '';
+        $sel_Degree->E = '';
+        $sel_Degree->M = '';
+        $sel_Degree->H = '';
+
+        //年級、科目 篩選條件
+        $gra_html = '';
+        $subj_html = '';
+        $chap_html = '';
+        $grade_data = $this->grade();
+        if (!empty($grade_data)){
+            foreach ($grade_data as $v) {
+                $sel_gra = ($p_gra===$v->g_id) ? 'selected':'';
+                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        $que_data = Ques::all();
+        foreach ($que_data as $k => $v) {
+            //題型、答案
+            switch ($v->q_quetype) {
+                case "S": 
+                    $que_data[$k]->q_quetype = "單選"; 
+                    $que_data[$k]->q_ans = chr($v->q_ans+64);
+                    break;
+                case "D": 
+                    $que_data[$k]->q_quetype = "複選"; 
+                    $ans = array();
+                    $ans = explode(",", $v->q_ans);
+                    $ans_html = array();
+                    foreach ($ans as $o) {
+                        $ans_html[] = chr($o+64);
+                    }
+                    $que_data[$k]->q_ans = implode(", ", $ans_html);
+                    break;
+                case "R": 
+                    $que_data[$k]->q_quetype = "是非"; 
+                    $que_data[$k]->q_ans = ($v->q_ans==="1") ? "O":"X";
+                    break;
+                case "M": 
+                    $que_data[$k]->q_quetype = '選填'; 
+                    $ans = array();
+                    $ans = explode(",", $v->q_ans);
+                    $ans_html = array();
+                    foreach ($ans as $o) {
+                        if (!preg_match("/^[0-9]*$/", $o)){
+                            $ans_html[] = ($o==="a") ? '-':'±';
+                        }else{
+                            $ans_html[] = $o;
+                        }
+                    }
+                    $que_data[$k]->q_ans = implode(", ", $ans_html);
+                    break;
+            }
+            $qcont =  array();
+            //題目文字
+            if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($v->q_quetxt));
+            //題目圖檔
+            if (!empty($v->q_qm_src)){
+                if(is_file($v->q_qm_src))$qcont[] = '<IMG name="t_imgsrc" src="'.$v->q_qm_src.'" width="98%">';
+            }
+            //題目聲音檔
+            if (!empty($v->q_qs_src)){
+                if(is_file($v->q_qs_src)){
+                    $qcont[] = '<font color="green">題目音訊 O</font>';
+                }else{
+                    $qcont[] = '<font color="red">題目音訊遺失 X</font>';
+                }
+            }
+            $que_data[$k]->q_qcont = implode("<br>", $qcont);
+
+            $acont = array();
+            //詳解文字
+            if (!empty($v->q_anstxt)) $acont[] = nl2br(trim($v->q_anstxt));
+            //詳解圖檔
+            if(!empty($v->q_am_src)){
+                if (is_file($v->q_am_src))$acont[] = '<IMG name="t_imgsrc"  src="'.$v->q_am_src.'" width="98%">';
+            }
+            $amedia = array();
+            //詳解聲音檔
+            if(!empty($v->q_as_src)){
+                if(is_file($v->q_as_src)){
+                    $amedia[] = '<font color="green">詳解音訊 O</font>';
+                }else{
+                    $amedia[] = '<font color="red">詳解音訊遺失 X</font>';
+                }
+            }
+            //詳解影片檔
+            if(!empty($v->q_av_src)){
+                if(is_file($v->q_av_src)){
+                    $amedia[] = '<font color="green">詳解視訊 O</font>';
+                }else{
+                    $amedia[] = '<font color="red">詳解視訊遺失 X</font>';
+                }
+            }
+            $acont[] = implode(' | ', $amedia);
+            $que_data[$k]->q_acont = '<br>'.implode("<br>", $acont);
+            //難度
+            switch ($v->DEGREE) {
+                case "M": $que_data[$k]->q_degree = "中等"; break;
+                case "H": $que_data[$k]->q_degree = "困難"; break;
+                case "E": $que_data[$k]->q_degree = "容易"; break;
+                default: $que_data[$k]->q_degree = "容易"; break;
+            }
+            $que_data[$k]->q_update = date('Y/m/d H:i:s', $v->q_updated_at);
+            $que_data[$k]->q_know = ($v->q_know!==0) ? '知識點：'.$v->knows->name:'';
+
+            $que_data[$k]->q_gra = $v->gra->name;
+            $que_data[$k]->q_subj = $v->subj->name;
+            $que_data[$k]->q_chap = $v->chap->name;
+        }
+        return view('que.join', [
+            'menu_user' => $this->menu_user,
+            'title' => '題庫',
+            'Data' => $que_data,
+            'Grade' => $gra_html,
+            'Subject' => $subj_html,
+            'Chapter' => $chap_html,
+            'Degree' => $sel_Degree,
+            'Prev' => '',
+            'Next' => '',
+            'Pg' => ''
+        ]);
+    }
 }
+

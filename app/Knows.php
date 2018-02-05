@@ -3,7 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Gscs;
 class Knows extends Model
 {
     public $timestamps = false;
@@ -23,12 +23,12 @@ class Knows extends Model
 	];
 
 	public function gra(){
-		return $this->belongsto('App\Gscs', 'k_gra')->select('g_name as name');
+		return $this->belongsto(Gscs::class, 'k_gra')->select('g_name as name');
 	}
 	public function subj(){
-		return $this->belongsto('App\Gscs', 'k_subj')->select('g_name as name');
+		return $this->belongsto(Gscs::class, 'k_subj')->select('g_name as name');
 	}
 	public function chap(){
-		return $this->belongsto('App\Gscs', 'k_chap')->select('g_name as name');
+		return $this->belongsto(Gscs::class, 'k_chap')->select('g_name as name');
 	}
 }

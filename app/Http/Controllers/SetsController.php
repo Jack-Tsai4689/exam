@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Sets;
+use App\Setsque;
+use DB;
 use Input;
+use Auth;
 
 class SetsController extends TopController
 {
@@ -300,51 +303,32 @@ class SetsController extends TopController
         $data = Sets::find($sid);
         //限時
         $lime = explode(":", $data->s_limtime);
+        $first_sub = new \stdClass;
+        $first_sub->que = array();
+        $other_sub = array();
         //大題
         if ($data->s_sub){
-            $sub = Sets::select('s_id','s_intro','s_percen','s_page')
-                    ->where('s_pid', $sid)
-                    ->orderby('s_part')->get()->all();    
+            $sub = $data->sub()->get()->all();
+            $other_sub = $sub;
+            $fsub = array_shift($other_sub);
+            $first_sub->s_part = '(第1大題)';
+            $first_sub->subque = $fsub->subque;
+            $first_sub->s_id = $fsub->s_id;
         }else{
             $sub = array();
+            $fsub = $data->sub()->first();
+            $first_sub->s_id = $fsub->s_id;
+            $first_sub->subque = $fsub->subque;
+            $first_sub->s_part = '';
         }
-        
+        //$first_sub->que = $this->sets_review_format($first_sub->subque);
+        foreach ($first_sub->subque as $k => $v) {
+            $first_sub->que[] = $this->sets_review_format($v);
+        }
+        // foreach ($other_sub as $k => $v) {
+        //     $other_sub[$k]->que = $this->sets_review_format($v->subque);
+        // }
 
-        $part_button = '';
-        $part = '';
-        $part_que = '';
-        //題目排序用
-        $part_array = array();
-        // foreach ($sub as $i => $v) {
-        //     $j = $i+1;
-        //     $now = ($j==1) ? 'now':'';
-        //     $print_control = ($v->s_page=='Y')? '可回上頁修改':'不可回上頁修改';
-        //     //if ($parent_control!='S')$print_control.= '(考卷控制)';
-        //     $sub_intro[] = trim($v->s_intro);
-        //     $display_no = ($j>1) ? 'style="display:none;"':'';
-        //     $part_button.='<input type="button" class="btn w150 h25 bpart_div '.$now.'>" onclick="view('.$j.')" name="bpart" id="bpart'.$j.'" value="第'.$j.'大題('.$v->s_percen.'%)">';
-        //     $part.= '<div name="node" id="'.$v->s_id.'">';
-        //     $part.= '<div class="part_sort">: :</div>';
-        //     $part.= '<div style="display:inline-block;">';
-        //     $part.= '第'.$j.'大題('.$v->s_percen.'%)　'.$print_control;
-        //     $part.= '</div>';
-        //     $part.= '<img title="刪除" class="sub_del" src="'.URL::asset('img/icon_op_f.png').'" width="15" onclick="del_ask('.$sid.','.$v->ID.','.$j.')">';
-        //     $part.= '<div class="sub_intro" name="intro" id="intro'.$i.'">'.nl2br($v->INTRO).'</div>';
-        //     $part.= '</div>';
-        //     //按扭
-        //     $part_que.= '<input type="button" class="btn w100 partq" data-id="'.$v->ID.'" value="第'.$j.'大題">';
-        //     //題目排序
-        //     $part_array[] = $v->ID;
-        // }
-        // $qdata = array();
-        // $FirstPart = 0;
-        // //有大題，先loading
-        // if (!empty($sub)){
-        //     $FirstPart = $sub[0]->ID;
-        // }else{
-        //     $que = $this->SetsModel->sub_que(array($sid, 0));
-        //     $qdata = $this->_part_que($que);
-        // }
         return view('sets.review', [
             'menu_user' => $this->menu_user,
             'title' => $data->s_name.' - 題目預覽',
@@ -353,14 +337,64 @@ class SetsController extends TopController
             'Sum' => $data->s_sum,
             'Pass' => $data->s_pass_score,
             'Limtime' => (int)$lime[0].'時'.(int)$lime[1].'分'.(int)$lime[2].'秒',
-            'Sub' => $data->SUB,
-            'Part_btn' => $part_que,
-            'Part_cont' => $part,
+            //'Sub' => $data->SUB,
             'Part' => $sub,
-            // 'FirstPart' => $FirstPart,
-            // 'Part_ar' => $part_array,
-            'Qdata' => array()//$qdata
+            'FirstPart' => $first_sub,
+            'OtherPart' => $other_sub
         ]);
+    }
+    //試卷題目預覽 格式化
+    protected function sets_review_format($data){
+        //foreach ($data as $k => $v) {
+            //題型
+            switch ($data->q_quetype) {
+                case "S": 
+                    $data->q_ans = chr($data->q_ans+64);
+                    break;
+                case "D": 
+                    $ans = array();
+                    $ans = explode(",", $data->q_ans);
+                    $ans_html = array();
+                    foreach ($ans as $o) {
+                        $ans_html[] = chr($o+64);
+                    }
+                    $data->q_ans = implode(", ", $ans_html);
+                    break;
+                case "R": 
+                    $data->q_ans = ($data->q_ans==="1") ? "O":"X";
+                    break;
+                case "M": 
+                    $ans = array();
+                    $ans = explode(",", $data->q_ans);
+                    $ans_html = array();
+                    foreach ($ans as $o) {
+                        if (!preg_match("/^[0-9]*$/", $o)){
+                            $ans_html[] = ($o==="a") ? '-':'±';
+                        }else{
+                            $ans_html[] = $o;
+                        }
+                    }
+                    $data->q_ans = implode(", ", $ans_html);
+                    break;
+            }
+            $qcont =  array();
+            //題目文字
+            if (!empty($data->q_quetxt)) $qcont[] = nl2br(trim($data->q_quetxt));
+            //題目圖檔
+            if (!empty($data->q_qm_src)){
+                if(is_file($data->q_qm_src))$qcont[] = '<IMG src="'.$data->q_qm_src.'" width="98%">';
+            }
+            //題目聲音檔
+            if (!empty($data->q_qs_src)){
+                if(is_file($data->q_qs_src)){
+                    $qcont[] = '<font color="green">題目音訊 O</font>';
+                }else{
+                    $qcont[] = '<font color="red">題目音訊遺失 X</font>';
+                }
+            }
+            $data->q_qcont = implode("<br>", $qcont);
+        //}
+        return $data;
     }
 
     /**
@@ -373,6 +407,7 @@ class SetsController extends TopController
     {
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
+        if ($sid<=0)abort(400);
         $data = Sets::find($sid);
         //考試時間
         $Time = new \stdClass;
@@ -536,7 +571,154 @@ class SetsController extends TopController
         return redirect('/sets');
     }
     //ajax更新大題
-    public function ajpart(Request $req){
-        dd($req->all());
+    public function ajstore_part(Request $req, $sid){
+        // dd($req->all());
+        // exit;
+        $sub = ($req->has('sub') && !empty($req->input('sub'))) ? $req->input('sub'):array();
+        $sub_score = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
+        $sub_control = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
+        $sub_intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
+        //全部大題
+        $all_sub_id = array();
+        $sub_all = Sets::select('s_id','s_part')
+                       ->where('s_pid', $sid)
+                       ->orderby('s_part')->get()->all();
+        foreach ($sub_all as $v) {
+            $all_sub_id[] = $v->s_id;
+        }
+        if (!empty($sub)){
+            foreach ($sub as $k => $v) {
+                if ($k===0){
+                    //第一筆 純更新
+                    Sets::where('s_id', $all_sub_id[0])
+                        ->update([
+                            's_intro' => $sub_intro[$k],
+                            's_page' => $sub_control[$k],
+                            's_percen' => $sub_score[$k]
+                        ]);
+                    unset($all_sub_id[0]);
+                    continue;
+                }
+                if (!empty($v)){
+                    unset($all_sub_id[array_search($v, $all_sub_id)]);
+                    $sub_set = Sets::find($v);
+                    $sub_set->s_intro = $sub_intro[$k];
+                    $sub_set->s_page = $sub_control[$k];
+                    $sub_set->s_percen = $sub_score[$k];
+                    $sub_set->s_part = ($k+1);
+                    $sub_set->save();
+                }else{
+                    Sets::create([
+                        's_intro' => $sub_intro[$k],
+                        's_percen' => $sub_score[$k],
+                        's_pid' => $sid,
+                        's_part' => ($k+1),
+                        'created_at' => time(),
+                        'updated_at' => time(),
+                        's_page' => $sub_control[$k]
+                    ]);
+                }
+            }
+            foreach ($all_sub_id as $v) {
+                if (!empty($v)){
+                    //沒更新沒新增，刪除
+                    Sets::destroy($v);
+                }
+            }
+                Sets::where('s_id', $sid)
+                    ->update(['s_sub' => 1]);
+        }else{
+            //大題全刪除
+            if (Setsque::where('sq_sid', $sid)->where('sq_part', '!=',$sub_all[0]->s_id)->exists()){
+                about(400);
+            }
+            //沒有大題，預留第一大題
+            Sets::where('s_id', $sid)
+                ->update(['s_sub' => 0]);
+            Sets::where('s_pid', $sid)
+                ->where('s_part', '>=', 2)
+                ->delete();
+            //改配分為100
+            Sets::where('s_pid', $sid)
+                ->where('s_part', 1)
+                ->update(['s_percen' => 100]);
+        }
+        $json['Success'] = true;
+        echo json_encode($json);
+        exit;
+    }
+    //ajax查詢大題
+    public function ajedit_part($sid){
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        //大題
+        $have = Sets::find($sid);
+        $data = array();
+        if ($have->s_sub){
+            $sub = Sets::select('s_id','s_intro','s_percen','s_page')
+                        ->where('s_pid', $sid)
+                        ->orderby('s_part')->get()->all();
+            foreach ($sub as $v) {
+                $tmp = new \stdClass;
+                $tmp->sid = $v->s_id;
+                $tmp->percen = $v->s_percen;
+                $tmp->control = $v->s_page;
+                $tmp->intro = $v->s_intro;
+                array_push($data, $tmp);
+            }
+            unset($sub);
+        }
+        echo json_encode($data);
+    }
+    //ajax大題加入題目
+    public function partjoinque(Request $req, $sid){
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        $ques = ($req->has('ques') && !empty($req->input('ques'))) ? $req->input('ques'):'';
+        $part = ($req->has('npart') && (int)$req->input('npart')>0) ? (int)$req->input('npart'):0;
+        if (empty($ques) || $part===0)abort(400);
+        $addque = explode(',',$ques);
+
+        foreach ($addque as $q) {
+            //看資料是否存在，不存在會原條件返回，有存在會返回該筆資料
+            $que_exists = Setsque::firstOrNew(['sq_sid' => $sid, 'sq_part' => $part, 'sq_qid' => $q]);
+            if (!$que_exists->exists){
+                $que_exists->sq_sort = (int)Setsque::select('sq_sort')->where('sq_sid',$sid)->where('sq_part', $part)->max('sq_sort')+1;
+                $que_exists->sq_owner = Auth::user()->e_epno;
+                $que_exists->updated_at = time();
+                $que_exists->save();
+            }
+        }
+        $json['Success'] = true;
+        echo json_encode($json);
+    }
+    //ajax查詢大題題目
+    public function ajshow_que($sid){
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        $part_id = Input::get('part');
+        if (!is_numeric($part_id))abort(400);
+        $part_id = (int)$part_id;
+        if ($part_id<=0)abort(400);
+
+        $que = Setsque::select('sq_qid','sq_sort')
+                        ->where('sq_sid', $sid)
+                        ->where('sq_part', $part_id)
+                        ->orderby('sq_sort')->get()->all();
+        $html = '';
+        foreach ($que as $k => $v) {
+            $data = $this->sets_review_format($v->que);
+            $html.= '<tr align="center" name="node" id="'.$v->sq_sort.'">';
+            $html.= '<td class="handle">: :</td>';
+            $html.= '<td class="qno">'.$v->sq_sort.'</td>';
+            $html.= '<td class="qno_ans">'.$data->q_ans.'</td>';
+            $html.= '<td width="1000" align="left" class="que">'.$data->q_qcont.'</td>';
+            $html.= '</tr>';
+        }
+        $json['html'] = $html;
+        echo json_encode($json);
     }
 }

@@ -255,7 +255,7 @@
 						<td>{{ $v->gra->name }}</td>
 						<td>{{ $v->subj->name }}</td>
 						<td>{{ $v->chap->name }}</td>
-						<td><input type="button" class="btn w50" name="" id="" value="編輯" onclick="location.href='{{ url('/know/'.$v->k_id.'/edit') }}'"></td>
+						<td class="last"><input type="button" class="btn w50" name="" id="" value="編輯" onclick="location.href='{{ url('/know/'.$v->k_id.'/edit') }}'"></td>
 					</tr>
 				@endforeach
 				</tbody>
