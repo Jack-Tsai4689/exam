@@ -33,8 +33,12 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::get('{id}/subshow', "SetsController@ajedit_part");
 	//ajax加入題目
 	Route::post('{id}/joinq', "SetsController@partjoinque");
-	//ajax讀取大題目題
+	//ajax讀取大題題目
 	Route::get("{id}/part", "SetsController@ajshow_que");
+	//ajax更新大題題目順序
+	Route::post("{id}/usort", "SetsController@ajupdate_sortq");
+	//ajax更新大題順序
+	Route::post("{id}/upsort", "SetsController@ajupdate_psort");
 });
 
 Route::group(['prefix'=>'ques'], function(){

@@ -48,7 +48,7 @@ class Sets extends Model
     public function subque(){
         return $this->hasMany(Setsque::class, 'sq_part')
                     ->join('ques', 'ques.q_id','=','setsque.sq_qid')
-                    ->select('ques.*','sq_sort')
+                    ->select('ques.*','sq_sort','sq_qid')
                     ->orderby('sq_sort');
     }
 }

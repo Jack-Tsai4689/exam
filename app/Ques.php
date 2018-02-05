@@ -31,7 +31,8 @@ class Ques extends Model
 		'q_created_at',
 		'q_updated_at',
 		'q_keyword',
-		'q_know'
+		'q_know',
+		'q_num'
 	];
 
 	public function gra(){

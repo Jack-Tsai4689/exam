@@ -274,7 +274,7 @@
         <input type="button" name="" id="" onclick="edit_sub()" class="btn w100 h25" value="編輯">　
         <input type="button" onclick="open_part()" class="btn w100 h25" name="" id="start_part" value="開啟排序">
         <span id="part_func"><input type="button" onclick="close_part()" class="btn w100 h25" name="" id="" value="關閉排序">　
-        <input type="button" onclick="save_part()" class="btn w100 h25" name="" id="" value="儲存排序">　
+        <input type="button" class="btn w100 h25" name="" id="save_part" value="儲存排序">　
         </span>
         <div id="part_section">
         @foreach($Part as $i => $v)
@@ -298,19 +298,16 @@
         <div class="title"><label class="f17">題目{{ $FirstPart->s_part }}</label></div>
         <div class="title_intro">
             <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
-            <!-- <input type="button" class="btn w150" onclick="open_s(0)" name="esort" id="esort0" value="開啟排序">
-            <div class="tip" id="tip_esort0">※開啟排序，按住每題題號可以拖曳喔</div>
-            <input type="button" class="btn w150 hidden" onclick="close_s(0)" name="csort" id="csort0" value="關閉排序">
-            <div class="tip" id="tip_csort0">※關閉排序，但不儲存</div>
-            <input type="button" class="btn w150 hidden" onclick="save_s(0)" name="usort" id="usort0" value="儲存排序">
-            <div class="tip" id="tip_usort0">※儲存並關閉排序</div>
-            <input type="button" class="btn w150 hidden" name="rsort" id="rsort0" onclick="rand_sort(0)" value="隨機排序">
-            <input type="button" class="btn w150 hidden" name="nsort" id="nsort0" onclick="recover_sort(0);" value="回復排序"> -->
+            <input type="button" class="btn w150 esort" data-part="{{ $FirstPart->s_id }}" name="esort" id="esort{{ $FirstPart->s_id }}" value="開啟排序">
+            <div class="tip" id="tip_esort{{ $FirstPart->s_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
+            <input type="button" class="btn w150 hidden" data-part="{{ $FirstPart->s_id }}" onclick="close_s({{ $FirstPart->s_id }})" name="csort" id="csort{{ $FirstPart->s_id }}" value="關閉排序">
+            <div class="tip" id="tip_csort{{ $FirstPart->s_id }}">※關閉排序，但不儲存</div>
+            <input type="button" class="btn w150 usort hidden" data-part="{{ $FirstPart->s_id }}" name="usort" id="usort{{ $FirstPart->s_id }}" value="儲存排序">
+            <div class="tip" id="tip_usort{{ $FirstPart->s_id }}">※儲存並關閉排序</div>
         </div>
         <form id="form1" name="form1" method="post">
         	<div class="content">
         		<div id="cen">
-                    <label id="nowpart"></label>
         			<table class="list" cellpadding="0" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -322,7 +319,7 @@
                         </thead>
                         <tbody id="sort{{ $FirstPart->s_id }}">
                         @foreach($FirstPart->que as $q)
-                            <tr align="center" name="node" id="{{ $q->sq_sort }}">
+                            <tr align="center" name="node" id="{{ $q->sq_qid }}">
                                 <td class="handle">: :</td>
                                 <td class="qno">{{ $q->sq_sort }}</td>
                                 <td class="qno_ans">{{ $q->q_ans }}</td>
@@ -340,19 +337,18 @@
         <div class="title"><label class="f17">題目(第{{ $v->s_part }}大題)</label></div>
         <div class="title_intro">
             <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
-            <!-- <input type="button" class="btn w150" onclick="open_s(0)" name="esort" id="esort0" value="開啟排序">
-            <div class="tip" id="tip_esort0">※開啟排序，按住每題題號可以拖曳喔</div>
-            <input type="button" class="btn w150 hidden" onclick="close_s(0)" name="csort" id="csort0" value="關閉排序">
-            <div class="tip" id="tip_csort0">※關閉排序，但不儲存</div>
-            <input type="button" class="btn w150 hidden" onclick="save_s(0)" name="usort" id="usort0" value="儲存排序">
-            <div class="tip" id="tip_usort0">※儲存並關閉排序</div>
-            <input type="button" class="btn w150 hidden" name="rsort" id="rsort0" onclick="rand_sort(0)" value="隨機排序">
-            <input type="button" class="btn w150 hidden" name="nsort" id="nsort0" onclick="recover_sort(0);" value="回復排序"> -->
+            <input type="button" class="btn w150 esort" data-part="{{ $v->s_id }}" name="esort" id="esort{{ $v->s_id }}" value="開啟排序">
+            <div class="tip" id="tip_esort{{ $v->s_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
+            <input type="button" class="btn w150 hidden" data-part="{{ $v->s_id }}" onclick="close_s({{ $v->s_id }})" name="csort" id="csort{{ $v->s_id }}" value="關閉排序">
+            <div class="tip" id="tip_csort{{ $v->s_id }}">※關閉排序，但不儲存</div>
+            <input type="button" class="btn w150 usort hidden" data-part="{{ $v->s_id }}" name="usort" id="usort{{ $v->s_id }}" value="儲存排序">
+            <div class="tip" id="tip_usort{{ $v->s_id }}">※儲存並關閉排序</div>
+            {{-- <input type="button" class="btn w150 hidden" name="rsort" id="rsort0" onclick="rand_sort(0)" value="隨機排序">
+            <input type="button" class="btn w150 hidden" name="nsort" id="nsort0" onclick="recover_sort(0);" value="回復排序"> --}}
         </div>
         <form id="form1" name="form1" method="post">
             <div class="content">
                 <div id="cen">
-                    <label id="nowpart"></label>
                     <table class="list" cellpadding="0" cellspacing="0" width="100%">
                         <thead>
                             <tr>
@@ -363,12 +359,6 @@
                             </tr>
                         </thead>
                         <tbody id="sort{{ $v->s_id }}">
-                            <tr align="center" name="node" id="">
-                                <td class="handle">: :</td>
-                                <td class="qno"></td>
-                                <td class="qno_ans"></td>
-                                <td width="1000" align="left" class="que"></td>
-                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -450,26 +440,26 @@
 @stop
 @section('script')
 <script type="text/javascript" src="{{ URL::asset('/js/jquery-ui.js') }}"></script>
-<script type="text/javascript" src="{{ URL::asset('/jsfunc/sets_review.js') }}"></script>
+{{-- <script type="text/javascript" src="{{ URL::asset('/jsfunc/sets_review.js') }}"></script> --}}
 <script type="text/javascript">
 
 window.moveTo(0,0);window.resizeTo(screen.width,screen.height);
 // When the document is ready set up our sortable with it's inherant function(s)
-var n=2;
-var b=3,c=4; 
-eval('a'+n+'=b*c');
+// var n=2;
+// var b=3,c=4; 
+// eval('a'+n+'=b*c');
 
-for (var i = 1; i<=1; i++) {
-    eval('original_sort'+i+' = new Array()');
-    $("#sort"+i+" > tr[name=node]").each(function(j){
-        eval('original_sort'+i+'[j] = '+$(this).attr('id'));
-    });
-    eval('original_len'+i+' = original_sort'+i+'.length-1');
-    eval('newsort'+i+' = new Array()');
-    for(var j=0;j<=original_len;j++){
-        eval('newsort'+i+'[j] = original_sort'+i+'[j]');
-    }
-};
+// for (var i = 1; i<=1; i++) {
+//     eval('original_sort'+i+' = new Array()');
+//     $("#sort"+i+" > tr[name=node]").each(function(j){
+//         eval('original_sort'+i+'[j] = '+$(this).attr('id'));
+//     });
+//     eval('original_len'+i+' = original_sort'+i+'.length-1');
+//     eval('newsort'+i+' = new Array()');
+//     for(var j=0;j<=original_len;j++){
+//         eval('newsort'+i+'[j] = original_sort'+i+'[j]');
+//     }
+// };
 <?php 
 for($i=1;$i<=1;$i++){
     //echo 'var original_sort'.$i.' = new Array();';
@@ -484,10 +474,11 @@ for($i=1;$i<=1;$i++){
 // for(var i=0;i<=original_len;i++){
 //     newsort[i]=original_sort[i];
 // }
-$('document').ready(function() {
-    for(var i=1;i<=1;i++){
-      var sort = gb('sort'+i);
-      $(sort).sortable({
+$("#part").on("click", ".esort", function(){
+    let i = $(this).data("part");
+    let sort = gb('sort'+i);
+    $(sort).sortable();
+    $(sort).sortable({
         handle: '.handle',
         opacity: 0.6,
         //拖曳時透明
@@ -497,9 +488,64 @@ $('document').ready(function() {
         //只能垂直拖曳
         update : function () { 
         } 
-      });
-      $(sort).sortable('disable');
-    }
+    });
+    $(sort).sortable('enable');
+    $(sort).find('.handle').addClass('show_handle');
+    gb('esort'+i).style.display='none';
+    gb('csort'+i).style.display='inline-block';
+    gb('usort'+i).style.display='inline-block';
+});
+$("#part").on("click", ".usort", function(){
+    let i = $(this).data("part");
+    let sort = gb('sort'+i);
+    $(sort).sortable('disable');
+    var d=Array();
+    $("#part"+i+" .list tr[name=node]").each(function(){
+        d.push($(this).attr('id'));
+    });
+    var c=JSON.stringify(d);
+    $('#intro_open').show();
+    $('#intro_all').show();
+    $.ajax({
+        type: "POST",
+        url: "{{ url('/sets/'.$SETID.'/usort') }}",
+        headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+        data: {node:c,s:i,t:'q'},
+        dataType: "JSON",
+        success: function(){
+            let no = 1;
+            $("#part"+i+" .list .qno").each(function(){
+                this.innerHTML = no;
+                no++;
+            });
+            alert('更新成功');
+            gb('esort'+i).style.display='inline-block';
+            gb('csort'+i).style.display='none';
+            gb('usort'+i).style.display='none';
+            $('#intro_open').hide();
+            $('#intro_all').hide();
+        }
+    })
+});
+function save_s(id){
+    
+}
+$('document').ready(function() {
+    // for(var i=1;i<=1;i++){
+      // var sort = gb('sort8');
+      // $(sort).sortable({
+      //   handle: '.handle',
+      //   opacity: 0.6,
+      //   //拖曳時透明
+      //   cursor: 'move',
+      //   //游標設定
+      //   axis:'y',
+      //   //只能垂直拖曳
+      //   update : function () { 
+      //   } 
+      // });
+      // $(sort).sortable('disable');
+    // }
     var ps = gb('part_section');
       $(ps).sortable({
         handle: '.part_sort',
@@ -532,7 +578,7 @@ function close_part(){
     var func = gb('part_func');
     $(func).hide();
 }
-function save_part(){
+$("#save_part").on("click", function(){
     var d=Array();
     var f=0;
     $("div[name=node]").each(function(){
@@ -548,10 +594,10 @@ function save_part(){
         dataType:'json',
         data: $('#setsort').serialize(),
         success: function(data){
-            location.reload();
+            //location.reload();
         }
     });
-}
+});
 function del_ask(s,v,i){
     if (confirm('確定刪除第'+i+'大題?')){
         var getdata = {set:s,v:v,i:i};
@@ -569,16 +615,16 @@ function del_ask(s,v,i){
         });
     }
 }
-function open_s(i){
-    var sort = gb('sort'+i);
-    $(sort).sortable('enable');
-    $(sort).find('.handle').addClass('show_handle');
-    gb('esort'+i).style.display='none';
-    gb('csort'+i).style.display='inline-block';
-    gb('usort'+i).style.display='inline-block';
-    gb('nsort'+i).style.display='inline-block';
-    gb('rsort'+i).style.display='inline-block';
-}
+// function open_s(i){
+//     //var sort = gb('sort'+i);
+//     //$(sort).sortable('enable');
+//     //$(sort).find('.handle').addClass('show_handle');
+//     gb('esort'+i).style.display='none';
+//     gb('csort'+i).style.display='inline-block';
+//     gb('usort'+i).style.display='inline-block';
+//     // gb('nsort'+i).style.display='inline-block';
+//     // gb('rsort'+i).style.display='inline-block';
+// }
 function close_s(i){
     var sort = gb('sort'+i);
     $(sort).sortable('disable');
@@ -586,8 +632,8 @@ function close_s(i){
     gb('esort'+i).style.display='inline-block';
     gb('csort'+i).style.display='none';
     gb('usort'+i).style.display='none';
-    gb('nsort'+i).style.display='none';
-    gb('rsort'+i).style.display='none';
+    // gb('nsort'+i).style.display='none';
+    // gb('rsort'+i).style.display='none';
 }
 
 function recover_sort(i){
@@ -609,23 +655,7 @@ function shuffle(a,b) {
   var num = Math.random() > 0.5 ? -1:1;
   return num;
 }
-function save_s(id){
-    $('.sort').sortable('disable');
-    var d=Array();
-    var f=0;
-    $(".list tr[name=node]").each(function(){
-        d[f]=$(this).attr('id');
-        f++
-    });
-    var c=JSON.stringify(d);
-    $('#intro_open').show();
-    $('#intro_all').show();
-    $.post("update_setsort.php",{node:c,s:id,t:'q'},function(g){
-        if(g.success){
-            location.reload();
-        }
-    },"json");
-}
+
 // $('#esort').mouseover(function() { $('#tip_esort').css('display','block'); });
 // $('#esort').mouseout(function() { $('#tip_esort').css('display','none'); });
 // $('#csort').mouseover(function() { $('#tip_csort').css('display','block'); });
@@ -771,7 +801,7 @@ function check_data(){
         dataType:'json',
         data:$('#form2').serialize(),
         success: function(){
-            //location.reload();
+            location.reload();
         },
         error: function(){
             alert('大題有題目，無法刪除');
@@ -792,7 +822,11 @@ function zoom(){
 $(".ware").on('click', function(){
     if (gb('npart').value==""){
         let ele = $(".part").get(0);
-        gb('npart').value = $(ele).data('id');
+        if (typeof(ele)==='undefined'){
+            gb('npart').value = gb('s').value;
+        }else{
+            gb('npart').value = $(ele).data('id');
+        }
     }
     document.getElementById('que_pic').src="{{ url('/ques/imp') }}";
     $('#sets_filed').show();
