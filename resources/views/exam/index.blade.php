@@ -103,8 +103,10 @@
                             <td>{{ $v->days }}</td>
                             <td>{{ $v->lim }}</td>
                             <td class="last">
-                                <form>
-                                    <input type="submit" class="btn w100" id="{{ $v->s_id }}" name="start" value="進入">
+                                <form onsubmit="return examinit(this)">
+                                    {{ csrf_field() }}
+                                    <input type="hidden" name="sets" class="sets" value="{{ $v->s_id }}">
+                                    <input type="submit" class="btn w100" name="goin" value="進入">
                                 </form>
                             </td>
                         </tr>
@@ -115,4 +117,20 @@
 			</div>
 		</div>
 </div>
+@stop
+@section('script')
+<script>
+    function examinit(obj){
+        $.ajax({
+            type: "POST",
+            url: "{{ url('/exam/init') }}",
+            data: $(obj).serialize(),
+            dataType: "JSON",
+            success: function(){
+                window.open("{{ url('/exam/info') }}","result","width="+screen.width+",height="+screen.height+",resizable=yes,scrollbars=yes,location=no");
+            }
+        });
+        return false;
+    }
+</script>
 @stop

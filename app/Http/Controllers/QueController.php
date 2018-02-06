@@ -16,6 +16,7 @@ class QueController extends TopController
      */
     public function index()
     {
+        if (!$this->login_status())return redirect('/login');
         $search = array();
         $p_gra = 0;
         $p_subj = 0;
@@ -154,6 +155,7 @@ class QueController extends TopController
      */
     public function create()
     {
+        if (!$this->login_status())return redirect('/login');
         $sets_message = '';//'<div id="sets_title"><label class="17">'.$msg.'</label></div>';
         $data = array();
         //年級、科目 篩選條件
@@ -290,6 +292,7 @@ class QueController extends TopController
      */
     public function store(Request $req)
     {
+        if (!$this->login_status())return redirect('/login');
         /*
         file()
         ->getClientOriginalName() 原始名稱
@@ -477,6 +480,7 @@ class QueController extends TopController
      */
     public function edit($qid)
     {
+        if (!$this->login_status())return redirect('/login');
         if (!is_numeric($qid))abort(400);
         $qid = (int)$qid;
         if ($qid<=0)abort(400);
@@ -765,6 +769,7 @@ class QueController extends TopController
      */
     public function update(Request $req, $qid)
     {
+        if (!$this->login_status())return redirect('/login');
         if (!is_numeric($qid))abort(400);
         $qid = (int)$qid;
         if ($qid<=0)abort(400);
@@ -953,6 +958,7 @@ class QueController extends TopController
         //
     }
     public function join(){
+        if (!$this->login_status())abort(400);
         $search = array();
         $p_gra = 0;
         $p_subj = 0;

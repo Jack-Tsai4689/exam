@@ -19,6 +19,8 @@ Route::post('/login', 'HomeController@login');
 
 Route::group(['prefix'=>'exam'], function(){
 	Route::get('/', "ExamController@index");
+	Route::post('/init', "ExamController@init_check");
+	Route::get('/info', "ExamController@goexam");
 });
 
 //Route::resource('/sets', "SetsController");

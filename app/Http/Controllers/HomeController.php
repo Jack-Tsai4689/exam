@@ -45,22 +45,24 @@ class HomeController extends Controller
                 case 'T':
                     $user = Employes::where('e_epno', $input['accname'])->where('e_pwd', $input['pwd'])->first();
                     if ($user!=null){
-                        session()->put('ident'=>'T');
-                        session()->
+                        session()->put('ident', 'T');
+                        session()->put('epno',  $input['accname']);
+                        session()->put('epname', $user->e_epname);
                     }
                     break;
                 case 'S':
                     $user = Stus::where('st_no', $input['accname'])->first();
-                    if ($user!=null)$user->e_ident = "S";
+                    if ($user!=null){
+                        session()->put('ident', 'S');
+                        session()->put('epno',  $input['accname']);
+                        session()->put('epname', $user->st_name);
+                    }
                     break;
                 default:
                     abort(400);
                     break;
             }
             if ($user!=null){
-                Auth::login($user);
-                $b = Auth::user();
-                //dd($b);
                 if ($input['identity']==='T')return redirect('/sets');
                 if ($input['identity']==="S")return redirect('/exam');
             }else{
@@ -69,15 +71,25 @@ class HomeController extends Controller
         }
     }
     public function main(){
-        if (Auth::check()){
-            if (Auth::user()->e_ident==="T")return redirect('/sets');
-            if (Auth::user()->e_ident==="S")return redirect('/exam');
+        if (!empty(session('ident'))){
+            if (session('ident')==="T")return redirect('/sets');
+            if (session('ident')==="S")return redirect('/exam');    
         }else{
             return redirect('/login');
         }
+        // if (Auth::check()){
+        //     if (Auth::user()->e_ident==="T")return redirect('/sets');
+        //     if (Auth::user()->e_ident==="S")return redirect('/exam');
+        // }else{
+        //     return redirect('/login');
+        // }
     }
     public function logout(){
-        Auth::logout();
+        // Auth::logout();
+        session()->forget('ident');
+        session()->forget('epno');
+        session()->forget('epname');
+        session()->flush();
         return redirect('/');
     }
 }

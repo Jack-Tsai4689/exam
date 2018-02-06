@@ -20,6 +20,7 @@ class SetsController extends TopController
      */
     public function index()
     {   
+        if (!$this->login_status())return redirect('/login');
         $get = Input::all();
         $gra_id = 0;
         $subj_id = 0;
@@ -157,6 +158,7 @@ class SetsController extends TopController
      */
     public function create()
     {
+        if (!$this->login_status())return redirect('/login');
         //考試時間
         $Time = new \stdClass;
         $Time->begdate = date('Y/m/d');
@@ -222,6 +224,7 @@ class SetsController extends TopController
      */
     public function store(Request $req)
     {
+        if (!$this->login_status())return redirect('/login');
         $chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
         $s_name = ($req->has('setsname')) ? $req->input('setsname'):'';
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
@@ -294,6 +297,7 @@ class SetsController extends TopController
      */
     public function show($sid)
     {
+        if (!$this->login_status())return redirect('/login');
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -410,6 +414,7 @@ class SetsController extends TopController
      */
     public function edit($sid)
     {
+        if (!$this->login_status())return redirect('/login');
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -508,6 +513,7 @@ class SetsController extends TopController
      */
     public function update(Request $req, $sid)
     {
+        if (!$this->login_status())return redirect('/login');
         $chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
         $s_name = ($req->has('setsname')) ? $req->input('setsname'):'';
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
@@ -571,6 +577,7 @@ class SetsController extends TopController
      */
     public function destroy($id)
     {
+        if (!$this->login_status())return redirect('/login');
         //刪大題題目
         Setsque::where('sq_sid', $id)->delete();
         //刪大題
@@ -581,6 +588,7 @@ class SetsController extends TopController
     }
     //ajax更新大題
     public function ajstore_part(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         $sub = ($req->has('sub') && !empty($req->input('sub'))) ? $req->input('sub'):array();
         $sub_score = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
         $sub_control = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
@@ -682,6 +690,7 @@ class SetsController extends TopController
     }
     //ajax查詢大題
     public function ajedit_part($sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -706,6 +715,7 @@ class SetsController extends TopController
     }
     //ajax大題加入題目
     public function partjoinque(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -732,6 +742,7 @@ class SetsController extends TopController
     }
     //ajax查詢大題題目
     public function ajshow_que($sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -769,6 +780,7 @@ class SetsController extends TopController
     }
     //ajax更新大題題目順序
     public function ajupdate_sortq(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -788,6 +800,7 @@ class SetsController extends TopController
     }
     //ajax更新大題順序
     public function ajupdate_psort(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -800,6 +813,7 @@ class SetsController extends TopController
     }
     //ajax刪除題目
     public function ajdelete_que(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
@@ -816,6 +830,7 @@ class SetsController extends TopController
     }
     //切換試卷狀態
     public function status_change(Request $req, $sid){
+        if (!$this->login_status())abort(400);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);

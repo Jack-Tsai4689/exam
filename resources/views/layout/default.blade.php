@@ -14,6 +14,7 @@
 	<div id="menu">
 		<ul id="navigation">
 			<li><a href="#" style="text-align:center; width:85px;">首頁</a></li>
+			@if (session('ident')==="T")
 			<li><a href="{{ url('basic') }}" style="text-align:center; width:85px;">基本設定</a></li>
 			<li>
 				<a href="javascript:void(0)">出題系統</a>
@@ -23,6 +24,7 @@
 					<li><div class="ex"><a href="{{ url('know') }}">知識點管理</a></div></li>
 				</ul>
 			</li>
+			@endif
 			<li>
 				<a href="javascript:void(0)">線上測驗</a>
 				<ul>
