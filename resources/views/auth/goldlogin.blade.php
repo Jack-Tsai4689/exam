@@ -75,12 +75,12 @@
 	<form name="form1" id="form1" method="post" action="{{ url('login') }}" onSubmit="return check()">
 	<div id="content">
 		<div style="padding-top:20px;padding-bottom:5px;"><font class="f15">代碼</font><input type="text" class="input_field keyin" tabindex="1" name="code" id="code" value="1001"></div>
-		<div style="padding-bottom:5px;"><font class="f15">帳號</font><input type="text" class="input_field keyin" tabindex="2" name="accname" id="accname" value="shirley"></div>
+		<div style="padding-bottom:5px;"><font class="f15">帳號</font><input type="text" class="input_field keyin" tabindex="2" name="accname" id="accname" value=""></div>
 		<div style="padding-bottom:5px;"><font class="f15">密碼</font><input type="password" class="input_field keyin" name="pwd" id="pwd" value="1"></div>
 		<div style="padding-bottom:10px;"><label><input type="checkbox" name="remember" id="remember"><font class="f15" style="margin-left:5px;">記住我的帳號</font></label></div>
 		<div style="padding-bottom:10px;">
 			<center>
-				<div id="tp"><label><input type="radio" name="identity" id="identity_1" checked value="T">老師</label>
+				<div id="tp"><label><input type="radio" name="identity" id="identity_1" value="T">老師</label>
 				<label><input type="radio" name="identity" id="identity_2" value="S">學生</label>
 				</div>
 				<label><font color="red"></font></label>

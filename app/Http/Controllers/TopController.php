@@ -18,9 +18,15 @@ class TopController extends Controller
     	$this->middleware('auth');
     	if (Auth::check()){
 	    	$user = Auth::user();
-	    	$this->login_user = $user->e_epno;
-			$log_dpname = ($user->e_ident==="T") ? "老師":"學生";
-			$this->menu_user = $user->e_epname.$log_dpname;	
+            if ($user->e_ident==="T"){
+                $log_dpname = "老師";
+                $this->login_user = $user->e_epno;
+                $this->menu_user = $user->e_epname.$log_dpname; 
+            }else{
+                $log_dpname = "學生";
+                $this->login_user = $user->st_no;
+                $this->menu_user = $user->st_name.$log_dpname; 
+            }
             $this->login_type = $user->e_ident;
 		}
     }

@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use App\Employes;
+use App\Stus;
 use Input;
 use Validator;
-use Auth;
-use Session;
+// use Auth;
 
 class HomeController extends Controller
 {
@@ -40,13 +40,40 @@ class HomeController extends Controller
         ];
         $validator = Validator::make($input, $rule);
         if ($validator->passes()){
-            $user = Employes::where('e_epno', $input['accname'])
-                            ->where('e_ident', $input['identity'])
-                            ->where('e_pwd', $input['pwd'])->first();
+            $user = null;
+            switch ($input['identity']) {
+                case 'T':
+                    $user = Employes::where('e_epno', $input['accname'])->where('e_pwd', $input['pwd'])->first();
+                    if ($user!=null){
+                        session()->put('ident'=>'T');
+                        session()->
+                    }
+                    break;
+                case 'S':
+                    $user = Stus::where('st_no', $input['accname'])->first();
+                    if ($user!=null)$user->e_ident = "S";
+                    break;
+                default:
+                    abort(400);
+                    break;
+            }
             if ($user!=null){
                 Auth::login($user);
-                return redirect('/sets');
+                $b = Auth::user();
+                //dd($b);
+                if ($input['identity']==='T')return redirect('/sets');
+                if ($input['identity']==="S")return redirect('/exam');
+            }else{
+                return redirect('/login');
             }
+        }
+    }
+    public function main(){
+        if (Auth::check()){
+            if (Auth::user()->e_ident==="T")return redirect('/sets');
+            if (Auth::user()->e_ident==="S")return redirect('/exam');
+        }else{
+            return redirect('/login');
         }
     }
     public function logout(){

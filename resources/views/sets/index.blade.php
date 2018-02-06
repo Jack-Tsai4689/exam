@@ -36,6 +36,13 @@
 		#sets_view {
 			width: 80px;
 		}
+		.edit_func div {
+			height: auto;
+		}
+		.del {
+			background-color: red;
+			color: white;
+		}
 	</style>
 @stop
 @section('content')
@@ -80,16 +87,18 @@
 							<font class="f12">應測人數(<font class="class_examed">已測</font>/<font class="class_notexam">未測</font>/<font class="class_examing">測驗中</font>)</font>
 						</th>
 						<th id="again" name="times">重覆考</th>
-						<th id="exam_time" name="exam_time">考試時間</th>
+						<th id="exam_time" name="exam_time">考試期間</th>
 						<th id="createtime" name="createtime">發表時間</th>
 						<th id="lime" name="lime">考試限時</th>
+						<th width="60">狀態</th>
 						<th id="sets_view">題目預覽</th>
 						<th class="last" style="width:82px;">編輯</th>
 					</tr>
 				</thead>
 				<tbody>
-				@foreach ($Data as $v)
-				<tr class="">
+				@foreach ($Data as $i => $v)
+					@php $class = ($i%2==0) ? 'deep':'shallow'; @endphp
+				<tr class="{{ $class }}">
 					<td name="setsname" class="left">{{ $v->s_name }}</td>
 					<td>{{ $v->s_owner }}</td>
 					<td>{{ $v->gra->name }}</td>
@@ -99,21 +108,33 @@
 					<td name="exam_time">{{ $v->time }}</td>
 					<td name="createtime">{{ $v->updated_at }}</td>
 					<td name="lime">{{ $v->s_limtime }}</td>
+					<td>{{ $v->finish }}</td>
 					<td><a id="sets_link" href="sets/{{ $v->s_id }}/show">題目預覽</a></td>
 					<td class="last">
-						<form action="{{ url('/sets/'.$v->s_id) }}" method="post" onsubmit="return delcheck()">
-							{{ csrf_field() }}
-							<input type="hidden" name="_method" value="DELETE">
 						<div class="edit_group btn" onclick="open_edit({{ $v->s_id }})">編輯</div>
+						@if (!$v->s_finish)
 						<div id="edit_func_{{ $v->s_id }}" class="edit_func" name="edit_group">
-							<div><a href="{{ url('sets/'.$v->s_id.'/edit') }}">修改</a></div>
-                            <div><input type="submit" value="刪除"></div>
-                            <div><a href="javascript:void(0)" >新增題目</a></div>
-                            <div><a href="upload_md.php?f_sets=" target="_blank">Excel匯入</a></div>
+							<div><input type="button" onclick="location.href='{{ url('sets/'.$v->s_id.'/edit') }}'" value="修改"></div>
+							<div>
+								<form action="{{ url('/sets/'.$v->s_id.'/finish') }}" method="post" onsubmit="return updcheck()">
+									{{ csrf_field() }}
+									<input type="hidden" name="_method" value="PUT">
+									<input type="hidden" name="status" value="open">
+                            		<input type="submit" value="開放">
+                            	</form>
+							</div>
+							<div>
+                            	<form action="{{ url('/sets/'.$v->s_id) }}" method="post" onsubmit="return delcheck()">
+									{{ csrf_field() }}
+									<input type="hidden" name="_method" value="DELETE">
+                            		<input type="submit" class="del" value="刪除">
+                            	</form>
+                            </div>
     						<div><a href="javascript:void(0)" onclick="">設定班級</a></div>
-                            <div><a href="javascript:void(0)" onclick="copyfrom()">複製</a></div>
+{{--                             <div><a href="javascript:void(0)" onclick="copyfrom()">複製</a></div>
+ --}}					
 						</div>
-						</form>
+						@endif
 					</td>
 				</tr>
 				@endforeach
@@ -207,6 +228,11 @@ $('#tiphelp').mouseout(function() {
 function show_icon(){ $('#intro_icon').show()}
 function hide_icon(){ $('#intro_icon').hide();}
 
+function updcheck(){
+	if (!confirm("開放後無法提前關閉，確定開放?")){
+		return false;
+	}
+}
 function delcheck(){
 	if (!confirm("確定刪除?")){
 		return false;

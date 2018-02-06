@@ -6,14 +6,18 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'AlterEmployes' => $baseDir . '/database/migrations/2018_02_06_164451_alter_employes.php',
     'AlterKnow' => $baseDir . '/database/migrations/2018_02_01_222725_alter_know.php',
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
+    'AlterStus' => $baseDir . '/database/migrations/2018_02_06_174855_alter_stus.php',
     'BasicTable' => $baseDir . '/database/migrations/2018_01_28_172034_basic_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+    'CreateQuesTable' => $baseDir . '/database/migrations/2018_01_30_163833_create_ques_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',
     'DatabaseSeeder' => $baseDir . '/database/seeds/DatabaseSeeder.php',
     'EmployesTable' => $baseDir . '/database/migrations/2018_01_28_173056_employes_table.php',
+    'ExamsTable' => $baseDir . '/database/migrations/2018_02_06_150844_exams_table.php',
     'File_Iterator' => $vendorDir . '/phpunit/php-file-iterator/src/Iterator.php',
     'File_Iterator_Facade' => $vendorDir . '/phpunit/php-file-iterator/src/Facade.php',
     'File_Iterator_Factory' => $vendorDir . '/phpunit/php-file-iterator/src/Factory.php',
@@ -531,6 +535,7 @@ return array(
     'SebastianBergmann\\Version' => $vendorDir . '/sebastian/version/src/Version.php',
     'SetsTable' => $baseDir . '/database/migrations/2018_01_28_172402_sets_table.php',
     'SetsqueTable' => $baseDir . '/database/migrations/2018_01_30_162841_setsque_table.php',
+    'StusTable' => $baseDir . '/database/migrations/2018_02_06_163521_stus_table.php',
     'TestCase' => $baseDir . '/tests/TestCase.php',
     'Text_Template' => $vendorDir . '/phpunit/php-text-template/src/Template.php',
 );

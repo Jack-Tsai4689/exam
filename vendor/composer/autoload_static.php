@@ -263,14 +263,18 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
     );
 
     public static $classMap = array (
+        'AlterEmployes' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_164451_alter_employes.php',
         'AlterKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_222725_alter_know.php',
         'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
         'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
+        'AlterStus' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_174855_alter_stus.php',
         'BasicTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172034_basic_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
+        'CreateQuesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_163833_create_ques_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'EmployesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_173056_employes_table.php',
+        'ExamsTable' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_150844_exams_table.php',
         'File_Iterator' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Iterator.php',
         'File_Iterator_Facade' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Facade.php',
         'File_Iterator_Factory' => __DIR__ . '/..' . '/phpunit/php-file-iterator/src/Factory.php',
@@ -788,6 +792,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'SebastianBergmann\\Version' => __DIR__ . '/..' . '/sebastian/version/src/Version.php',
         'SetsTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172402_sets_table.php',
         'SetsqueTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_162841_setsque_table.php',
+        'StusTable' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_163521_stus_table.php',
         'TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',
         'Text_Template' => __DIR__ . '/..' . '/phpunit/php-text-template/src/Template.php',
     );

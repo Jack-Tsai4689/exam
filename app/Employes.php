@@ -20,6 +20,7 @@ class Employes extends Model implements Authenticatable
     	'e_pwd',
     	'e_sex',
     	'e_email',
-    	'e_webid'
+    	'e_webid',
+        'remember_token'
     ];
 }

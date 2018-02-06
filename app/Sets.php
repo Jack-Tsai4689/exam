@@ -42,7 +42,7 @@ class Sets extends Model
     }
     //大題
     public function sub(){
-        return $this->hasMany($this, 's_pid')->select('s_id','s_part','s_intro','s_percen','s_page');
+        return $this->hasMany($this, 's_pid')->select('s_id','s_part','s_intro','s_percen','s_page')->orderby('s_part');
     }
     //大題題目
     public function subque(){
