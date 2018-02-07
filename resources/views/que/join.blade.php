@@ -7,6 +7,9 @@
 		.show{
 			display: block;
 		}
+		#all {
+			margin: 20px auto;
+		}
 		.hiden {
 			display: none;
 		}
@@ -30,28 +33,28 @@
 	</div>
 	<div class="title_intro condition">
 		<div>
-			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
-			年級：
-			<select name="f_grade" onchange="submit();">
+			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">條件</div>
+			類別：
+			<select name="gra" onchange="getsubj(this.value)">
 				<option value="">全部</option>{!! $Grade !!}
 			</select>
 			科目：
-			<select name="f_subject" onChange="submit();">
+			<select name="subj" id="subj" onchange="getchap(this.value)">
 				<option value="">全部</option>{!! $Subject !!}
 			</select>
 			章節：
-			<select name="f_chapter" onChange="submit();">
+			<select name="chap" id="chap">
 				<option value="">全部</option>{!! $Chapter !!}
 			</select>
 			難度：
-			<select name="f_degree" onChange="submit();">
+			<select name="degree">
 				<option value=""  {{ $Degree->A}} >全部</option>
 				<option value="E" {{ $Degree->E}} >容易</option>
 				<option value="M" {{ $Degree->M}} >中等</option>
 				<option value="H" {{ $Degree->H}} >困難</option>
 				</select>
-			<input type="hidden" name="p" id="p" value="">
-			<input type="hidden" name="action" id="action" value="">
+			<input type="button" id="cond" value="篩選">
+			<input type="hidden" name="page" id="urlpage" value="">
 			<input type="button" id="sel_que" value="加入至考卷">
 		</div>
 	</div>
@@ -65,7 +68,7 @@
 						<th name="que">題目</th>
 						<th style="width:80px;">題型</th>
 						<th name="ans" style="width:5%; min-width:49px;">答案</th>
-						<th name="gra" style="width:6%; min-width:59px;">年級</th>
+						<th name="gra" style="width:6%; min-width:59px;">類別</th>
 						<th name="sub" style="width:5%; min-width:49px;">科目</th>
 						<th name="chp" style="width:9.5%; min-width:99px;">章節</th>
 						<th name="deg" style="width:4%; min-width:39px;">難度</th>
@@ -96,11 +99,11 @@
 	</div>
 	</form>
 	<div id="page" class="content">
-		<label class="all_rows">共筆資料</label>
+		<label class="all_rows">共{{ $Num }}筆資料</label>
 		<div class="each">
-			{{ $Prev }}
-			<select id="pagegroup" onchange="page(this.value)">{{ $Pg }}</select>
-			{{ $Next }}
+			{{ $Page->prev }}
+			<select id="pagegroup" onchange="gp(this.value)">{{ $Page->pg }}</select>
+			{{ $Page->next }}
 		</div>
 	</div>
 </div>
@@ -196,37 +199,67 @@ function search_confirm(){
   } 
   if (search.trim()!=''){form1.submit();}
 }
-function close_oans(){ $('#oans_list').css('display','none');}
-function close_list(){ $('#status_list').css('display','none'); }
-  function open_point(ele){
-  	var elem = document.getElementById(ele);
-  	var p_elem = document.getElementById('p'+ele);
-  	if ($(elem).hasClass('hiden')){
-  		$(elem).addClass('show');
-  		$(elem).removeClass('hiden');
-  		p_elem.src = 'open.png';
-  	}else{
-  		$(elem).removeClass('show');
-  		$(elem).addClass('hiden');
-  		p_elem.src = 'close.png';
-  	}
-    // if ($('#'+ele).css('display')=='none'){
-    //   $('#'+ele).css('display','block');
-    //   $('#p'+ele).attr('src','open.png');
-    // }else{
-    //   $('#'+ele).css('display','none');
-    //   $('#p'+ele).attr('src','close.png');
-    // }
-  }
-  function open_dans(ele){
-    if ($('#'+ele).css('display')=='none'){
-      $('#'+ele).css('display','block');
-      $('#p'+ele).attr('src','open.png');
-    }else{
-      $('#'+ele).css('display','none');
-      $('#p'+ele).attr('src','close.png');
-    }
-  }
+let g = 0;
+function getsubj(v){
+	g = v;
+	gb("subj").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("subj").innerHTML = '<option value="0">全部</option>';
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
+	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'subj', g:v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('subj').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+function getchap(v){
+	gb("chap").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
+	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'chap', 'g':g, 's':v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('chap').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('chap').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+$("#cond").on('click', function(){
+	ques_find();
+});
+function gp(p){
+	gb('urlpage').value = p;
+	ques_find();
+}
+function ques_find(){
+	location.href = '{{ url('/ques/imp') }}?'+$("#form1").serialize();
+}
 $("#sel_que").on('click', function(){
 	let que_range = [];
 	$(".qchk:checked").each(function(){

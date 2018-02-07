@@ -67,7 +67,7 @@ Route::group(['prefix'=>'know'], function(){
 	Route::get('{id}/edit', "KnowledgeController@edit");
 	Route::delete('{id}', "KnowledgeController@destroy");
 	Route::put('{id}', "KnowledgeController@update");
-	Route::get('join', "KnowledgeController@join");
+	Route::get('/join', "KnowledgeController@join");
 });
 
 Route::get('basic', "BasicController@index");

@@ -111,5 +111,8 @@ document.onkeydown = function(event){
 		}
 	});
 }
+// document.oncontextmenu = function(){
+// 	window.event.returnValue=false; //將滑鼠右鍵事件取消
+// }
 //window.moveTo((screen.width)/4,(screen.height)/5);
 </script>

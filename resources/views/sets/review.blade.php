@@ -441,6 +441,7 @@
 </div>
 <form id="setsort" name="setsort">
     <input type="hidden" name="node" id="node">
+    <input type="hidden" name="s" id="s" value="{{ $SETID }}">
 </form>
 <form id="joinq">
     <input type="hidden" name="ques" id="ques">

@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Knows;
-use Auth;
+//use Auth;
 class KnowledgeController extends TopController
 {
     /**
@@ -17,8 +17,60 @@ class KnowledgeController extends TopController
     public function index()
     {
         if (!$this->login_status)return redirect('/login');
-        $data = Knows::all()->all();
-        foreach ($data as $k => $v) {
+
+        $data = $this->knows_list();
+        return view('know.index', $data);
+        
+    }
+    private function knows_list(){
+        $p_gra = 0;
+        $p_subj = 0;
+        $p_chap = 0;
+
+        $_get = request()->all();
+        $query_search = false;
+        if (!empty($_get)){
+            $p_gra = (int)request()->input('gra');
+            $p_subj = (int)request()->input('subj');
+            $p_chap = (int)request()->input('chap');
+        }
+
+        $gra_html = '';
+        $subj_html = '';
+        $chap_html = '';
+        $grade_data = $this->grade();
+        if (!empty($grade_data)){
+            foreach ($grade_data as $v) {
+                $sel_gra = ($p_gra===$v->g_id) ? 'selected':'';
+                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        if ($p_gra>0){
+            $query_search = true;
+            $subject_data = $this->subject($p_gra);
+            foreach ($subject_data as $v) {
+                $sel_subj = ($p_subj===$v->g_id) ? 'selected':'';
+                $subj_html.= '<option '.$sel_subj.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        if ($p_subj>0){
+            $query_search = true;
+            $chapter_data = $this->chapter($p_gra, $p_subj);
+            foreach ($chapter_data as $v) {
+                $sel_chap = ($p_chap===$v->g_id) ? 'selected':'';
+                $chap_html.= '<option '.$sel_chap.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        if ($query_search){
+            $knows = new Knows;
+            if ($p_gra>0)$knows = $knows->where('k_gra', $p_gra);
+            if ($p_subj>0)$knows = $knows->where('k_subj', $p_subj);
+            if ($p_chap>0)$knows = $knows->where('k_chap', $p_chap);
+            $knows_data = $knows->paginate(10);
+        }else{
+            $knows_data = Knows::paginate(10);
+        }
+        foreach ($knows_data as $k => $v) {
             //知識點
             $kcont = array();
             //文字
@@ -28,32 +80,31 @@ class KnowledgeController extends TopController
             if(!empty($v->k_pic)){
                 if (is_file($v->k_pic))$kcont[] = '<IMG class="know" src="'.$v->k_pic.'" width="98%">';
             }
-            $data[$k]->k_content = implode("<br>", $kcont);
+            $knows_data[$k]->k_content = implode("<br>", $kcont);
         }
-        $gra_html = '';
-        $subj_html = '';
-        $chap_html = '';
-        $grade_data = $this->grade();
-        if (!empty($grade_data)){
-            foreach ($grade_data as $v) {
-                $sel_gra = '';//($p_gra===$v->g_id) ? 'selected':'';
-                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
-            }
-        }
-        return view('know.index', [
+        
+        $page_info = $this->page_info(
+            $knows_data->currentPage(),
+            $knows_data->lastPage(),
+            $knows_data->total()
+        );
+        $pfunc = new \stdClass;
+        $pfunc->prev = $this->prev_page;
+        $pfunc->next = $this->next_page;
+        $pfunc->pg = $this->group_page;
+
+        $data = [
             'menu_user' => $this->menu_user,
             'title' => '知識點',
-            'Data' => $data,
+            'Data' => $knows_data,
             'Grade' => $gra_html,
-            'Subject' => '',
-            'Chapter' => '',
-            'Prev' => '',
-            'Num' => 0,
-            'Next' => '',
-            'Pg' => ''
-        ]);
+            'Subject' => $subj_html,
+            'Chapter' => $chap_html,
+            'Page' => $pfunc,
+            'Num' => $knows_data->total()
+        ];
+        return $data;
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -123,7 +174,7 @@ class KnowledgeController extends TopController
         $data['Kimg_html'] = $kimg_html;
         $data['menu_user'] = $this->menu_user;
         $data['title'] = '知識點 - 新增';
-        $data['Owner'] = Auth::user()->e_epno;
+        $data['Owner'] = $this->login_user;
         $data['Grade'] = $grade_html;
         $data['Subject'] = $subject_html;
         $data['Chapter'] = $chapter_html;
@@ -204,7 +255,7 @@ class KnowledgeController extends TopController
         $kid = (int)$kid;
         if ($kid<=0)abort(400);
 
-        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
+        if ($this->login_type!=="T"){
             die('很抱歉，權限不足');
             return;
         }
@@ -283,7 +334,7 @@ class KnowledgeController extends TopController
         $kid = (int)$kid;
         if ($kid<=0)abort(400);
 
-        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
+        if ($this->login_type!=="T"){
             die('很抱歉，權限不足');
             return;
         }
@@ -350,40 +401,8 @@ class KnowledgeController extends TopController
     }
     public function join(){
         if (!$this->login_status)abort(401);
-        $data = Knows::all()->all();
-        foreach ($data as $k => $v) {
-            //知識點
-            $kcont = array();
-            //文字
-            $kcont[] = '<strong>'.trim($v->k_name).'</strong>';
-            if (!empty($v->k_content)) $kcont[] = nl2br(trim($v->k_content));
-            //圖檔
-            if(!empty($v->k_pic)){
-                if (is_file($v->k_pic))$kcont[] = '<IMG class="know" src="'.$v->k_pic.'" width="98%">';
-            }
-            $data[$k]->k_content = implode("<br>", $kcont);
-        }
-        $gra_html = '';
-        $subj_html = '';
-        $chap_html = '';
-        $grade_data = $this->grade();
-        if (!empty($grade_data)){
-            foreach ($grade_data as $v) {
-                $sel_gra = '';//($p_gra===$v->g_id) ? 'selected':'';
-                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
-            }
-        }
-        return view('know.join', [
-            'menu_user' => $this->menu_user,
-            'title' => '選擇 知識點',
-            'Data' => $data,
-            'Grade' => $gra_html,
-            'Subject' => '',
-            'Chapter' => '',
-            'Prev' => '',
-            'Num' => 0,
-            'Next' => '',
-            'Pg' => ''
-        ]);
+        $data = $this->knows_list();
+        $data['title'] = '選擇 知識點';
+        return view('know.join', $data);
     }
 }

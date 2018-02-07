@@ -28,7 +28,7 @@
 	<div class="title_intro condition">
 		<div>
 			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">條件</div>
-			年級：
+			類別：
 			<select name="gra" onchange="getsubj(this.value)">
 				<option value="0">全部</option>{!! $Grade !!}
 			</select>
@@ -41,7 +41,7 @@
 				<option value="0">全部</option>{!! $Chapter !!}
 			</select>
 			難度：
-			<select name="degree" onChange="submit();">
+			<select name="degree">
 				<option value=""  {{ $Degree->A}} >全部</option>
 				<option value="E" {{ $Degree->E}} >容易</option>
 				<option value="M" {{ $Degree->M}} >中等</option>
@@ -61,7 +61,7 @@
 						<th name="que">題目</th>
 						<th style="width:80px;">題型</th>
 						<th name="ans" style="width:5%; min-width:49px;">答案</th>
-						<th name="gra" style="width:6%; min-width:59px;">年級</th>
+						<th name="gra" style="width:6%; min-width:59px;">類別</th>
 						<th name="sub" style="width:5%; min-width:49px;">科目</th>
 						<th name="chp" style="width:9.5%; min-width:99px;">章節</th>
 						<th name="deg" style="width:4%; min-width:39px;">難度</th>
@@ -92,7 +92,7 @@
 		</div>
 	</div>
 	<div id="page" class="content">
-		<label class="all_rows">共筆資料</label>
+		<label class="all_rows">共{{ $Num }}筆資料</label>
 		<div class="each">
 			{!! $Page->prev !!}
 			<select id="pagegroup" onchange="gp(this.value)">{!! $Page->pg !!}</select>
@@ -186,7 +186,7 @@ function gp(p){
 	ques_find();
 }
 function ques_find(){
-	location.href = location.pathname+'?'+$("#form1").serialize();
+	location.href = '{{ url('/ques') }}?'+$("#form1").serialize();
 }
 </script>
 @stop

@@ -142,7 +142,7 @@
 		}
 		.condition label, .condition select {
 			margin-left: 5px;
-			font-size: 16px;
+			/*font-size: 16px;*/
 		}
 		.chk_select {
 			width: 20px;
@@ -205,7 +205,7 @@
 @section('content')
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<form name="form1" method="POST" action="{{ url('/know') }}">
+	<form name="form1" id="form1">
 	<div class="title_intro">
 		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/know') }}" style="margin-left:55px;">瀏覽全部</a></div>
 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增知識點" onclick="location.href='{{ url('/know/create') }}'"></div>
@@ -213,25 +213,24 @@
 	<div class="title_intro condition">
 		<div>
 			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
-				年級：
-				<select name="f_grade" onchange="submit();">
-					<option value="">全部</option>{!! $Grade !!}
+				類別：
+				<select name="gra" onchange="getsubj(this.value)">
+					<option value="0">全部</option>{!! $Grade !!}
 				</select>
 				科目：
-				<select name="f_subject" onChange="submit();">
-					<option value="">全部</option>{!! $Subject !!}
+				<select name="subj" id="subj" onchange="getchap(this.value)">
+					<option value="0">全部</option>{!! $Subject !!}
 				</select>
 				章節：
-				<select name="f_chapter" onChange="submit();">
-					<option value="">全部</option>{!! $Chapter !!}
+				<select name="chap" id="chap">
+					<option value="0">全部</option>{!! $Chapter !!}
 				</select>
+				<input type="button" id="cond" value="篩選">
+			<input type="hidden" name="page" id="urlpage" value="">
 		</div>
 	</div>
+	</form>
 	<div class="content" id="choice">
-		<!-- <div id="point_check">
-			<div id="check_btn"><input type="button" class="btn w70 h30" name="" id="" onclick="check_choice()" value="確定"></div>
-			<div id="check_tip"><center>小提醒</center>勾選右方知識點，並點擊確定回題目畫面。</div>
-		</div> -->
 		<div id="cen">
 			<input type="hidden" name="act" id="act" value="">
 			<input type="hidden" name="pid" id="pid" value="">
@@ -240,7 +239,7 @@
 					<tr>
 						<th style="width:99px;">發表者</th>
 						<th style="min-width:550px; width:60%;">知識點</th>
-						<th style="width:99px;">年級</th>
+						<th style="width:99px;">類別</th>
 						<th style="width:99px;">科目</th>
 						<th style="width:99px;">章節</th>
 						<th class="last" style="width:82px;">編輯</th>
@@ -265,83 +264,79 @@
 	<div id="page" class="content">
 		<label class="all_rows">共{{ $Num }}筆資料</label>
 		<div class="each">
-			{{ $Prev }}
-			<select id="pagegroup" onchange="page(this.value)">
-				{{ $Pg }}
-			</select>
-			{{ $Next }}
+			{!! $Page->prev !!}
+			<select id="pagegroup" onchange="page(this.value)">{!! $Page->pg !!}</select>
+			{!! $Page->next !!}
 		</div>
 	</div>
-	</form>
 </div>
 @stop
 @section('script')
 <script type="text/javascript">
-function page(p){
-	form1.action='ex_point?p='+p;
-	form1.submit();
-}
-function edit(value){
-    location.href='ex_pointA.php?f_pno=ex_point&w_add=F&f_pid='+value;
-}
-function del(value){
-    if(confirm("確定刪除此知識點?")){
-        $('#pid').val(value);
-        $('#act').val('del');
-        form1.submit();
-    }
-}
-function trim(value){
-    return value.replace(/^\s+|\s+$/g, '');
-}
 function search_confirm(){
   var search = $('#f_search').val();
   if (trim(search)!=''){form1.submit();}
 }
-function point_m(value){
-	var mp = $('#mp'+value);
-	if (mp.css('display')=='none'){
-		mp.css('display','block');
-		$('#m'+value).attr('src','open.png');
-	}else{
-		mp.css('display','none');
-		$('#m'+value).attr('src','close.png');
+let g = 0;
+function getsubj(v){
+	g = v;
+	gb("subj").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("subj").innerHTML = '<option value="0">全部</option>';
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
 	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'subj', g:v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('subj').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+		}
+	});
 }
-var no_choice = true;
-$(document).mouseleave(function(e){
-	if (!no_choice){
-		window.onbeforeunload = function (e) {
-			return '尚未儲存，確定離開?';
-		}	
-	}else{
-		window.onbeforeunload = null;
+function getchap(v){
+	gb("chap").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
 	}
-  
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'chap', 'g':g, 's':v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('chap').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('chap').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+$("#cond").on('click', function(){
+	knows_find();
 });
-function point_chk(){
-	no_choice = false;
+function gp(p){
+	gb('urlpage').value = p;
+	knows_find();
 }
-function check_choice(){//知識點編號回傳給題目
-    var check = $('input[name="radbox"]:checked').val();
-    if (check==null){
-    	alert('尚未選擇');
-    }else{
-    	// self.opener.document.getElementById('f_pid').value=check;//編號
-	    // self.opener.document.forms[0].submit();//全部都能用
-	    //self.opener.document.getElementById('pid_check').innerHTML="已選擇";//編號
-	    //opener.window.document.getElementById('pid_pic').innerHTML=check;
-	    // window.close();
-	    var point = $('#point_content', parent.document);
-	    point.html('');
-		point.append(
-			$('<div>').html(document.getElementById('np_'+check).innerHTML),
-			$('<input>').attr({type:'button',value:'重選知識點',class:'btn w160 h25',name:'upd_point',onClick:'select_point()'}),
-			$('<input>').attr({type:'button',value:'取消知識點',class:'btn w160 h25',name:'upd_point',onClick:'remove_point()'}),
-			$('<input>').attr({type:'hidden',name:'f_pid',id:'f_pid',value:check})
-    	);
-    	$('#sets_filed', parent.document).hide();
-	}
+function knows_find(){
+	location.href = '{{ url('/know') }}?'+$("#form1").serialize();
 }
 </SCRIPT>
 @stop

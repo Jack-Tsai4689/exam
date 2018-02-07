@@ -212,7 +212,7 @@
 <body>
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<form name="form1" method="POST" action="{{ url('/know') }}">
+	<form name="form1" id="form1">
 	<div class="title_intro">
 		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/know') }}" style="margin-left:55px;">瀏覽全部</a></div>
 {{-- 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增知識點" onclick="location.href='{{ url('/know/create') }}'"></div> --}}
@@ -221,19 +221,22 @@
 		<div>
 			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
 				年級：
-				<select name="f_grade" onchange="submit();">
+				<select name="gra" onchange="getsubj(this.value)">
 					<option value="">全部</option>{!! $Grade !!}
 				</select>
 				科目：
-				<select name="f_subject" onChange="submit();">
+				<select name="subj" id="subj" onchange="getchap(this.value)">
 					<option value="">全部</option>{!! $Subject !!}
 				</select>
 				章節：
-				<select name="f_chapter" onChange="submit();">
+				<select name="chap" id="chap">
 					<option value="">全部</option>{!! $Chapter !!}
 				</select>
+				<input type="button" id="cond" value="篩選">
+			<input type="hidden" name="page" id="urlpage" value="">
 		</div>
 	</div>
+	</form>
 	<div class="content" id="choice">
 		<div id="point_check">
 			<div id="check_btn"><input type="button" class="btn w70 h30" name="" id="" onclick="check_choice()" value="確定"></div>
@@ -248,7 +251,7 @@
 						<th style="width:80px;"></th>
 						<th style="width:99px;">發表者</th>
 						<th style="min-width:550px; width:60%;">知識點</th>
-						<th style="width:99px;">年級</th>
+						<th style="width:99px;">類別</th>
 						<th style="width:99px;">科目</th>
 						<th class="last" style="width:99px;">章節</th>
 					</tr>
@@ -272,51 +275,78 @@
 	<div id="page" class="content">
 		<label class="all_rows">共{{ $Num }}筆資料</label>
 		<div class="each">
-			{{ $Prev }}
-			<select id="pagegroup" onchange="page(this.value)">
-				{{ $Pg }}
+			{!! $Page->prev !!}
+			<select id="pagegroup" onchange="page(this.value)">{!! $Page->pg !!}
 			</select>
-			{{ $Next }}
+			{!! $Page->next !!}
 		</div>
 	</div>
-	</form>
 </div>
 </body>
 <script type="text/javascript">
-function page(p){
-	form1.action='ex_point?p='+p;
-	form1.submit();
-}
-function trim(value){
-    return value.replace(/^\s+|\s+$/g, '');
-}
 function search_confirm(){
   var search = $('#f_search').val();
   if (trim(search)!=''){form1.submit();}
 }
-function point_m(value){
-	var mp = $('#mp'+value);
-	if (mp.css('display')=='none'){
-		mp.css('display','block');
-		$('#m'+value).attr('src','open.png');
-	}else{
-		mp.css('display','none');
-		$('#m'+value).attr('src','close.png');
+function getsubj(v){
+	g = v;
+	gb("subj").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("subj").innerHTML = '<option value="0">全部</option>';
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
 	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'subj', g:v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('subj').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+		}
+	});
 }
-var no_choice = true;
-$(document).mouseleave(function(e){
-	if (!no_choice){
-		window.onbeforeunload = function (e) {
-			return '尚未儲存，確定離開?';
-		}	
-	}else{
-		window.onbeforeunload = null;
+function getchap(v){
+	gb("chap").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
 	}
-  
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'chap', 'g':g, 's':v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('chap').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('chap').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+$("#cond").on('click', function(){
+	knows_find();
 });
-function point_chk(){
-	no_choice = false;
+function gp(p){
+	gb('urlpage').value = p;
+	knows_find();
+}
+function knows_find(){
+	location.href = '{{ url('/know/join') }}?'+$("#form1").serialize();
 }
 function check_choice(){//知識點編號回傳給題目
     var check = $('.chk_select:checked').val();

@@ -24,40 +24,34 @@ class SetsController extends TopController
     public function index()
     {   
         if (!$this->login_status)return redirect('/login');
-        $get = Input::all();
-        $gra_id = 0;
-        $subj_id = 0;
-        if (!empty($get)){
-            $gra_id = (int)Input::get('f_grade');
-            $subj_id = (int)Input::get('f_subject');
+        $p_gra = 0;
+        $p_subj = 0;
+
+        $_get = Input::all();
+        if (!empty($_get)){
+            $p_gra = (int)request()->input('gra');
+            $p_subj = (int)request()->input('subj');
         }
         $sets = new Sets;
         $sets = $sets->where('s_pid',0);
-        if ($gra_id>0)$sets = $sets->where('s_gra', $gra_id);
-        if ($subj_id>0)$sets = $sets->where('s_subj', $subj_id);
+        if ($p_gra>0)$sets = $sets->where('s_gra', $p_gra);
+        if ($p_subj>0)$sets = $sets->where('s_subj', $p_subj);
         $sets_data = $sets->paginate(10);
         $gra = $this->grade();
-        $grade_data = '';
-        $subj_data = '';
-        $g_data = false;
+        $gra_html = '';
+        $subj_html = '';
         if ($gra!=null){
             $gsel = '';
             foreach ($gra as $v) {
-                if ($gra_id===$v->g_id){
-                    $gsel = 'selected';
-                    $g_data = true;
-                }else{
-                    $gsel = '';
-                }
-                $grade_data.= '<option '.$gsel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+                $sel_gra = ($p_gra===$v->g_id) ? 'selected':'';
+                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
         }
-        if ($g_data){
-            $ssel = '';
-            $subj = $this->subject($gra_id);
+        if ($p_gra>0){
+            $subj = $this->subject($p_gra);
             foreach ($subj as $v) {
-                $ssel = ($subj_id===$v->g_id) ? 'selected':'';
-                $subj_data.= '<option '.$ssel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+                $sel_subj = ($p_subj===$v->g_id) ? 'selected':'';
+                $subj_html.= '<option '.$sel_subj.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
         }
         if ($sets_data!=null){
@@ -82,85 +76,12 @@ class SetsController extends TopController
         return view('sets.index', [
             'menu_user' => $this->menu_user,
             'title' => '考卷列表',
-            'Grade' => $grade_data,
-            'Subject' => $subj_data,
+            'Grade' => $gra_html,
+            'Subject' => $subj_html,
             'Data' => $sets_data,
-            'Page' => $pfunc
+            'Page' => $pfunc,
+            'Num' => $sets_data->total()
         ]);
-
-        // $page = (isset($_GET['p']) && (int)$_GET['p']>0) ? (int)$_GET['p']:1;
-        // $this->_page($page);
-        // $this->load->model("SetsModel");
-        // $sets_row = $this->SetsModel->tea_sets_row(array($_SESSION['gold']->epno));
-        // $sets_data = $this->SetsModel->tea_sets_data(array($_SESSION['gold']->epno, $this->_pstart(), $this->_pend()));
-        // //年級、科目 篩選條件
-        // $this->load->model("BasicModel");
-        // $gra_html = '';
-        // $subj_html = '';
-        // $grade_data = $this->BasicModel->get_grade();
-        // if (!empty($grade_data)){
-        //     foreach ($grade_data as $v) {
-        //         $gra_html.= '<option value="'.$v->ID.'">'.$v->NAME.'</option>';
-        //     }
-        //     $subject_data = $this->BasicModel->get_subject(array($grade_data[0]->ID));
-        //     if (!empty($subject_data)){
-        //         foreach ($subject_data as $v) {
-        //             $subj_html.= '<option value="'.$v->ID.'">'.$v->NAME.'</option>';
-        //         }
-        //     }
-        // }
-        // $pagegroup = ceil($sets_row/$this->_prow());
-        // $prev = '';
-        // $next = '';
-        // if ($page>1)$prev = '<input type="button" class="btn btn-default" onclick="page('.($page-1).')" value="上一頁">';
-        // if ($pagegroup>$page)$next = '<input type="button" class="btn btn-default" onclick="page('.($page+1).')" value="下一頁">';
-        // $pg = '';
-        // for ($i = 1; $i<=$pagegroup;$i++){
-        //     $pg.='<option value="'.$i.'">'.$i.'</option>';
-        // }
-        // $c_id = array();
-        // $c_name = array();
-        // $ca_id = array();
-        // $ca_name = array();
-        // $gra_id = array();
-        // $gra_name = array();
-        // $subj_id = array();
-        // $subj_name = array();
-        // $this->load->library('gold');
-        // $this->gold = new gold;
-        // $this->load->model('AuthModel');
-        // $this->AuthModel->Set_db($_SESSION['gold']->code);
-        // $user = $this->AuthModel->user_info(array($_SESSION['gold']->epno));
-        // $this->gold->Web_init($_SESSION['gold']->code, $_SESSION['gold']->epno, $user->PASS, $_SESSION['gold']->ident, $user->WEBID);
-        // foreach ($sets_data as $k => $v) {
-        //     //if ($v->WEBSETID>0){
-        //         $gca = $this->SetsModel->sets_gca_showone(array($v->ID));
-        //         $sets_data[$k]->cname = '';
-        //         if ($gca!=null){
-        //             if (in_array($gca->CID, $c_id)){
-        //                 $sets_data[$k]->cname = $c_name[array_search($gca->CID, $c_id)];
-        //             }else{
-        //                 $c_id[] = $gca->CID;
-        //                 $cdata = $this->gold->get_Class_only($gca->GID, $gca->CID);
-        //                 $c_name[] = $cdata->Data[0]->name;
-        //                 $sets_data[$k]->cname = $cdata->Data[0]->name;
-        //             }
-        //         }
-        //     //} 
-        // }
-        // $this->gold = null;
-        // $this->load->view('_header', array(
-        //     'ident' => $this->dp_info,
-        //     'title' => '考卷列表'
-        // ));
-        // $this->load->view('sets/index', array(
-        //     'Grade' => $gra_html,
-        //     'Subject' => $subj_html,
-        //     'Data' => $sets_data,
-        //     'Prev' => $prev,
-        //     'Next' => $next,
-        //     'Pg' => $pg
-        // ));
     }
 
     /**

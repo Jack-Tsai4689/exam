@@ -63,13 +63,13 @@
 	<div class="title_intro condition">
 		<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
 		類別：
-		<select name="grade" onchange="getsubj(this.value)">
-			<option value="">全部</option>
+		<select name="gra" onchange="getsubj(this.value)">
+			<option value="0">全部</option>
 			{!! $Grade !!}
 		</select>
 		科目：
 		<select name="subj" id="subj">
-			<option value="">全部</option>
+			<option value="0">全部</option>
 			{!! $Subject !!}
 		</select>
 		<input type="button" id="cond" value="篩選">
@@ -83,7 +83,7 @@
 					<tr>
 						<th id="setsname" name="setsname">考卷</th>
 						<th id="owner">擁有者</th>
-						<th>年級</th>
+						<th>類別</th>
 						<th id="subj" name="subj">科目</th>
 						<th >班級<br>
 							<font class="f12">應測人數(<font class="class_examed">已測</font>/<font class="class_notexam">未測</font>/<font class="class_examing">測驗中</font>)</font>
@@ -145,10 +145,10 @@
 		</div>
 	</div>
 	<div id="page" class="content">
-		<label class="all_rows">共筆資料</label>
+		<label class="all_rows">共{{ $Num }}筆資料</label>
 		<div class="each">
 			{!! $Page->prev !!}
-			<select id="pagegroup" onchange="page(this.value)">{!! $Page->pg !!}</select>
+			<select id="pagegroup" onchange="gp(this.value)">{!! $Page->pg !!}</select>
 			{!! $Page->next !!}
 		</div>
 	</div>
@@ -264,8 +264,15 @@ function getsubj(v){
 		}
 	});
 }
-function cond(){
-	location.href = '{{ url('/sets')}}?'+$("#search").serialize();
+$("#cond").on('click', function(){
+	sets_find();
+});
+function gp(p){
+	gb('urlpage').value = p;
+	sets_find();
+}
+function sets_find(){
+	location.href = '{{ url('/sets')}}?'+$("#search").serialize();	
 }
 </script>
 @stop

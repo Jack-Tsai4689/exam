@@ -18,7 +18,7 @@ class ExamController extends TopController
      */
     public function index()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $sets = Sets::where('s_finish',1)->get()->all();
         foreach ($sets as $k => $v) {
             $sets[$k]->days = (!empty($v->s_begtime)) ? $v->s_begtime.' - '.$v->s_endtime:'不限';
