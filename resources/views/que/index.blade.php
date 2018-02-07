@@ -11,12 +11,15 @@
 		.list > tbody > tr > td.qcont {
 			text-align: left;
 		}
+		.pic {
+			width: 500px;
+		}
 	</style>
 @stop
 @section('content')
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<form name="form1" id="form1" method="POST" action="{{ url('/ques') }}">
+	<form name="form1" id="form1">
 	<div class="title_intro">
 		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/ques') }}" style="margin-left:55px;">瀏覽全部</a></div>
 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<a href=""><input type="button" class="btn f16 w150" name="" id="" value="Excel匯入" onclick="location.href='upload_md.php'"></a></div>
@@ -24,30 +27,31 @@
 	</div>
 	<div class="title_intro condition">
 		<div>
-			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
+			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">條件</div>
 			年級：
-			<select name="f_grade" onchange="submit();">
-				<option value="">全部</option>{!! $Grade !!}
+			<select name="gra" onchange="getsubj(this.value)">
+				<option value="0">全部</option>{!! $Grade !!}
 			</select>
 			科目：
-			<select name="f_subject" onChange="submit();">
-				<option value="">全部</option>{!! $Subject !!}
+			<select name="subj" id="subj" onchange="getchap(this.value)">
+				<option value="0">全部</option>{!! $Subject !!}
 			</select>
 			章節：
-			<select name="f_chapter" onChange="submit();">
-				<option value="">全部</option>{!! $Chapter !!}
+			<select name="chap" id="chap">
+				<option value="0">全部</option>{!! $Chapter !!}
 			</select>
 			難度：
-			<select name="f_degree" onChange="submit();">
+			<select name="degree" onChange="submit();">
 				<option value=""  {{ $Degree->A}} >全部</option>
 				<option value="E" {{ $Degree->E}} >容易</option>
 				<option value="M" {{ $Degree->M}} >中等</option>
 				<option value="H" {{ $Degree->H}} >困難</option>
 				</select>
-			<input type="hidden" name="p" id="p" value="">
-			<input type="hidden" name="action" id="action" value="">
+			　<input type="button" id="cond" value="篩選">
+			<input type="hidden" name="page" id="urlpage" value="">
 		</div>
 	</div>
+	</form>
 	<div class="content">
 		<div id="cen">
 			<table cellpadding="0" cellspacing="0" width="100%" class="list">
@@ -87,49 +91,18 @@
 			</table>
 		</div>
 	</div>
-	</form>
 	<div id="page" class="content">
 		<label class="all_rows">共筆資料</label>
 		<div class="each">
-			{{ $Prev }}
-			<select id="pagegroup" onchange="page(this.value)">{{ $Pg }}</select>
-			{{ $Next }}
+			{!! $Page->prev !!}
+			<select id="pagegroup" onchange="gp(this.value)">{!! $Page->pg !!}</select>
+			{!! $Page->next !!}
 		</div>
 	</div>
 </div>
 @stop
 @section('script')
 <script type="text/javascript">
-function chk_all(){
-	$('input:checkbox[name=choice_f]').prop('checked',true);
-}
-function notchk_all(){
-	$('input:checkbox[name=choice_f]').prop('checked',false);	
-}
-function field_change(){
-	var chk,attribute;
-	var real = $('input:checkbox[name=choice_f]:checked').val();
-	if (real==null){
-		document.getElementById('field_msg').innerHTML = '至少選一個';
-	}else{
-		$('input:checkbox[name=choice_f]').each(function(){
-			chk = $(this).prop('checked');
-			attribute = $(this).val();
-			if (chk){
-				$('th[name="'+attribute+'"]').css('display','table-cell');
-				$('td[name="'+attribute+'"]').css('display','table-cell');
-			}else{
-				$('th[name="'+attribute+'"]').css('display','none');
-				$('td[name="'+attribute+'"]').css('display','none');
-			}
-		});
-		close_field();
-	}
-}
-function page(p){
-	form1.action='ex_set.php?p='+p;
-	form1.submit();
-}
 function open_edit(value){
 	var func = $('#edit_func_'+value);
 	if (func.hasClass('show')){
@@ -139,48 +112,10 @@ function open_edit(value){
 		func.addClass('show');
 	}
 }
-function open_field(){
-	$('#sets_filed').css('display','block');
-}
-function close_field(){
-	$('#sets_filed').css('display','none');
-	document.getElementById('field_msg').innerHTML = '';
-}
 var i='';
 function check_all(obj,cName){
     var checkboxs = document.getElementsByName(cName);
     for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
-}
-function goo2(epno,f_fields) {
-  var rtn_data = window.open("fieldlist.php?f_pno=ex_set&self=true&epno="+epno+"&f_fields="+f_fields,"result","width=1026,height=768,resizable=yes,scrollbars=yes,location=no");
-}
-function delete_one(value){
-  if (confirm('您確定要刪除此題目？')){
-    location.href="ex_set.php?action=delete&qid="+value+"&p="+document.getElementById('p').value;
-  }
-}
-function chk(value){//选择确认 (删题目/改分享)
-  var que = new Array();
-  var choice = 0;
-  $('input:checkbox:checked[name="chkbox[]"]').each(function(i) { 
-    if ($(this).val()!=''){
-      choice = 1;
-      return false;
-    }
-  });
-  if (!choice){
-    alert('您尚未勾選題目');
-  }else{
-    if (value=='delete'){
-      if (confirm('您確定要刪除所勾選的題目？')){
-        $('#action').val('deletenums');
-        form1.submit();
-      }
-    }else if (value=='change'){
-      $('#action').val(value);
-      form1.submit();
-    }
-  }
 }
 function search_confirm(){
   var search = $('#f_search').val();
@@ -191,36 +126,67 @@ function search_confirm(){
   } 
   if (search.trim()!=''){form1.submit();}
 }
-function close_oans(){ $('#oans_list').css('display','none');}
-function close_list(){ $('#status_list').css('display','none'); }
-  function open_point(ele){
-  	var elem = document.getElementById(ele);
-  	var p_elem = document.getElementById('p'+ele);
-  	if ($(elem).hasClass('hiden')){
-  		$(elem).addClass('show');
-  		$(elem).removeClass('hiden');
-  		p_elem.src = 'open.png';
-  	}else{
-  		$(elem).removeClass('show');
-  		$(elem).addClass('hiden');
-  		p_elem.src = 'close.png';
-  	}
-    // if ($('#'+ele).css('display')=='none'){
-    //   $('#'+ele).css('display','block');
-    //   $('#p'+ele).attr('src','open.png');
-    // }else{
-    //   $('#'+ele).css('display','none');
-    //   $('#p'+ele).attr('src','close.png');
-    // }
-  }
-  function open_dans(ele){
-    if ($('#'+ele).css('display')=='none'){
-      $('#'+ele).css('display','block');
-      $('#p'+ele).attr('src','open.png');
-    }else{
-      $('#'+ele).css('display','none');
-      $('#p'+ele).attr('src','close.png');
-    }
-  }
+
+let g = 0;
+function getsubj(v){
+	g = v;
+	gb("subj").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("subj").innerHTML = '<option value="0">全部</option>';
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
+	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'subj', g:v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('subj').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+function getchap(v){
+	gb("chap").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("chap").innerHTML = '<option value="0">全部</option>';
+		return;
+	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'chap', 'g':g, 's':v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('chap').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('chap').innerHTML = '<option value="">無資料</option>';
+		}
+	});
+}
+$("#cond").on('click', function(){
+	ques_find();
+});
+function gp(p){
+	gb('urlpage').value = p;
+	ques_find();
+}
+function ques_find(){
+	location.href = location.pathname+'?'+$("#form1").serialize();
+}
 </script>
 @stop

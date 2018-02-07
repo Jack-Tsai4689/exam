@@ -16,7 +16,7 @@ class KnowledgeController extends TopController
      */
     public function index()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $data = Knows::all()->all();
         foreach ($data as $k => $v) {
             //知識點
@@ -61,7 +61,7 @@ class KnowledgeController extends TopController
      */
     public function create()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $data = array();
         //年級、科目 篩選條件
         $grade_html = '<option value="0">無年級</option>';
@@ -139,7 +139,7 @@ class KnowledgeController extends TopController
      */
     public function store(Request $req)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $k_name = ($req->has('f_kname') && !empty($req->input('f_kname'))) ? trim($req->input('f_kname')):'';
         $k_content = ($req->has('f_kcont') && !empty($req->input('f_kcont'))) ? trim($req->input('f_kcont')):'';
         $k_keyword = ($req->has('f_kw') && !empty($req->input('f_kw'))) ? trim($req->input('f_kw')):'';
@@ -199,7 +199,7 @@ class KnowledgeController extends TopController
      */
     public function edit($kid)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         if (!is_numeric($kid))abort(400);
         $kid = (int)$kid;
         if ($kid<=0)abort(400);
@@ -278,7 +278,7 @@ class KnowledgeController extends TopController
      */
     public function update(Request $req, $kid)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         if (!is_numeric($kid))abort(400);
         $kid = (int)$kid;
         if ($kid<=0)abort(400);
@@ -349,7 +349,7 @@ class KnowledgeController extends TopController
         //
     }
     public function join(){
-        if (!$this->login_status())abort(400);
+        if (!$this->login_status)abort(401);
         $data = Knows::all()->all();
         foreach ($data as $k => $v) {
             //知識點

@@ -217,10 +217,9 @@
                 <tr class="deep">
                     <td align="right">題目圖檔</td>
                     <td>
-                        <IMG id="qimg" src="{{ $Qimg }}" width="98%"><br>
-                        <div id="qimg_content">{{ $Qimg_html }}</div>
-                        <input type="hidden" id="f_qimg" name="f_qimg" value="{{ $Qimgsrc }}">
-                        格式：JPG/PNG
+                        <div id="qmold" {!! $Qmsold !!}><IMG id="qimg" src="{{ $Qimg }}" width="98%"><br>{!! $Qimg_html !!}</div>
+                        <div id="qmup" {!! $Qm_upload !!}><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
+                        <input type="hidden" id="qm_src" name="qm_src" value="{{ $Qimgsrc }}"></div>
                     </td>
                 </tr>
                 <tr class="shallow">
@@ -338,16 +337,15 @@
                 <tr class="shallow">
                     <td align="right">圖片檔</td>
                     <td>
-                        <IMG id="aimg" src="{{ $Aimg }}" width="98%"><br>
-                        <div id="aimg_content">{!! $Aimg_html !!}</div>
-                        <input type="hidden" id="am_src" name="am_src" value="{{ $Aimgsrc }}">
-                        格式：JPG/PNG
+                        <div id="amold" {!! $Amsold !!}><IMG id="aimg" src="{{ $Aimg }}" width="98%"><br>{!! $Aimg_html !!}</div>
+                        <div id="amup" {!! $Am_upload !!}><input type="file" name="apic" id="apic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
+                        <input type="hidden" id="am_src" name="am_src" value="{{ $Aimgsrc }}"></div>
                     </td>
                 </tr>
                 <tr class="deep">
                     <TD align="right">聲音檔</TD>
                     <td><div id="asold" {!! $Asold !!}>{!! $Asound_html !!}</div>
-                        <div id="aup" {!! $As_upload !!}><input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3
+                        <div id="asup" {!! $As_upload !!}><input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3
                         <input type="hidden" name="as_src" id="as_src" value="{{ $Asoundsrc }}"></div>
                     </TD>
                 </TR>
@@ -401,15 +399,27 @@ function gb(v){
 function rem(v){
     if (confirm('確定刪除?')){
         switch(v){
+            case 'delqm':
+                gb('qm_src').value = '';
+                $("#qmup").removeClass("hiden");
+                gb("qmold").innerHTML = '';
+                $("#qmold").hide();
+                break;
             case "delqs":
                 gb('qs_src').value = '';
                 $("#qup").removeClass("hiden");
                 gb("qsold").innerHTML = '';
                 $("#qsold").hide();
                 break;
+            case "delam":
+                gb('am_src').value = '';
+                $("#amup").removeClass("hiden");
+                gb("amold").innerHTML = '';
+                $("#amold").hide();
+                break;
             case "delas":
                 gb('as_src').value = '';
-                $("#aup").removeClass("hiden");
+                $("#asup").removeClass("hiden");
                 gb("asold").innerHTML = '';
                 $("#asold").hide();
                 break;

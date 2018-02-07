@@ -19,6 +19,8 @@ class Ques extends Model
 		'q_qs_name',
 		'q_ans',
 		'q_anstxt',
+		'q_am_src',
+		'q_am_name',
 		'q_as_src',
 		'q_as_name',
 		'q_av_src',

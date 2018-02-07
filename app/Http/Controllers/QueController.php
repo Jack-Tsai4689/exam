@@ -6,7 +6,11 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Ques;
-use Auth;
+use URL;
+//use Auth;
+
+const UPLOAD_DIR = "uploads/que";
+
 class QueController extends TopController
 {
     /**
@@ -14,22 +18,46 @@ class QueController extends TopController
      *
      * @return \Illuminate\Http\Response
      */
+    
+    public function __construct(){
+        parent::__construct();
+    }
     public function index()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $search = array();
         $p_gra = 0;
         $p_subj = 0;
         $p_chap = 0;
         $p_degree = '';
-
         $sel_Degree = new \stdClass;
         $sel_Degree->A = '';
         $sel_Degree->E = '';
         $sel_Degree->M = '';
         $sel_Degree->H = '';
 
-        //年級、科目 篩選條件
+        $_get = request()->all();
+        $query_search = false;
+        if (!empty($_get)){
+            $p_gra = (int)request()->input('gra');
+            $p_subj = (int)request()->input('subj');
+            $p_chap = (int)request()->input('chap');
+            $p_degree = trim(request()->input('degree'));
+            $allow_degree = array('E','M','H');
+            if (!empty($p_degree)){
+                if (!in_array($p_degree, $allow_degree)){
+                    $p_degree = '';
+                }else{
+                    $query_search = true;
+                    switch ($p_degree) {
+                        case 'E': $sel_Degree->E = 'selected'; break;
+                        case 'M': $sel_Degree->M = 'selected'; break;
+                        case 'H': $sel_Degree->H = 'selected'; break;
+                    }
+                }
+            }
+        }
+
         $gra_html = '';
         $subj_html = '';
         $chap_html = '';
@@ -40,7 +68,32 @@ class QueController extends TopController
                 $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
         }
-        $que_data = Ques::all();
+        if ($p_gra>0){
+            $query_search = true;
+            $subject_data = $this->subject($p_gra);
+            foreach ($subject_data as $v) {
+                $sel_subj = ($p_subj===$v->g_id) ? 'selected':'';
+                $subj_html.= '<option '.$sel_subj.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        if ($p_subj>0){
+            $query_search = true;
+            $chapter_data = $this->chapter($p_gra, $p_subj);
+            foreach ($chapter_data as $v) {
+                $sel_chap = ($p_chap===$v->g_id) ? 'selected':'';
+                $chap_html.= '<option '.$sel_chap.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        if ($query_search){
+            $ques = new Ques;
+            if ($p_degree>"")$ques = $ques->where('q_degree', $p_degree);
+            if ($p_gra>0)$ques = $ques->where('q_gra', $p_gra);
+            if ($p_subj>0)$ques = $ques->where('q_subj', $p_subj);
+            if ($p_chap>0)$ques = $ques->where('q_chap', $p_chap);
+            $que_data = $ques->paginate(10);
+        }else{
+            $que_data = Ques::paginate(10);
+        }
         foreach ($que_data as $k => $v) {
             //題型、答案
             switch ($v->q_quetype) {
@@ -82,7 +135,7 @@ class QueController extends TopController
             if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($v->q_quetxt));
             //題目圖檔
             if (!empty($v->q_qm_src)){
-                if(is_file($v->q_qm_src))$qcont[] = '<IMG name="t_imgsrc" src="'.$v->q_qm_src.'" width="98%">';
+                if(is_file($v->q_qm_src))$qcont[] = '<IMG class="pic" src="'.$v->q_qm_src.'">';
             }
             //題目聲音檔
             if (!empty($v->q_qs_src)){
@@ -99,7 +152,7 @@ class QueController extends TopController
             if (!empty($v->q_anstxt)) $acont[] = nl2br(trim($v->q_anstxt));
             //詳解圖檔
             if(!empty($v->q_am_src)){
-                if (is_file($v->q_am_src))$acont[] = '<IMG name="t_imgsrc"  src="'.$v->q_am_src.'" width="98%">';
+                if (is_file($v->q_am_src))$acont[] = '<IMG class="pic"  src="'.$v->q_am_src.'">';
             }
             $amedia = array();
             //詳解聲音檔
@@ -119,7 +172,7 @@ class QueController extends TopController
                 }
             }
             $acont[] = implode(' | ', $amedia);
-            $que_data[$k]->q_acont = '<br>'.implode("<br>", $acont);
+            $que_data[$k]->q_acont = '詳解<br>'.implode("<br>", $acont);
             //難度
             switch ($v->q_degree) {
                 case "M": $que_data[$k]->q_degree = "中等"; break;
@@ -134,6 +187,17 @@ class QueController extends TopController
             $que_data[$k]->q_subj = $v->subj->name;
             $que_data[$k]->q_chap = $v->chap->name;
         }
+        
+        $page_info = $this->page_info(
+            $que_data->currentPage(),
+            $que_data->lastPage(),
+            $que_data->total()
+        );
+        $pfunc = new \stdClass;
+        $pfunc->prev = $this->prev_page;
+        $pfunc->next = $this->next_page;
+        $pfunc->pg = $this->group_page;
+        
         return view('que.index', [
             'menu_user' => $this->menu_user,
             'title' => '題庫',
@@ -142,9 +206,7 @@ class QueController extends TopController
             'Subject' => $subj_html,
             'Chapter' => $chap_html,
             'Degree' => $sel_Degree,
-            'Prev' => '',
-            'Next' => '',
-            'Pg' => ''
+            'Page' => $pfunc
         ]);
     }
 
@@ -155,9 +217,8 @@ class QueController extends TopController
      */
     public function create()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         $sets_message = '';//'<div id="sets_title"><label class="17">'.$msg.'</label></div>';
-        $data = array();
         //年級、科目 篩選條件
         $Q_Grade = '';
         $Q_Subject = '';
@@ -183,7 +244,7 @@ class QueController extends TopController
                 $Q_Chapter.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
             }
         }
-        
+        $data = array();
         /*
         如果有舊檔，以不刪檔的為主
         上傳裁剪後刪檔 nq
@@ -206,33 +267,33 @@ class QueController extends TopController
         //刪檔
         $loading_nq = false;
         $epno = $this->login_user;
-        if (is_file('questions/tmp/dnqrc_'.$epno.'.jpg')){
-            $loading_dnq = true;
-            //不刪檔，裁過的，直接載入
-            $data['Qimg'] = base_url('questions/tmp/dnqrc_'.$epno.'.jpg');
-            $qimg_html.= '<input type="button" value="重新裁切" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
-        }else if (is_file('questions/tmp/dnqr_'.$epno.'.jpg')){
-            $loading_dnq = true;
-            //不刪檔，沒裁過，跳至裁切
-            $qimg_html.= '<input type="button" value="載入舊圖檔" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
-        }
-        if (!$loading_dnq){
-            if (is_file('questions/tmp/nqrc_'.$epno.'.jpg')){
-                //刪檔，裁過的，直接載入
-                $loading_nq = true;
-                $data['Qimg'] = base_url('questions/tmp/nqrc_'.$epno.'.jpg');
+        // if (is_file('questions/tmp/dnqrc_'.$epno.'.jpg')){
+        //     $loading_dnq = true;
+        //     //不刪檔，裁過的，直接載入
+        //     $data['Qimg'] = base_url('questions/tmp/dnqrc_'.$epno.'.jpg');
+        //     $qimg_html.= '<input type="button" value="重新裁切" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
+        // }else if (is_file('questions/tmp/dnqr_'.$epno.'.jpg')){
+        //     $loading_dnq = true;
+        //     //不刪檔，沒裁過，跳至裁切
+        //     $qimg_html.= '<input type="button" value="載入舊圖檔" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
+        // }
+        // if (!$loading_dnq){
+        //     if (is_file('questions/tmp/nqrc_'.$epno.'.jpg')){
+        //         //刪檔，裁過的，直接載入
+        //         $loading_nq = true;
+        //         $data['Qimg'] = base_url('questions/tmp/nqrc_'.$epno.'.jpg');
                 //$qimg_html.= '<input type="button" value="載入舊圖檔" id="nlque" class="btn w100 h25" onClick="uque(this.id);" >';
             //}else if (is_file('questions/tmp/nqr_'.$epno.'.jpg')){
                 //刪檔，沒裁過，跳至裁切
                 //$loading_nq = true;
                 //$qimg_html.= '<input type="button" value="載入舊圖檔" id="nclque" class="btn w100 h25" onClick="uque(this.id);" >';
-            }
-            $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nque" class="btn w160 h25" onClick="uque(this.id)" >   ';
-            $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnque" class="btn w160 h25" onClick="uque(this.id)" >   ';
-        }
-        if ($loading_dnq || $loading_nq){
-            $qimg_html.= '<input type="button" value="刪除圖檔" id="dque" class="btn w100 h25" onClick="uque(this.id)" >   ';
-        }
+            // }
+        //     $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        //     $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        // }
+        // if ($loading_dnq || $loading_nq){
+        //     $qimg_html.= '<input type="button" value="刪除圖檔" id="dque" class="btn w100 h25" onClick="uque(this.id)" >   ';
+        // }
         $data['Qimg_html'] = $qimg_html;
         $data['Sets_msg'] = $sets_message;
         $data['Q_Grade'] = $Q_Grade;
@@ -245,33 +306,33 @@ class QueController extends TopController
         $loading_dna = false;
         //刪檔
         $loading_na = false;
-        if (is_file('questions/tmp/dnarc_'.$epno.'.jpg')){
-            $loading_dna = true;
-            //不刪檔，裁過的，直接載入
-            $data['Aimg'] = base_url('questions/tmp/dnarc_'.$epno.'.jpg');
-            $aimg_html.= '<input type="button" value="重新裁切" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
-        }else if (is_file('questions/tmp/dnar_'.$epno.'.jpg')){
-            $loading_dna = true;
-            //不刪檔，沒裁過，跳至裁切
-            $aimg_html.= '<input type="button" value="載入舊圖檔" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
-        }
-        if (!$loading_dna){
-            if (is_file('questions/tmp/narc_'.$epno.'.jpg')){
-                //刪檔，裁過的，直接載入
-                $loading_na = true;
-                $data['Aimg'] = base_url('questions/tmp/narc_'.$epno.'.jpg');
-                //$aimg_html.= '<input type="button" value="載入舊圖檔" id="nlque" class="btn w100 h25" onClick="uans(this.id);" >';
-            }else if (is_file('questions/tmp/nar_'.$epno.'.jpg')){
-                //刪檔，沒裁過，跳至裁切
-                $loading_na = true;
-                $aimg_html.= '<input type="button" value="載入舊圖檔" id="nclans" class="btn w100 h25" onClick="uans(this.id);" >';
-            }
-            $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nans" class="btn w160 h25" onClick="uans(this.id)" >   ';
-            $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnans" class="btn w160 h25" onClick="uans(this.id)" >   ';
-        }
-        if ($loading_dna || $loading_na){
-            $aimg_html.= '<input type="button" value="刪除圖檔" id="dans" class="btn w100 h25" onClick="uans(this.id)" >   ';
-        }
+        // if (is_file('questions/tmp/dnarc_'.$epno.'.jpg')){
+        //     $loading_dna = true;
+        //     //不刪檔，裁過的，直接載入
+        //     $data['Aimg'] = base_url('questions/tmp/dnarc_'.$epno.'.jpg');
+        //     $aimg_html.= '<input type="button" value="重新裁切" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
+        // }else if (is_file('questions/tmp/dnar_'.$epno.'.jpg')){
+        //     $loading_dna = true;
+        //     //不刪檔，沒裁過，跳至裁切
+        //     $aimg_html.= '<input type="button" value="載入舊圖檔" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
+        // }
+        // if (!$loading_dna){
+        //     if (is_file('questions/tmp/narc_'.$epno.'.jpg')){
+        //         //刪檔，裁過的，直接載入
+        //         $loading_na = true;
+        //         $data['Aimg'] = base_url('questions/tmp/narc_'.$epno.'.jpg');
+        //         //$aimg_html.= '<input type="button" value="載入舊圖檔" id="nlque" class="btn w100 h25" onClick="uans(this.id);" >';
+        //     }else if (is_file('questions/tmp/nar_'.$epno.'.jpg')){
+        //         //刪檔，沒裁過，跳至裁切
+        //         $loading_na = true;
+        //         $aimg_html.= '<input type="button" value="載入舊圖檔" id="nclans" class="btn w100 h25" onClick="uans(this.id);" >';
+        //     }
+        //     $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        //     $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        // }
+        // if ($loading_dna || $loading_na){
+        //     $aimg_html.= '<input type="button" value="刪除圖檔" id="dans" class="btn w100 h25" onClick="uans(this.id)" >   ';
+        // }
         $data['Aimg_html'] = $aimg_html;
         //難度
         $degree = new \stdClass;
@@ -292,7 +353,8 @@ class QueController extends TopController
      */
     public function store(Request $req)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
+
         /*
         file()
         ->getClientOriginalName() 原始名稱
@@ -310,8 +372,8 @@ class QueController extends TopController
         $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
         $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
         $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
-        $qimg = ($req->has('f_qimg') && !empty($req->input('f_qimg'))) ? trim($req->input('f_qimg')):'';
-        $aimg = ($req->has('f_aimg') && !empty($req->input('f_aimg'))) ? trim($req->input('f_aimg')):'';
+        //$qimg = ($req->has('f_qimg') && !empty($req->input('f_qimg'))) ? trim($req->input('f_qimg')):'';
+        //$aimg = ($req->has('f_aimg') && !empty($req->input('f_aimg'))) ? trim($req->input('f_aimg')):'';
         $qpath = '';
         $apath = '';
 
@@ -375,9 +437,31 @@ class QueController extends TopController
                 break;
         }
         //上傳check
-        //題目聲音
+        
         if (!is_dir('uploads'))mkdir('uploads',777);
         if (!is_dir('uploads/que'))mkdir('uploads/que',777);
+        // const DIR = "uploads/que";
+        //題目圖片
+        $qm_src = '';
+        $qm_name = '';
+        $qm_file = $req->file('qpic');
+        if ($qm_file!=null){
+            $file_error = false;
+            if ($req->hasFile('qpic')){
+                $mime = $qm_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($qm_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
+                    $qm_src = UPLOAD_DIR.'/'.$file;
+                    $qm_file->move(UPLOAD_DIR, $file);
+                    $qm_name = $qm_file->getClientOriginalName();
+                }
+            }
+        }
+        //題目聲音
         $qs_src = '';
         $qs_name = '';
         $qs_file = $req->file('qsound');
@@ -387,11 +471,32 @@ class QueController extends TopController
                 $mime = $qs_file->getMimeType();
                 if ($mime!='audio/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $qs_file->move('uploads/que', $uuid.'.'.$qs_file->getClientOriginalExtension());
-                    $qs_src = 'uploads/que/'.$uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $uuid = md5($qs_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $qs_src = UPLOAD_DIR.'/'.$file;
+                    $qs_file->move(UPLOAD_DIR, $file);
                     $qs_name = $qs_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解圖片
+        $am_src = '';
+        $am_name = '';
+        $am_file = $req->file('apic');
+        if ($am_file!=null){
+            $file_error = false;
+            if ($req->hasFile('apic')) {
+                $mime = $am_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($am_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$am_file->getClientOriginalExtension();
+                    $am_src = UPLOAD_DIR.'/'.$file;
+                    $am_file->move(UPLOAD_DIR, $file);
+                    $am_name = $am_file->getClientOriginalName();
                 }
             }           
         }
@@ -405,10 +510,11 @@ class QueController extends TopController
                 $mime = $as_file->getMimeType();
                 if ($mime!='audio/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $as_file->move('uploads/que', $uuid.'.'.$as_file->getClientOriginalExtension());
-                    $as_src = 'uploads/que/'.$uuid.'.'.$as_file->getClientOriginalExtension();
+                    $uuid = md5($as_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$as_file->getClientOriginalExtension();
+                    $as_src = UPLOAD_DIR.'/'.$file;
+                    $as_file->move(UPLOAD_DIR, $file);
                     $as_name = $as_file->getClientOriginalName();
                 }
             }           
@@ -423,10 +529,11 @@ class QueController extends TopController
                 $mime = $av_file->getMimeType();
                 if ($mime!='video/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $av_file->move('uploads/que', $uuid.'.'.$av_file->getClientOriginalExtension());
-                    $av_src = 'uploads/que/'.$uuid.'.'.$av_file->getClientOriginalExtension();
+                    $uuid = md5($av_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$av_file->getClientOriginalExtension();
+                    $av_src = UPLOAD_DIR.'/'.$file;
+                    $av_file->move(UPLOAD_DIR, $file);
                     $av_name = $av_file->getClientOriginalName();
                 }
             }           
@@ -434,13 +541,15 @@ class QueController extends TopController
         $save = [
             'q_quetype' => $que_type,
             'q_quetxt' => $quetxt,
-            'q_qm_src' => '',
-            'q_qm_name' => '',
+            'q_qm_src' => $qm_src,
+            'q_qm_name' => $qm_name,
             'q_qs_src' => $qs_src,
             'q_qs_name' => $qs_name,
             'q_num' => $num,
             'q_ans' => $all_ans,
             'q_anstxt' => $anstxt,
+            'q_am_src' => $am_src,
+            'q_am_name' => $am_name,
             'q_as_src' => $as_src,
             'q_as_name' => $as_name,
             'q_av_src' => $av_src,
@@ -480,12 +589,12 @@ class QueController extends TopController
      */
     public function edit($qid)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         if (!is_numeric($qid))abort(400);
         $qid = (int)$qid;
         if ($qid<=0)abort(400);
-        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
-            die('很抱歉，權限不足');
+        if (session('ident')!=="T"){
+            echo '很抱歉，權限不足';
             return;
         }
 
@@ -651,6 +760,18 @@ class QueController extends TopController
         $qimg_html = '';
         $del_qimg = '';
         $data['Qimg'] = '';
+        $qm_upload = true;
+        if (!empty($que->q_qm_src)){
+            $qimg_html = '檔名：'.$que->q_qm_name;
+            if (is_file($que->q_qm_src)){
+                $qimg_html.= '　<input type="button" value="刪除圖片"  class="btn w100" id="delqm" onclick="rem(this.id)">';
+                $qm_upload = false;
+            }else{
+                $qimg_html.= '　<font color="red">檔案遺失</font>';
+            }
+            $data['Qimg'] = URL::asset($que->q_qm_src);
+            
+        }
         // if (!empty($que->QIMGSRC)){
         //     if (is_file($que->QIMGSRC)){
         //         $data['Qimg'] = base_url($que->QIMGSRC);
@@ -665,11 +786,12 @@ class QueController extends TopController
         $qsound_html = '';
         $qs_upload = true;
         if (!empty($que->q_qs_src)){
+            $qsound_html = '檔名：'.$que->q_qs_name;
             if (is_file($que->q_qs_src)){
-                $qsound_html.= '檔名：'.$que->q_qs_name.'　<input type="button" value="刪除聲音檔"  class="btn w100" id="delqs" onclick="rem(this.id)">';
+                $qsound_html.= '　<input type="button" value="刪除聲音檔"  class="btn w100" id="delqs" onclick="rem(this.id)">';
                 $qs_upload = false;
             }else{
-                $qsound_html.= '<font color="red">檔案遺失</font>';
+                $qsound_html.= '　<font color="red">檔案遺失</font>';
             }
             $qsound_html.='<br>';
         }
@@ -677,6 +799,17 @@ class QueController extends TopController
         $aimg_html = '';
         $del_aimg = '';
         $data['Aimg'] = '';
+        $am_upload = true;
+        if (!empty($que->q_am_src)){
+            $aimg_html = '檔名：'.$que->q_am_name;
+            if (is_file($que->q_am_src)){
+                $aimg_html.= '　<input type="button" value="刪除圖片"  class="btn w100" id="delam" onclick="rem(this.id)">';
+                $am_upload = false;
+            }else{
+                $aimg_html.= '　<font color="red">檔案遺失</font>';
+            }
+            $data['Aimg'] = URL::asset($que->q_am_src);
+        }
         // if (!empty($que->AIMGSRC)){
         //     if (is_file($que->AIMGSRC)){
         //         $data['Aimg'] = base_url($que->AIMGSRC);
@@ -691,11 +824,12 @@ class QueController extends TopController
         $asound_html = '';
         $as_upload = true;
         if (!empty($que->q_as_src)){
+            $asound_html = '檔名：'.$que->q_as_name;
             if (is_file($que->q_as_src)){
-                $asound_html.= '檔名：'.$que->q_as_name.'　<input type="button" value="刪除聲音檔"  class="btn w100" id="delas" onclick="rem(this.id)">';
+                $asound_html.= '　<input type="button" value="刪除聲音檔"  class="btn w100" id="delas" onclick="rem(this.id)">';
                 $as_upload = false;
             }else{
-                $asound_html.= '<font color="red">檔案遺失</font>';
+                $asound_html.= '　<font color="red">檔案遺失</font>';
             }
             $asound_html.= '<br>';
         }
@@ -716,6 +850,8 @@ class QueController extends TopController
         $data['Qid'] = $qid;
         $data['Qimgsrc'] = $que->q_qm_src;
         $data['Qimg_html'] = $qimg_html;
+        $data['Qmsold'] = ($qm_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['Qm_upload'] = (!$qm_upload) ? 'class="hiden"':'';
         $data['Quetxt'] = $que->q_quetxt;
         $data['Qsoundsrc'] = $que->q_qs_src;
         $data['Qsound_html'] = $qsound_html;
@@ -726,6 +862,8 @@ class QueController extends TopController
         $data['Anstxt'] = $que->q_anstxt;
         $data['Aimgsrc'] = $que->q_am_src;
         $data['Aimg_html'] = $aimg_html;
+        $data['Amsold'] = ($am_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['Am_upload'] = (!$am_upload) ? 'class="hiden"':'';
         $data['Asoundsrc'] = $que->q_as_src;
         $data['Asound_html'] = $asound_html;
         $data['Asold'] = ($as_upload) ? 'class="hiden"':'style="inline-block;"';
@@ -769,11 +907,11 @@ class QueController extends TopController
      */
     public function update(Request $req, $qid)
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status)return redirect('/login');
         if (!is_numeric($qid))abort(400);
         $qid = (int)$qid;
         if ($qid<=0)abort(400);
-        if (Auth::user()->e_ident!=="A" && Auth::user()->e_ident!=="T"){
+        if (session('ident')!=="T"){
             die('很抱歉，權限不足');
             return;
         }
@@ -842,11 +980,34 @@ class QueController extends TopController
                 return;
                 break;
         }
-        
+        $qmold_src = ($req->has('qm_src') && !empty($req->input('qm_src'))) ? trim($req->input('qm_src')):'';
         $qsold_src = ($req->has('qs_src') && !empty($req->input('qs_src'))) ? trim($req->input('qs_src')):'';
+
+        $amold_src = ($req->has('am_src') && !empty($req->input('am_src'))) ? trim($req->input('am_src')):'';
         $asold_src = ($req->has('as_src') && !empty($req->input('as_src'))) ? trim($req->input('as_src')):'';
         $avold_src = ($req->has('av_src') && !empty($req->input('av_src'))) ? trim($req->input('av_src')):'';
 
+        //題目圖片
+        $qm_src = '';
+        $qm_name = '';
+        $qm_file = $req->file('qpic');
+        if ($qm_file!=null){
+            $file_error = false;
+            if ($req->hasFile('qpic')) {
+                $mime = $qm_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($qm_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
+                    $qm_src = UPLOAD_DIR.'/'.$file;
+                    $qm_file->move(UPLOAD_DIR, $file);
+                    $qm_name = $qm_file->getClientOriginalName();
+                }
+            }           
+        }
+        //題目聲音
         $qs_src = '';
         $qs_name = '';
         $qs_file = $req->file('qsound');
@@ -856,11 +1017,32 @@ class QueController extends TopController
                 $mime = $qs_file->getMimeType();
                 if ($mime!='audio/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $qs_file->move('uploads/que', $uuid.'.'.$qs_file->getClientOriginalExtension());
-                    $qs_src = 'uploads/que/'.$uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $uuid = md5($qs_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $qs_src = UPLOAD_DIR.'/'.$file;
+                    $qs_file->move(UPLOAD_DIR, $file);
                     $qs_name = $qs_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解圖片
+        $am_src = '';
+        $am_name = '';
+        $am_file = $req->file('apic');
+        if ($am_file!=null){
+            $file_error = false;
+            if ($req->hasFile('apic')) {
+                $mime = $am_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($am_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$am_file->getClientOriginalExtension();
+                    $am_src = UPLOAD_DIR.'/'.$file;
+                    $am_file->move(UPLOAD_DIR, $file);
+                    $am_name = $am_file->getClientOriginalName();
                 }
             }           
         }
@@ -874,10 +1056,11 @@ class QueController extends TopController
                 $mime = $as_file->getMimeType();
                 if ($mime!='audio/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $as_file->move('uploads/que', $uuid.'.'.$as_file->getClientOriginalExtension());
-                    $as_src = 'uploads/que/'.$uuid.'.'.$as_file->getClientOriginalExtension();
+                    $uuid = md5($as_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$as_file->getClientOriginalExtension();
+                    $as_src = UPLOAD_DIR.'/'.$file;
+                    $as_file->move(UPLOAD_DIR, $file);
                     $as_name = $as_file->getClientOriginalName();
                 }
             }           
@@ -892,10 +1075,11 @@ class QueController extends TopController
                 $mime = $av_file->getMimeType();
                 if ($mime!='video/mpeg')$file_error = true;
                 if (!$file_error){
-                    $uuid = md5(uniqid(rand(), true));
                     //上傳
-                    $av_file->move('uploads/que', $uuid.'.'.$av_file->getClientOriginalExtension());
-                    $av_src = 'uploads/que/'.$uuid.'.'.$av_file->getClientOriginalExtension();
+                    $uuid = md5($av_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$av_file->getClientOriginalExtension();
+                    $av_src = UPLOAD_DIR.'/'.$file;
+                    $av_file->move(UPLOAD_DIR, $file);
                     $av_name = $av_file->getClientOriginalName();
                 }
             }           
@@ -916,20 +1100,30 @@ class QueController extends TopController
         $que->q_updated_at = time();
 
         //刪舊的或本來就沒有
+        if (empty($qmold_src)){
+            if (!empty($que->q_qm_src)){
+                if (is_file($que->q_qm_src)){ if (unlink($que->q_qm_src)){} }
+            }
+            $que->q_qm_src = $qm_src;
+            $que->q_qm_name = $qm_name;
+        }
         if (empty($qsold_src)){
             if (!empty($que->q_qs_src)){
-                if (is_file($que->q_qs_src)){
-                    if (unlink($que->q_qs_src)){}
-                }
+                if (is_file($que->q_qs_src)){ if (unlink($que->q_qs_src)){} }
             }
             $que->q_qs_src = $qs_src;
             $que->q_qs_name = $qs_name;
         }
+        if (empty($amold_src)){
+            if (!empty($que->q_am_src)){
+                if (is_file($que->q_am_src)){ if (unlink($que->q_am_src)){} }
+            }
+            $que->q_am_src = $am_src;
+            $que->q_am_name = $am_name;
+        }
         if (empty($asold_src)){
             if (!empty($que->q_as_src)){
-                if (is_file($que->q_as_src)){
-                    if (unlink($que->q_as_src)){}
-                }
+                if (is_file($que->q_as_src)){ if (unlink($que->q_as_src)){} }
             }
             $que->q_as_src = $as_src;
             $que->q_as_name = $as_name;
@@ -958,7 +1152,7 @@ class QueController extends TopController
         //
     }
     public function join(){
-        if (!$this->login_status())abort(400);
+        if (!$this->login_status)die('登入逾時，請重新登入');
         $search = array();
         $p_gra = 0;
         $p_subj = 0;
@@ -1024,7 +1218,7 @@ class QueController extends TopController
             if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($v->q_quetxt));
             //題目圖檔
             if (!empty($v->q_qm_src)){
-                if(is_file($v->q_qm_src))$qcont[] = '<IMG name="t_imgsrc" src="'.$v->q_qm_src.'" width="98%">';
+                if(is_file($v->q_qm_src))$qcont[] = '<IMG class="pic" src="'.$v->q_qm_src.'">';
             }
             //題目聲音檔
             if (!empty($v->q_qs_src)){
@@ -1041,7 +1235,7 @@ class QueController extends TopController
             if (!empty($v->q_anstxt)) $acont[] = nl2br(trim($v->q_anstxt));
             //詳解圖檔
             if(!empty($v->q_am_src)){
-                if (is_file($v->q_am_src))$acont[] = '<IMG name="t_imgsrc"  src="'.$v->q_am_src.'" width="98%">';
+                if (is_file($v->q_am_src))$acont[] = '<IMG class="pic" src="'.$v->q_am_src.'">';
             }
             $amedia = array();
             //詳解聲音檔

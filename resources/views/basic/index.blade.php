@@ -296,6 +296,9 @@ function ngra(obj){
 			$(".gc").on("click", function(){
 				getsubj(this);
 			});
+		},
+		error: function(){
+			alert('登入逾時，請重新登入');
 		}
 	});
 	return false;
@@ -323,6 +326,9 @@ function nsubj(obj){
 				getchap(this);
 			});
 			alert('新增成功');
+		},
+		error: function(){
+			alert('登入逾時，請重新登入');
 		}
 	});
 	return false;
@@ -345,6 +351,9 @@ function nchap(obj){
 			}
 			alert('新增成功');
 			obj.chapname.value = '';
+		},
+		error: function(){
+			alert('登入逾時，請重新登入');
 		}
 	});
 	return false;
@@ -378,6 +387,9 @@ function getsubj(v){
 			$(".sedit").on('click', function(){
 				sed(this);
 			});
+		},
+		error: function(){
+			alert('登入逾時，請重新登入');
 		}
 	});
 }
@@ -401,6 +413,9 @@ function getchap(v){
 			$(".cedit").on('click', function(){
 				ced(this);
 			});
+		},
+		error: function(){
+			alert('登入逾時，請重新登入');
 		}
 	});
 }

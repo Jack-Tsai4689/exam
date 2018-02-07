@@ -221,7 +221,7 @@
                         <IMG id="qimg" src="{{ $Qimg }}" width="98%"><br>
                         <div id="qimg_content">{!! $Qimg_html !!}</div>
                         <input type="hidden" id="f_qimg" name="f_qimg" value="">
-                    	格式：JPG/PNG
+                    	<input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
                     </td>
                 </tr>
                 <tr class="shallow">
@@ -368,7 +368,7 @@
                         <IMG id="aimg" src="{{ $Aimg }}" width="98%"><br>
                         <div id="aimg_content">{!! $Aimg_html !!}</div>
                         <input type="hidden" id="f_aimg" name="f_aimg" value="">
-                        格式：JPG/PNG
+                        <input type="file" name="apic" id="apic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
                     </td>
                 </tr>
                 <tr class="deep">

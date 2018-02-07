@@ -63,15 +63,17 @@
 	<div class="title_intro condition">
 		<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
 		類別：
-		<select name="f_grade" onchange="cond()">
+		<select name="grade" onchange="getsubj(this.value)">
 			<option value="">全部</option>
 			{!! $Grade !!}
 		</select>
 		科目：
-		<select name="f_subject" onchange="cond()">
+		<select name="subj" id="subj">
 			<option value="">全部</option>
 			{!! $Subject !!}
 		</select>
+		<input type="button" id="cond" value="篩選">
+		<input type="hidden" name="page" id="urlpage" value="">
 	</div>
 	</form>
 	<div class="content" data-step="1" data-intro="我建立的所有考卷" data-position="top">
@@ -145,9 +147,9 @@
 	<div id="page" class="content">
 		<label class="all_rows">共筆資料</label>
 		<div class="each">
-			{{ $Prev }}
-			<select id="pagegroup" onchange="page(this.value)">{{ $Pg }}</select>
-			{{ $Next }}
+			{!! $Page->prev !!}
+			<select id="pagegroup" onchange="page(this.value)">{!! $Page->pg !!}</select>
+			{!! $Page->next !!}
 		</div>
 	</div>
 </div>
@@ -237,6 +239,30 @@ function delcheck(){
 	if (!confirm("確定刪除?")){
 		return false;
 	}
+}
+function getsubj(v){
+	gb("subj").innerHTML = '<option value="">搜尋中</option>';
+	if (v==="0"){
+		gb("subj").innerHTML = '<option value="0">全部</option>';
+		return;
+	}
+	$.ajax({
+		type:"GET",
+		url:"{{ url('basic/detail') }}",
+		data:{'type':'subj', g:v},
+		dataType:"JSON",
+		success: function(rs){
+			let html = '<option value="0">全部</option>';
+			for (let i in rs){
+				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+			}
+			gb('subj').innerHTML = html;
+		},
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+		}
+	});
 }
 function cond(){
 	location.href = '{{ url('/sets')}}?'+$("#search").serialize();

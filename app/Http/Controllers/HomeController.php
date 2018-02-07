@@ -58,9 +58,6 @@ class HomeController extends Controller
                         session()->put('epname', $user->st_name);
                     }
                     break;
-                default:
-                    abort(400);
-                    break;
             }
             if ($user!=null){
                 if ($input['identity']==='T')return redirect('/sets');

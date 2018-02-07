@@ -266,6 +266,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'AlterEmployes' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_164451_alter_employes.php',
         'AlterKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_222725_alter_know.php',
         'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
+        'AlterQuesImg' => __DIR__ . '/../..' . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
         'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
         'AlterStus' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_174855_alter_stus.php',
         'BasicTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172034_basic_table.php',

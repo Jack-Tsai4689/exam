@@ -12,16 +12,21 @@ class TopController extends Controller
 {
     protected $menu_user = null;
     protected $login_user = null;
+    protected $login_status = false;
     protected $login_type = null;
+
+    protected $prev_page = '';
+    protected $next_page = '';
+    protected $group_page = '';
 
     public function __construct(){
     	if (!empty(session('ident'))){
+          $this->login_status = true;
+          $this->login_type = session('ident');
             if (session('ident')==='T')$log_dpname = "老師";
             if (session('ident')==='S')$log_dpname = "同學";
             $this->login_user = session('epno');
             $this->menu_user = session('epname').$log_dpname;
-        }else{
-            return redirect('/login');
         }
   //   	if (Auth::check()){
 	 //    	$user = Auth::user();
@@ -37,9 +42,6 @@ class TopController extends Controller
   //           $this->login_type = $user->e_ident;
 		// }
     }
-    protected function login_status(){
-        return ($this->menu_user===null) ? false:true;
-    }
     //取得類別
     protected function grade(){
         return Gscs::where('g_graid', 0)->where('g_subjid', 0)->get()->all();
@@ -51,5 +53,23 @@ class TopController extends Controller
     //取得章節
     protected function chapter($graid, $subjid){
         return Gscs::where('g_graid', $graid)->where('g_subjid', $subjid)->get()->all();
+    }
+    protected function page_info($curr, $last, $total){
+      if ($total>10){
+        $prev_happened = (($curr-1)>=1) ? 'onclick="gp('.($curr-1).')"':'style="visibility: hidden;"';
+        $this->prev_page = '<input type="button" '.$prev_happened.' value="上一頁">';
+
+        $next_happened = (($curr+1)<=$last) ? 'onclick="gp('.($curr+1).')"':'style="visibility: hidden;"';
+        $this->next_page = '<input type="button" '.$next_happened.' value="下一頁">';
+            
+        $p = 1;
+        while($p<=$last){
+            $sel_page = ($curr===$p) ? 'selected':'';
+            $this->group_page.= '<option '.$sel_page.' value="'.$p.'">第'.$p.'頁</option>';
+            $p++;
+        }
+      }else{
+        $this->group_page = '<option value="1">第1頁</option>';
+      }
     }
 }

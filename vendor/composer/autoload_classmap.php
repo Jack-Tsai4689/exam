@@ -9,6 +9,7 @@ return array(
     'AlterEmployes' => $baseDir . '/database/migrations/2018_02_06_164451_alter_employes.php',
     'AlterKnow' => $baseDir . '/database/migrations/2018_02_01_222725_alter_know.php',
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
+    'AlterQuesImg' => $baseDir . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
     'AlterStus' => $baseDir . '/database/migrations/2018_02_06_174855_alter_stus.php',
     'BasicTable' => $baseDir . '/database/migrations/2018_01_28_172034_basic_table.php',

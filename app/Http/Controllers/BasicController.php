@@ -14,9 +14,12 @@ class BasicController extends TopController
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        parent::__construct();
+    }
     public function index()
     {
-        if (!$this->login_status())return redirect('/login');
+        if (!$this->login_status) return redirect('/login');
         $grade_data = $this->grade();
         return view('basic.index', [
             'menu_user' => $this->menu_user,
@@ -44,7 +47,7 @@ class BasicController extends TopController
      */
     public function store(Request $req)
     {
-        if (!$this->login_status()) return redirect('/login');
+        if (!$this->login_status) abort(401);
         $error = false;
         $type = ($req->has('type')) ? $req->input('type'):'';
         if (empty($type))$error = true;
@@ -119,7 +122,7 @@ class BasicController extends TopController
         return response()->json($rs_data);
     }
     public function ajshow(Request $req){
-        if (!$this->login_status())abort(400);
+        if (!$this->login_status)abort(401);
         $error = false;
         $type = ($req->has('type')) ? $req->input('type'):'';
         if (empty($type))abort(400);
