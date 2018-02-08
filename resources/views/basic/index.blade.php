@@ -174,13 +174,8 @@
 	<div class="content">
 		<div id="cen">
 			<div class="basic_sub">章節</div>
-			<!-- <form id="newchap" onsubmit="return nchap()">
-			<div class="addbtn"> -->
-				<!-- <input type="hidden" name="type" value="chap"> -->
 				<input type="hidden" name="graid" id="cgraid" value="">
 				<input type="hidden" name="subjid" id="subjid" value="">
-				<!-- 新章節：<input type="text" name="chapname" id="chapname">　<input type="submit" class="btn f16 w100" value="新增章節"></div>
-			</form> -->
 			<table cellpadding="0" cellspacing="0" width="100%" class="list">
 				<thead>
 					<tr>
@@ -203,8 +198,8 @@
 </div>
 <div id="intro_open"></div>
 <div id="intro_all">
-    <div id="intro_content" class="set_content">
-        <div id="intro_title">更新中...</div>
+    <div id="intro_content">
+        <div id="intro_title"><img src="{{ URL::asset('img/tenor.gif') }}" width="60"></div>
     </div>
 </div>
 <div id="updateg" class="list_set">
@@ -216,10 +211,10 @@
                     <form method="post" onsubmit="return gcheck(this)">
                     類別：<input type="text" name="ugraname" id="ugraname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="ugcancel"><font class="f15">取消</font></a></div>
                         <input type="hidden" name="ugraid" id="ugraid">
-                        <input type="hidden" name="type" value="gra">
+                        <input type="hidden" name="type" value="ugra">
                     </div>
                     </form>
                 </div>
@@ -236,11 +231,10 @@
                     <form method="post" onsubmit="return scheck(this)">
                     科目：<input type="text" name="usubjname" id="usubjname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="uscancel"><font class="f15">取消</font></a></div>
-                        <input type="hidden" name="subjgra" id="subjgra">
                         <input type="hidden" name="usubjid" id="usubjid">
-                        <input type="hidden" name="type" value="subj">
+                        <input type="hidden" name="type" value="usubj">
                     </div>
                     </form>
                 </div>
@@ -257,12 +251,10 @@
                     <form method="post" onsubmit="return ccheck(this)">
                     章節：<input type="text" name="uchapname" id="uchapname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="uccancel"><font class="f15">取消</font></a></div>
-                        <input type="hidden" name="chapgra" id="chapgra">
-                        <input type="hidden" name="chapsubj" id="chapsubj">
                         <input type="hidden" name="uchapid" id="uchapid">
-                        <input type="hidden" name="type" value="chap">
+                        <input type="hidden" name="type" value="uchap">
                     </div>
                     </form>
                 </div>
@@ -277,6 +269,7 @@ var g = 0;
 var s = 0;
 function ngra(obj){
 	if (gb('graname').value=="")return false;
+	act_start();
 	$.ajax({
 		type:"POST",
 		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -293,18 +286,18 @@ function ngra(obj){
 			}
 			gb('gralist').innerHTML = html;
 			gb('graname').value = '';
-			$(".gc").on("click", function(){
-				getsubj(this);
-			});
+			act_end();
 		},
-		error: function(){
-			alert('登入逾時，請重新登入');
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			act_end();
 		}
 	});
 	return false;
 }
 function nsubj(obj){
 	if (obj.subjname.value=="")return false;
+	act_start();
 	$.ajax({
 		type:"POST",
 		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -322,19 +315,19 @@ function nsubj(obj){
 				gb('subjlist').innerHTML = html;
 			}
 			obj.subjname.value = '';
-			$(".sc").bind("click", function(){
-				getchap(this);
-			});
 			alert('新增成功');
+			act_end();
 		},
-		error: function(){
-			alert('登入逾時，請重新登入');
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			act_end();
 		}
 	});
 	return false;
 }
 function nchap(obj){
 	if (obj.chapname.value=="")return false;
+	act_start();
 	$.ajax({
 		type:"POST",
 		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
@@ -351,22 +344,21 @@ function nchap(obj){
 			}
 			alert('新增成功');
 			obj.chapname.value = '';
+			act_end();
 		},
-		error: function(){
-			alert('登入逾時，請重新登入');
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			act_end();
 		}
 	});
 	return false;
 }
-$(".gc").on('click', function(){
-	s = 0;
-	getsubj(this);
-});
-function getsubj(v){
+$("#gralist").on("click", ".gc", function(){
 	$('#gralist').find('tr').removeClass('select');
-	var tr = v.parentElement.parentElement;
+	var tr = this.parentElement.parentElement;
 	$(tr).addClass('select');
-	g = $(v).data("id");
+	g = $(this).data("id");
+	act_start();
 	$.ajax({
 		type:"GET",
 		url:"{{ url('basic/detail') }}",
@@ -381,23 +373,24 @@ function getsubj(v){
 			}
 			gb('subjlist').innerHTML = html;
 			gb('chaplist').innerHTML = '';
-			$(".sc").bind("click", function(){
-				getchap(this);
-			});
-			$(".sedit").on('click', function(){
-				sed(this);
-			});
+			act_end();
 		},
-		error: function(){
-			alert('登入逾時，請重新登入');
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400){
+				gb('subjlist').innerHTML = '';
+				gb('chaplist').innerHTML = '';
+			}
+			act_end();
 		}
 	});
-}
-function getchap(v){
+});
+$("#subjlist").on("click", ".sc", function(){
 	$('#subjlist').find('tr').removeClass('select');
-	var tr = v.parentElement.parentElement;
+	var tr = this.parentElement.parentElement;
 	$(tr).addClass('select');
-	s = $(v).data("id");
+	s = $(this).data("id");
+	act_start();
 	$.ajax({
 		type:"GET",
 		url:"{{ url('basic/detail') }}",
@@ -410,45 +403,37 @@ function getchap(v){
 				html+= '<tr><td class="name"><a class="cc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="cedit" data-id="'+rs[i].ID+'" value="更名"></td></tr>';
 			}
 			gb('chaplist').innerHTML = html;
-			$(".cedit").on('click', function(){
-				ced(this);
-			});
+			act_end();
 		},
-		error: function(){
-			alert('登入逾時，請重新登入');
+		error: function(rs){
+			if (rs.status==401)alert('登入逾時，請重新登入');
+			if (rs.status==400)gb('chaplist').innerHTML = '';
+			act_end();
 		}
 	});
-}
-function ged(v){
-	var tr = v.parentElement.parentElement;
+});
+$("#gralist").on("click", ".gedit", function(){
+	var tr = this.parentElement.parentElement;
 	var ac = $(tr).find('td > a.gc');
 	gb('ugraname').value = $(ac).text();
 	gb('ugraid').value = $(ac).data("id");
 	$(gb('updateg')).show();
-}
-function sed(v){
-	var tr = v.parentElement.parentElement;
+});
+$("#subjlist").on("click", ".sedit", function(){
+	var tr = this.parentElement.parentElement;
 	var ac = $(tr).find('td > a.sc');
 	gb('usubjname').value = $(ac).text();
 	gb('usubjid').value = $(ac).data("id");
 	$(gb('updates')).show();
 	gb('usubjname').focus();
-}
-function ced(v){
-	var tr = v.parentElement.parentElement;
+});
+$("#chaplist").on("click", ".cedit", function(){
+	var tr = this.parentElement.parentElement;
 	var cc = $(tr).find('td > a.cc');
 	gb('uchapname').value = cc.text();
 	gb('uchapid').value = $(cc).data("id");
 	$(gb('updatec')).show();
 	gb('uchapname').focus();
-}
-$(".gedit").on('click', function(){
-	var tr = this.parentElement.parentElement;
-	var gc = $(tr).find('td > a.gc');
-	gb('ugraname').value = $(gc).text();
-	gb('ugraid').value = $(gc).data("id");
-	$(gb('updateg')).show();
-	gb('ugraname').focus();	
 });
 $("#ugcancel").on('click', function(){
 	$(gb("updateg")).hide();
@@ -464,7 +449,8 @@ function gcheck(v){
 	if (gb("ugraid").value=="0")return false;
 	$.ajax({
 		type:"POST",
-		url:"basic/ucont",
+		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+		url:"{{ url('/basic')}}",
 		data:$(v).serialize(),
 		dataType:"JSON",
 		success: function(rs){
@@ -477,12 +463,6 @@ function gcheck(v){
 			}
 			gb('gralist').innerHTML = html;
 			gb('graname').value = '';
-			$(".gc").on("click", function(){
-				getsubj(this);
-			});
-			$(".gedit").on('click', function(){
-				ged(this);
-			});
 		}
 	});
 	$(gb("updateg")).hide();
@@ -493,7 +473,8 @@ function scheck(v){
 	if (gb("usubjid").value=="0")return false;
 	$.ajax({
 		type:"POST",
-		url:"basic/ucont",
+		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+		url:"{{ url('/basic')}}",
 		data:$(v).serialize(),
 		dataType:"JSON",
 		success: function(rs){
@@ -506,12 +487,6 @@ function scheck(v){
 			}
 			gb('subjlist').innerHTML = html;
 			gb('chaplist').innerHTML = '';
-			$(".sc").on("click", function(){
-				getchap(this);
-			});
-			$(".sedit").on('click', function(){
-				sed(this);
-			});
 		}
 	});
 	$(gb("updates")).hide();
@@ -522,7 +497,8 @@ function ccheck(v){
 	if (gb("uchapid").value=="0")return false;
 	$.ajax({
 		type:"POST",
-		url:"basic/ucont",
+		headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+		url:"{{ url('/basic')}}",
 		data:$(v).serialize(),
 		dataType:"JSON",
 		success: function(rs){
@@ -532,13 +508,18 @@ function ccheck(v){
 				html+= '<tr><td class="name"><a class="cc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="cedit" data-id="'+rs[i].ID+'" value="更名"></td></tr>';
 			}
 			gb('chaplist').innerHTML = html;
-			$(".cedit").on('click', function(){
-				ced(this);
-			});
 		}
 	});
 	$(gb("updatec")).hide();
 	return false;
+}
+function act_start(){
+	$('#intro_open').show();
+    $('#intro_all').show();
+}
+function act_end(){
+	$('#intro_open').hide();
+    $('#intro_all').hide();
 }
 </script>
 @stop

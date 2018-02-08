@@ -10,10 +10,10 @@
 	@yield('style')
 </head>
 <body>
-<div id="top"><a href="ex_listw.php" title="回首頁"><img src="{{ URL::asset('img/logo.png') }}" style="height:50px;margin-left:50px;"></a>
+<div id="top"><a href="{{ url('/') }}" title="回首頁"><img src="{{ URL::asset('img/logo.png') }}" style="height:50px;margin-left:50px;"></a>
 	<div id="menu">
 		<ul id="navigation">
-			<li><a href="#" style="text-align:center; width:85px;">首頁</a></li>
+			<li><a href="{{ url('/') }}" style="text-align:center; width:85px;">首頁</a></li>
 			@if (session('ident')==="T")
 			<li><a href="{{ url('basic') }}" style="text-align:center; width:85px;">基本設定</a></li>
 			<li>
@@ -25,15 +25,15 @@
 				</ul>
 			</li>
 			@endif
-			<li>
+			{{-- <li>
 				<a href="javascript:void(0)">線上測驗</a>
 				<ul>
-					<li><div class="te"><a href="">評量測驗</a></div></li>
+					<li><div class="te"><a href="#">評量測驗</a></div></li>
 					<li><div class="te"><a href="javascript:void(0)">成績查詢</a></div></li>
 					<li><div class="te"><a href="score_status.php">測驗狀態查詢</a></div></li>
 					<li><div class="te"><a href="ex_print.php">診斷報告列印</a></div></li>
 				</ul>
-			</li>
+			</li> --}}
 		</ul>
 		<div class="top_per" id="top_id"><a href="">{{ $menu_user }}</a></div><div class="top_per"><a href="{{ url('/logout') }}">登出系統</a></div>
 	</div>

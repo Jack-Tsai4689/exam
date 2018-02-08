@@ -76,4 +76,3 @@ Route::get('basic/detail', "BasicController@ajshow");
 
 
 
-

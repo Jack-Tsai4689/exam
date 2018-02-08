@@ -1,5 +1,5 @@
 #all{
-    min-width:1152px
+    /*min-width:1152px*/
 }
 #title, .title{
     height:30px;
@@ -204,9 +204,4 @@ hr{
 }
 .show{
     display:block
-}
-@media screen and (min-width:1500px){
-    #all{
-        min-width:1644px
-    }
 }

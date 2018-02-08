@@ -275,7 +275,7 @@
 <script type="text/javascript">
 function search_confirm(){
   var search = $('#f_search').val();
-  if (trim(search)!=''){form1.submit();}
+  //if (trim(search)!=''){form1.submit();}
 }
 let g = 0;
 function getsubj(v){

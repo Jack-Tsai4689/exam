@@ -87,8 +87,8 @@
 			</center>
 		</div>
 		<div class="btn_di" style="padding-bottom:10px;"><input type="submit" name="sure" class="btn f16" id="sure" value="登入"></div>
-		<div style="text-align:center;padding-bottom:5px;"><a href="forgot.php" class="f13">忘記帳號或密碼</a></div>
-		<div class="btn_di" style="padding-bottom:25px;"><input type="button" name="register" class="btn f16" id="register" value="我要註冊"  onclick="location.href='register1.html'"></div>
+		<div style="text-align:center;padding-bottom:5px;"><a href="#" class="f13">忘記帳號或密碼</a></div>
+		<div class="btn_di" style="padding-bottom:25px;"><input type="button" name="register" class="btn f16" id="register" value="我要註冊"></div>
 	</div>
 	</form>
 </div>

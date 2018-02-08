@@ -22,7 +22,7 @@
 	<form name="form1" id="form1">
 	<div class="title_intro">
 		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/ques') }}" style="margin-left:55px;">瀏覽全部</a></div>
-		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<a href=""><input type="button" class="btn f16 w150" name="" id="" value="Excel匯入" onclick="location.href='upload_md.php'"></a></div>
+		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<a href=""><input type="button" class="btn f16 w150" name="" id="" value="Excel匯入"></a></div>
 		<label class="f16" id="choice_fie"><a href="javascript:void(0)" onclick="open_field();">選擇欄位</a></label>
 	</div>
 	<div class="title_intro condition">
@@ -124,7 +124,7 @@ function search_confirm(){
   for (var i = 0; i < search.length; i++) { 
       rs += search.substr(i, 1).replace(pattern, ''); 
   } 
-  if (search.trim()!=''){form1.submit();}
+  //if (search.trim()!=''){form1.submit();}
 }
 
 let g = 0;
