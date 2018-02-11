@@ -8,6 +8,8 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
 use App\Sets;
+use App\Setsque;
+use App\Exams;
 
 class ExamController extends TopController
 {
@@ -108,7 +110,7 @@ class ExamController extends TopController
         echo '1';
     }
     public function goexam(){
-            //試卷方式
+        //試卷方式
         $can_exam = true;
         if (session('type')==="sets"){
             $exam_type = 'sets';
@@ -134,16 +136,14 @@ class ExamController extends TopController
             if ($lime[2]>0) $limetime.= (int)$lime[2].'秒';
             return view('exam.info', [
                 'title' => $exam_name,
-                'exam_type' => 'sets',
-                'exam_exnum' => '',
-                'exam_grade' => '',
-                'exam_subject' => '',
-                'exam_chapter' => '',
-                'exam_degree' => '',
-                'exam_listseq' => $s_id,
-                'exam_limtime' => $sets->s_limtime,
-                'exam_cram' => '',
-                'exam_fkey' => '',
+                'type' => 'sets',
+                'exnum' => '',
+                'gra' => '',
+                'subj' => '',
+                'chap' => '',
+                'degree' => '',
+                'sets' => $s_id,
+                'lime' => $sets->s_limtime,
                 'score_open' => '',
                 'Sum' => $sets->s_sum,
                 'Limetime' => $limetime,
@@ -152,5 +152,41 @@ class ExamController extends TopController
                 'Times' => $time
             ]);
         }
+    }
+    public function examing(Request $req){
+        $type = ($req->has('type') && !empty($req->input('type'))) ? trim($req->input('type')):'';
+        $exnum = ($req->has('exnum') && !empty($req->input('exnum'))) ? trim($req->input('exnum')):'';
+        $gra = ($req->has('gra') && (int)$req->input('gra')>0) ? (int)$req->input('gra'):0;
+        $subj = ($req->has('subj') && (int)$req->input('subj')>0) ? (int)$req->input('subj'):0;
+        $chap = ($req->has('chap') && (int)$req->input('chap')>0) ? (int)$req->input('chap'):0;
+        $degree = ($req->has('degree') && !empty($req->input('degree'))) ? trim($req->input('degree')):'';
+        $sets = ($req->has('sets') && (int)$req->input('sets')>0) ? (int)$req->input('sets'):0;
+        $lime = ($req->has('lime') && !empty($req->input('lime'))) ? trim($req->input('lime')):'';
+
+        if ($type==="sets"){
+            if ($sets<=0)abort(400);
+            $this->_exam_sets($sets);
+        }
+    }
+    private function _exam_sets($sid){
+        $sets_data = Sets::find($sid);
+        if (!$sets_data->s_again){
+            $record = Exams::where('s_id', $sid)->where('e_stu', session('epno'))->first();
+            if (!empty($record)){
+                echo'已考過';
+                return;
+            }
+        }
+        $lime = explode(":", $sets_data->s_limtime);
+        Exams::create([
+            
+        ]);
+        $data = [
+            'sets_name' => $sets_data->s_name,
+            'hour' => $lime[0],
+            'min' => $lime[1],
+            'sec' => $lime[2],
+
+        ];
     }
 }

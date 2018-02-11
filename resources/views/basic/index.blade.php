@@ -310,7 +310,7 @@ function nsubj(obj){
 				var s_sel = null;
 				for (var i in rs){
 					s_sel = (rs[i].ID===s) ? 'class="select"':'';
-					html+= '<tr '+s_sel+'><td class="name"><a href="javascript:void(0)" class="sc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="sedit" data-id="'+rs[i].ID+'" value="更名"></td><td><form onsubmit="return nchap(this)"><input type="text" name="chapname"><input type="hidden" name="type" value="chap"><input type="hidden" name="g" value="'+rs[i].ID+'"><input type="submit" class="btn w70" value="確定"></form></td></tr>';
+					html+= '<tr '+s_sel+'><td class="name"><a href="javascript:void(0)" class="sc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="sedit" data-id="'+rs[i].ID+'" value="更名"></td><td><form onsubmit="return nchap(this)"><input type="text" name="chapname"><input type="hidden" name="type" value="chap"><input type="hidden" name="g" value="'+g+'"><input type="hidden" name="s" value="'+rs[i].ID+'"><input type="submit" class="btn w70" value="確定"></form></td></tr>';
 				}
 				gb('subjlist').innerHTML = html;
 			}

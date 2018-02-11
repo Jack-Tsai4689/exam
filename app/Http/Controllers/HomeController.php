@@ -8,6 +8,7 @@ use App\Employes;
 use App\Stus;
 use Input;
 use Validator;
+use Cookie;
 // use Auth;
 
 class HomeController extends Controller
@@ -28,7 +29,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('auth.goldlogin');
+        $accname = Cookie::get('id');
+        $rem_chk = (empty($accname)) ? '':'checked';
+        return view('auth.goldlogin', [
+            'accname' => $accname,
+            'rem_chk' => $rem_chk
+        ]);
     }
     public function login(){
         $input = Input::all();
@@ -60,10 +66,18 @@ class HomeController extends Controller
                     break;
             }
             if ($user!=null){
+                if (request()->has('remember')){
+                    Cookie::queue('id', $input['accname'], 1440);
+                }else{
+                    Cookie::queue('id', $input['accname'], -1440);
+                }                
                 if ($input['identity']==='T')return redirect('/sets');
                 if ($input['identity']==="S")return redirect('/exam');
             }else{
-                return redirect('/login');
+                // return redirect('/login');
+                return redirect()->back()->withInput([
+                    'accname' => request()->old('accname')
+                ])->with('msg','登入失敗');
             }
         }
     }
