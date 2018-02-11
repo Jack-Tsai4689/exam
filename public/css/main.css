@@ -89,9 +89,15 @@
 		text-align: center;
 	}
 	#menu {
-		float: right;
+		/*float: right;*/
 		display: inline-block;
-		margin-right: 50px;
+		/*margin-right: 50px;*/
+		position: absolute;
+		top: 0;
+		z-index: 3;
+		height: 50px;
+		line-height: 50px;
+		right: 50px;
 	}
 	ul#navigation {
 		float: left;

@@ -2,8 +2,8 @@
 <html lang="zh-Hant-TW">
 <head>
 	<META http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<meta name="keywords" content="政龍文教-金牌教師線上測驗系統" />
-	<meta name="description" content="專門的補習班管理系統公司，金牌教師是線上測驗系統平台，老師自行上題目，學生登入考式，即測即評。老師線上解題，學生就在雲端上課；切片檢查系統，診斷學生答題分析；為學生量身訂做，針對個別缺點再加強。" />
+	<meta name="keywords" content="線上測驗系統" />
+	<meta name="description" content="線上測驗系統平台，老師自行上題目，即測即評。診斷學生答題分析。" />
 	<link rel="stylesheet" type="text/css" href="{{ URL::asset('css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ URL::asset('css/main.css') }}">
 	<noscript>
@@ -21,7 +21,9 @@
 	#img_bg {
 		margin-top: 7%;
 		text-align: center;
-		margin-bottom: -15px;
+		/*margin-bottom: -15px;*/
+		font-size: 40px;
+		font-weight: bolder;
 	}
 	#content {
 		width: 370px;
@@ -64,26 +66,24 @@
 		height: 15px;
 	}
 	</style>
-	<title>政龍文教-金牌教師線上測驗系統</title>
+	<title>線上測驗系統</title>
 </head>
 <body>
-<div id="top"><img src="{{ URL::asset('img/logo.png')}}" style="height:50px;margin-left:50px;"></div>
+<div id="top"><div style="font-size: 20px; margin-left: 20px;">線上測驗系統</div></div>
 <div id="all">
-	<div id="img_bg">
-		<img src="{{ URL::asset('img/logo.png')}}" style="height:100px;">
-	</div>
+	<div id="img_bg">線上測驗系統</div>
 	<form name="form1" id="form1" method="post" action="{{ url('login') }}" onSubmit="return check()">
 	<div id="content">
-		<div style="padding-top:20px;padding-bottom:5px;"><font class="f15">代碼</font><input type="text" class="input_field keyin" tabindex="1" name="code" id="code" value="1001"></div>
-		<div style="padding-bottom:5px;"><font class="f15">帳號</font><input type="text" class="input_field keyin" tabindex="2" name="accname" id="accname" value=""></div>
-		<div style="padding-bottom:5px;"><font class="f15">密碼</font><input type="password" class="input_field keyin" name="pwd" id="pwd" value="1"></div>
-		<div style="padding-bottom:10px;"><label><input type="checkbox" name="remember" id="remember"><font class="f15" style="margin-left:5px;">記住我的帳號</font></label></div>
+		<div style="padding-top:20px;padding-bottom:5px;"><font class="f15">代碼</font><input type="text" class="input_field keyin" tabindex="1" name="code" id="code" value=""></div>
+		<div style="padding-bottom:5px;"><font class="f15">帳號</font><input type="text" class="input_field keyin" tabindex="2" name="accname" id="accname" value="{{ $accname }}"></div>
+		<div style="padding-bottom:5px;"><font class="f15">密碼</font><input type="password" class="input_field keyin" name="pwd" id="pwd" value=""></div>
+		<div style="padding-bottom:10px;"><label><input type="checkbox" name="remember" id="remember" {{ $rem_chk }}><font class="f15" style="margin-left:5px;">記住我的帳號</font></label></div>
 		<div style="padding-bottom:10px;">
 			<center>
 				<div id="tp"><label><input type="radio" name="identity" id="identity_1" value="T">老師</label>
 				<label><input type="radio" name="identity" id="identity_2" value="S">學生</label>
 				</div>
-				<label><font color="red"></font></label>
+				<label><font color="red" id="msg">@if(session()->has('msg')) {{ session()->get('msg') }} @endif</font></label>
 			</center>
 		</div>
 		<div class="btn_di" style="padding-bottom:10px;"><input type="submit" name="sure" class="btn f16" id="sure" value="登入"></div>
@@ -100,17 +100,15 @@
 		return document.getElementById(v);
 	}
 	function check(){
+		if (!gb('identity_1').checked && !gb('identity_2').checked){
+			gb('msg').innerHTML = '請確認身份';
+			return false;
+		}
 		if (gb('accname').value==''){
 			gb('accname').focus();
 		}else{
 			gb('pwd').focus();
 		}
-		if (gb('remember').checked){
-			document.cookie='id='+document.form1.accname.value;
-		}else{document.cookie='id=';}
-		if (gb('code').checked){
-			document.cookie='ucode='+document.form1.ucode.value;
-		}else{document.cookie='ucode=';}
 		if (gb('accname').value==''){
 			gb('accname').focus();
 			return false;

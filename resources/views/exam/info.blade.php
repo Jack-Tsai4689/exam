@@ -44,7 +44,7 @@
 <body>
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<form name="form1" id="form1" method="post" action="exam.php">
+	<form name="form1" id="form1" method="post" action="{{ url('/exam/start')}}">
 		<div class="content">
 			<div id="cen">
 				<table cellpadding="0" cellspacing="0" class="list" width="100%">
@@ -86,16 +86,14 @@
 			</div>
             <div id="go"><input type="submit" class="btn w100" value="開始測驗"></div>
 		</div>
-		<input type="hidden" name="exam_type" value="{{ $exam_type }}">
-		<input type="hidden" name="exam_exnum" value="{{ $exam_exnum }}">
-		<input type="hidden" name="exam_grade" value="{{ $exam_grade }}">
-		<input type="hidden" name="exam_subject" value="{{ $exam_subject }}">
-		<input type="hidden" name="exam_chapter" value="{{ $exam_chapter }}">
-		<input type="hidden" name="exam_degree" value="{{ $exam_degree }}">
-		<input type="hidden" name="exam_listseq" value="{{ $exam_listseq }}">
-		<input type="hidden" name="exam_limtime" value="{{ $exam_limtime }}">
-		<input type="hidden" name="exam_cram" value="{{ $exam_cram }}">
-		<input type="hidden" name="exam_fkey" value="{{ $exam_fkey }}">
+		<input type="hidden" name="type" value="{{ $type }}">
+		<input type="hidden" name="exnum" value="{{ $exnum }}">
+		<input type="hidden" name="gra" value="{{ $gra }}">
+		<input type="hidden" name="subj" value="{{ $subj }}">
+		<input type="hidden" name="chap" value="{{ $chap }}">
+		<input type="hidden" name="degree" value="{{ $degree }}">
+		<input type="hidden" name="sets" value="{{ $sets }}">
+		<input type="hidden" name="lime" value="{{ $lime }}">
 	</FORM>
 </body>
 </html>

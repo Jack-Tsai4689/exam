@@ -51,7 +51,6 @@ class BasicController extends TopController
         $error = false;
         $type = ($req->has('type')) ? $req->input('type'):'';
 
-        dd($req->all());
         if (empty($type))$error = true;
         if ($error)abort(400);
         $data = new Gscs;

@@ -1,4 +1,4 @@
-	<title>{{ $title }}  金牌教師</title>
+	<title>{{ $title }}  線上測驗</title>
 	<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=9; IE=8; IE=7" />
 	<script type="text/javascript" src="{{ URL::asset('/js/html5media.min.js') }}"></script>

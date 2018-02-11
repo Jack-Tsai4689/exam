@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant-TW">
 <head>
-	<title>{{ $title }}  金牌教師</title>
+	<title>{{ $title }}  線上測驗</title>
 	<META http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="csrf-token" content="{{ csrf_token() }}" />
 	<meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=9; IE=8; IE=7" />
@@ -10,7 +10,7 @@
 	@yield('style')
 </head>
 <body>
-<div id="top"><a href="{{ url('/') }}" title="回首頁"><img src="{{ URL::asset('img/logo.png') }}" style="height:50px;margin-left:50px;"></a>
+<div id="top"><div style="font-size: 20px; margin-left: 20px;">線上測驗系統</div></div>
 	<div id="menu">
 		<ul id="navigation">
 			<li><a href="{{ url('/') }}" style="text-align:center; width:85px;">首頁</a></li>

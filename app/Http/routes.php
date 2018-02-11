@@ -19,8 +19,12 @@ Route::post('/login', 'HomeController@login');
 
 Route::group(['prefix'=>'exam'], function(){
 	Route::get('/', "ExamController@index");
+	//session初始化
 	Route::post('/init', "ExamController@init_check");
+	//測驗init 確認
 	Route::get('/info', "ExamController@goexam");
+	//開始測驗
+	Route::post('/start', "ExamController@examing");
 });
 
 //Route::resource('/sets', "SetsController");
