@@ -22,4 +22,5 @@ class Exams extends Model
                 'e_nnum',
                 'e_score'
 	];
+
 }

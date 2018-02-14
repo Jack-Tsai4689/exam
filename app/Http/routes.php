@@ -25,6 +25,8 @@ Route::group(['prefix'=>'exam'], function(){
 	Route::get('/info', "ExamController@goexam");
 	//開始測驗
 	Route::post('/start', "ExamController@examing");
+	//test
+	Route::get('/test/{id}', "ExamController@examtest");
 });
 
 //Route::resource('/sets', "SetsController");

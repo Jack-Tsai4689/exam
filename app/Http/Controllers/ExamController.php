@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Sets;
 use App\Setsque;
 use App\Exams;
-
+use DB;
 class ExamController extends TopController
 {
     /**
@@ -168,6 +168,9 @@ class ExamController extends TopController
             $this->_exam_sets($sets);
         }
     }
+    public function examtest($sid){
+        $this->_exam_sets($sid);
+    }
     private function _exam_sets($sid){
         $sets_data = Sets::find($sid);
         if (!$sets_data->s_again){
@@ -178,9 +181,33 @@ class ExamController extends TopController
             }
         }
         $lime = explode(":", $sets_data->s_limtime);
-        Exams::create([
-            
+        //主記錄先放
+        $edata = new Exams;
+        $edata->fill([
+            'e_stu' => session('epno'),
+            's_id' => $sid,
+            'e_pid' => 0,
+            'e_sub' => $sets_data->s_sub,
+            'e_begtime_at' => time()
         ]);
+        $edata->save();
+        $eid = $edata->e_id;
+
+        $first_part = null;
+        $first_que = new \stdclass;
+        if ($sets_data->s_sub){
+            //找大題 -> 找題目，放進exam_details
+            $part_que = Sets::where('s_pid', $sid)->orderby('s_part')->get()->all();
+            foreach ($part_que as $pv) {
+                //把考卷寫一份到學生卷
+                DB::insert("INSERT INTO exam_details(s_id, ed_eid, ed_sort, ed_qid) SELECT ?, ?, sq_sort, sq_qid FROM setsque WHERE sq_sid=? AND sq_part =? ORDER BY sq_sort", [$pv->s_id, $eid, $sid, $pv->s_id]);
+            }
+            //loading第一題資料
+            $first_quedata = Setsque::where('sq_sid', $sid)
+                                    ->where('sq_part', $part_que[0]->s_id)
+                                    ->where('sq_sort',1)->first();
+        }
+        
         $data = [
             'sets_name' => $sets_data->s_name,
             'hour' => $lime[0],
