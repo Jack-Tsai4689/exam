@@ -12,9 +12,9 @@ class AlterEmployes extends Migration
      */
     public function up()
     {
-        // Schema::table('employes', function (Blueprint $table) {
-        //     $table->string('remember_token', 50)->default('');
-        // });
+        Schema::table('employes', function (Blueprint $table) {
+            $table->string('remember_token', 50)->default('');
+        });
     }
 
     /**
@@ -24,6 +24,8 @@ class AlterEmployes extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('employes', function (Blueprint $table) {
+            $table->dropColumn('remember_token');
+        });
     }
 }

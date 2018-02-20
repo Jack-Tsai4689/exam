@@ -94,6 +94,7 @@
 		<input type="hidden" name="degree" value="{{ $degree }}">
 		<input type="hidden" name="sets" value="{{ $sets }}">
 		<input type="hidden" name="lime" value="{{ $lime }}">
+		{{ csrf_field() }}
 	</FORM>
 </body>
 </html>

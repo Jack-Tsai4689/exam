@@ -75,6 +75,43 @@
     		height: 65px;
     		margin: 5px 0px 5px 0px;
     	}
+        #intro_open {
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+            position: fixed;
+            opacity: 0.8;
+            z-index: 3;
+            background:-moz-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+            background: -ms-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+            background: -webkit-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+            filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr='#66000000',endColorstr='#e6000000',GradientType=1)";
+            -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+            display: none;
+        }
+        #intro_all {
+            width: 100%;
+            position: fixed;
+            z-index: 5;
+            top: 0px;
+            margin: 7% auto;
+            display: none;
+        }
+        #intro_content {
+            width: 500px;
+            margin: 0% auto;
+            position: relative;
+            float: none;
+            height: 150px;
+            border-radius: 10px;
+            height: 80px;
+        }
+        #intro_title {
+            font-size: 20px;
+            text-align: center;
+            line-height: 80px;
+        }
 	</style>
 @stop
 @section('content')
@@ -117,10 +154,17 @@
 			</div>
 		</div>
 </div>
+<div id="intro_open"></div>
+<div id="intro_all">
+    <div id="intro_content">
+        <div id="intro_title"><img src="{{ URL::asset('img/tenor.gif') }}" width="60"></div>
+    </div>
+</div>
 @stop
 @section('script')
 <script>
     function examinit(obj){
+        act_start();
         $.ajax({
             type: "POST",
             url: "{{ url('/exam/init') }}",
@@ -128,9 +172,21 @@
             dataType: "JSON",
             success: function(){
                 window.open("{{ url('/exam/info') }}","result","width="+screen.width+",height="+screen.height+",resizable=yes,scrollbars=yes,location=no");
+                act_end();
+            },
+            error: function(){
+                act_end();
             }
         });
         return false;
+    }
+    function act_start(){
+        $('#intro_open').show();
+        $('#intro_all').show();
+    }
+    function act_end(){
+        $('#intro_open').hide();
+        $('#intro_all').hide();
     }
 </script>
 @stop

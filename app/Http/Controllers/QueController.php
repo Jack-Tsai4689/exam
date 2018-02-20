@@ -139,7 +139,7 @@ class QueController extends TopController
             if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($v->q_quetxt));
             //題目圖檔
             if (!empty($v->q_qm_src)){
-                if(is_file($v->q_qm_src))$qcont[] = '<IMG class="pic" src="'.$v->q_qm_src.'">';
+                if(is_file($v->q_qm_src))$qcont[] = '<IMG class="pic" src="'.URL::asset($v->q_qm_src).'">';
             }
             //題目聲音檔
             if (!empty($v->q_qs_src)){
@@ -156,7 +156,7 @@ class QueController extends TopController
             if (!empty($v->q_anstxt)) $acont[] = nl2br(trim($v->q_anstxt));
             //詳解圖檔
             if(!empty($v->q_am_src)){
-                if (is_file($v->q_am_src))$acont[] = '<IMG class="pic"  src="'.$v->q_am_src.'">';
+                if (is_file($v->q_am_src))$acont[] = '<IMG class="pic"  src="'.URL::asset($v->q_am_src).'">';
             }
             $amedia = array();
             //詳解聲音檔

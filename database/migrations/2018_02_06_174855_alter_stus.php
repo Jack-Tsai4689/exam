@@ -24,6 +24,8 @@ class AlterStus extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('stus', function (Blueprint $table) {
+            $table->dropColumn('remember_token');
+        });
     }
 }

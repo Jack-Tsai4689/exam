@@ -20,6 +20,9 @@
 			width: 18px;
 			height: 18px;
 		}
+		.pic {
+			max-width: 100%;
+		}
 	</style>
 </head>
 <body>

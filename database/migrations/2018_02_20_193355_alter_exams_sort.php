@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterQuesKnow extends Migration
+class AlterExamsSort extends Migration
 {
     /**
      * Run the migrations.
@@ -12,8 +12,8 @@ class AlterQuesKnow extends Migration
      */
     public function up()
     {
-        Schema::table('ques', function (Blueprint $table) {
-            $table->integer('q_know')->default(0);
+        Schema::table('exams', function (Blueprint $table) {
+            $table->integer('e_sort')->default(0);
         });
     }
 
@@ -24,8 +24,8 @@ class AlterQuesKnow extends Migration
      */
     public function down()
     {
-        Schema::table('ques', function (Blueprint $table) {
-            $table->dropColumn('q_know');
+        Schema::table('exams', function (Blueprint $table) {
+            $table->dropColumn('e_sort');
         });
     }
 }

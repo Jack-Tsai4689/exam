@@ -24,6 +24,8 @@ class AlterKnow extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('knows', function (Blueprint $table) {
+            $table->dropColumn('k_keyword');
+        });
     }
 }

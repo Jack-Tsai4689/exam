@@ -324,7 +324,7 @@ class SetsController extends TopController
             if (!empty($data->q_quetxt)) $qcont[] = nl2br(trim($data->q_quetxt));
             //題目圖檔
             if (!empty($data->q_qm_src)){
-                if(is_file($data->q_qm_src))$qcont[] = '<IMG src="'.$data->q_qm_src.'" width="98%">';
+                if(is_file($data->q_qm_src))$qcont[] = '<IMG src="'.URL::asset($data->q_qm_src).'" width="98%">';
             }
             //題目聲音檔
             if (!empty($data->q_qs_src)){

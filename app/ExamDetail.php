@@ -18,4 +18,9 @@ class ExamDetail extends Model
 		'ed_times',
 		'ed_right'
 	];
+	
+	//大題題目
+    public function que(){
+        return $this->hasOne(Ques::class, 'q_id','ed_qid')->select('*');
+    }
 }

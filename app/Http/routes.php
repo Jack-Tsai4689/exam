@@ -27,6 +27,8 @@ Route::group(['prefix'=>'exam'], function(){
 	Route::post('/start', "ExamController@examing");
 	//test
 	Route::get('/test/{id}', "ExamController@examtest");
+	//存答案 &　下題題目
+	Route::post('/', "ExamController@store");
 });
 
 //Route::resource('/sets', "SetsController");

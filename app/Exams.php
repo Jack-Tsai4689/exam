@@ -14,6 +14,7 @@ class Exams extends Model
                 's_id',
                 'e_pid',
                 'e_sub',
+                'e_sort',
                 'e_begtime_at',
                 'e_endtime_at',
                 'e_used_time',

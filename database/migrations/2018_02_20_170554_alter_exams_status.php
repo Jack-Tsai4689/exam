@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AlterQuesImg extends Migration
+class AlterExamsStatus extends Migration
 {
     /**
      * Run the migrations.
@@ -12,9 +12,8 @@ class AlterQuesImg extends Migration
      */
     public function up()
     {
-        Schema::table('ques', function (Blueprint $table) {
-            $table->string('q_am_src', 100)->default('');
-            $table->string('q_am_name', 255)->default('');
+        Schema::table('exams', function (Blueprint $table) {
+            $table->char('e_status', 1)->default('N');
         });
     }
 
@@ -25,6 +24,8 @@ class AlterQuesImg extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('exams', function (Blueprint $table) {
+            $table->dropColumn('e_status');
+        });
     }
 }

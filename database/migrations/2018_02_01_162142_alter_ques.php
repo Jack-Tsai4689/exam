@@ -24,6 +24,8 @@ class AlterQues extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('ques', function (Blueprint $table) {
+            $table->dropColumn('q_num');
+        });
     }
 }

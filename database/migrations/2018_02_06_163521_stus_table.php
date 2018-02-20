@@ -27,6 +27,6 @@ class StusTable extends Migration
      */
     public function down()
     {
-        Schema::drop('stuses');
+        Schema::drop('stus');
     }
 }

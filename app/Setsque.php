@@ -19,6 +19,6 @@ class Setsque extends Model
     ];
     //大題題目
     public function que(){
-        return $this->hasOne(Ques::class, 'q_id','sq_qid');
+        return $this->hasOne(Ques::class, 'q_id','sq_qid')->select('*');
     }
 }
