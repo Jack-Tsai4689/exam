@@ -26,9 +26,12 @@ Route::group(['prefix'=>'exam'], function(){
 	//開始測驗
 	Route::post('/start', "ExamController@examing");
 	//test
-	Route::get('/test/{id}', "ExamController@examtest");
+	//Route::get('/test/{id}', "ExamController@examtest");
 	//存答案 &　下題題目
 	Route::post('/', "ExamController@store");
+	//redis test
+	// Route::post('/podcast', "ExamController@test");
+	Route::post('/quit', "ExamController@quit");
 });
 
 //Route::resource('/sets', "SetsController");

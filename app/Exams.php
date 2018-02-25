@@ -21,7 +21,8 @@ class Exams extends Model
                 'e_rnum',
                 'e_wnum',
                 'e_nnum',
-                'e_score'
+                'e_score',
+                'e_status'
 	];
 
 }

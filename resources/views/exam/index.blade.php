@@ -150,7 +150,6 @@
                     @endforeach
                     </tbody>
 				</table>
-                <input type="hidden" name="exam" id="exam">
 			</div>
 		</div>
 </div>

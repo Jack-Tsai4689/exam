@@ -55,6 +55,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         array (
             'Psy\\' => 4,
             'Psr\\Log\\' => 8,
+            'Predis\\' => 7,
             'PhpParser\\' => 10,
         ),
         'M' => 
@@ -180,6 +181,10 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'Psr\\Log\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
+        'Predis\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/predis/predis/src',
         ),
         'PhpParser\\' => 
         array (

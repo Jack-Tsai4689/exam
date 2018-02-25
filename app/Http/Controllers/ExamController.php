@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+//use Event;
+// use App\Events\PushNotification;
+use Redis;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -21,6 +24,14 @@ class ExamController extends TopController
      *
      * @return \Illuminate\Http\Response
      */
+    private $encrypt_hash = "JerryTsai";
+    private $hash = null;
+    private $aes_key = null;
+    private $aes_iv = null;
+
+    public function __construct(){
+        parent::__construct();
+    }
     public function index()
     {
         if (!$this->login_status)return redirect('/login');
@@ -31,24 +42,48 @@ class ExamController extends TopController
             $sets[$k]->lim = (int)$lime[0].'時'.(int)$lime[1].'分'.(int)$lime[2].'秒';
 
         }
-        
         return view('exam.index', [
             'menu_user' => $this->menu_user,
             'title' => '測驗',
             'Data' => $sets
         ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    // aes初始化
+    private function _aes_init(){
+        $this->hash = hash('SHA384', $this->encrypt_hash, true);
+        $this->aes_key = substr($this->hash, 0, 32);
+        $this->aes_iv = substr($this->hash, 32, 16);
     }
-
+    //加密
+    private function _encrypt($data){
+        $padding = 16 - (strlen($data) % 16);
+        $data.= str_repeat(chr($padding), $padding);
+        $encrypt = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $this->aes_key, $data, MCRYPT_MODE_CBC, $this->aes_iv);
+        return base64_encode($encrypt);
+    }
+    //解密
+    private function _decrypt($source){
+        $encrypt = base64_decode($source);
+        $data = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $this->aes_key, $encrypt, MCRYPT_MODE_CBC, $this->aes_iv);
+        $padding = ord($data[strlen($data) - 1]);
+        return substr($data, 0, -$padding);
+    }
+    //中離記錄，接收至socket.js
+    public function quit(Request $req){
+        $token = $req->input('token');
+        //$time = $req->input('time');
+        $this->_aes_init();
+        $user = $this->_decrypt($token);
+        $io = Redis::get($token);
+        Redis::del($token);
+        Redis::del($io);
+        $exam_data = explode("|", $user);
+        Exams::where('e_id', $exam_data[1])
+             ->where('e_stu', $exam_data[0])
+             ->where('e_status', 'N')
+             ->update(['e_status' => 'O', 'e_endtime_at' => time() ]);
+        //Event::fire(new PushNotification($this->login_user, '123'));
+    }
     /**
      * Store a newly created resource in storage.
      *
@@ -65,11 +100,35 @@ class ExamController extends TopController
         $qtype = ($req->has('qtype') && !empty($req->input('qtype'))) ? trim($req->input('qtype')):'';
         $qnum = ($req->has('qnum') && (int)$req->input('qnum')>0) ? (int)$req->input('qnum'):0;
         $act = ($req->has('next_qa') && !empty($req->input('next_qa'))) ? trim($req->input('next_qa')):'';
-
+        $eid = $req->input('exam');
         //下個大題
         if ($act==="part"){
-            $eid = $req->input('exam');
-
+            //學生卷id
+            $sid = $req->input('setid');
+            $hour = $req->input('hour');
+            $min = $req->input('min');
+            $sec = $req->input('sec');
+            $sets_data = Sets::find($sid);
+            $part = Exams::where('e_pid', $eid)->where('e_status','N')->orderby('e_sort')->first();
+            if ($part===null){
+                Exams::where('e_id', $eid)->update(['e_status'=>'Y', 'e_endtime_at'=> time()]);
+                die('考試結束');
+            }
+            $lime = $hour.":".$min.":".$sec;
+            return view('exam.nextpart', [
+                'title' => $sets_data->s_name,
+                'type' => 'sets',
+                'exam' => $eid,
+                'exnum' => '',
+                'gra' => '',
+                'subj' => '',
+                'chap' => '',
+                'degree' => '',
+                'sets' => $sid,
+                'lime' => $lime,
+                'epart' => $part->e_id,
+                'spart' => $part->s_id
+            ]);
             return;
         }
         if ($sid<=0 || $part<=0 || $qno<=0)abort(400);
@@ -114,6 +173,9 @@ class ExamController extends TopController
                     'e_status'=> "Y",
                     'e_endtime_at' => time()
                 ]);
+                Exams::where('e_id', $eid)->update([
+                    'e_endtime_at' => time()
+                ]);
                 echo 1;
                 return;
                 break;
@@ -124,53 +186,15 @@ class ExamController extends TopController
         $que = ExamDetail::select('ed_qid')
                          ->where('ed_eid', $part)
                          ->where('ed_sort', $qno)->first();
-        $quedata = $this->_Ques_Info($que->que()->first(), $qno);
+        if (Redis::exists('q_info:'.$que->ed_qid)){
+            $quedata = Redis::get('q_info:'.$que->ed_qid);
+        }else{
+            $quedata = $this->_Ques_Info($que->que()->first(), $qno);
+            Redis::set('q_info:'.$que->ed_qid, $quedata);
+        }
         echo json_encode($quedata);
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+    //session 傳值
     public function init_check(Request $req){
         $sets = ($req->has('sets') && (int)$req->input('sets')>0) ? (int)$req->input('sets'):0;
         if ($sets===0)abort(400);
@@ -179,6 +203,7 @@ class ExamController extends TopController
         session()->put('sets', $req->input('sets'));
         echo '1';
     }
+    //開始測驗
     public function goexam(){
         //試卷方式
         $can_exam = true;
@@ -191,8 +216,24 @@ class ExamController extends TopController
             $sets = Sets::find($s_id);
             if ($sets->s_sub){
                 $sub = $sets->sub()->get()->all();
+                //大題
                 foreach ($sub as $k => $v) {
                     $sub[$k]->back = ($v->s_page==='N') ? '不':'';
+                    //答案存redis
+                    $key = 's'.$s_id.'|p'.$v->s_id;
+                    if (!Redis::exists($key)){
+                        $subq = Setsque::where('sq_sid', $s_id)
+                                       ->where('sq_part', $v->s_id)
+                                       ->join('ques','ques.q_id','=','setsque.sq_qid')
+                                       ->select('q_ans')
+                                       ->orderby('sq_sort')
+                                       ->get()->all();
+                        $ans = array();
+                        foreach ($subq as $sk => $sv) {
+                            $ans[] = $sv->q_ans;
+                        }
+                        Redis::set('s'.$s_id.'|p'.$v->s_id, implode("|", $ans));
+                    }
                 }
             }else{
                 $sub = array();
@@ -204,6 +245,7 @@ class ExamController extends TopController
             if ($lime[0]>0) $limetime.= (int)$lime[0].'小時';
             if ($lime[1]>0) $limetime.= (int)$lime[1].'分';
             if ($lime[2]>0) $limetime.= (int)$lime[2].'秒';
+
             return view('exam.info', [
                 'title' => $exam_name,
                 'type' => 'sets',
@@ -223,6 +265,7 @@ class ExamController extends TopController
             ]);
         }
     }
+    //進行測驗
     public function examing(Request $req){
         $type = ($req->has('type') && !empty($req->input('type'))) ? trim($req->input('type')):'';
         $exnum = ($req->has('exnum') && !empty($req->input('exnum'))) ? trim($req->input('exnum')):'';
@@ -232,12 +275,27 @@ class ExamController extends TopController
         $degree = ($req->has('degree') && !empty($req->input('degree'))) ? trim($req->input('degree')):'';
         $sid = ($req->has('sets') && (int)$req->input('sets')>0) ? (int)$req->input('sets'):0;
         $lime = ($req->has('lime') && !empty($req->input('lime'))) ? trim($req->input('lime')):'';
-
+        $exam = ($req->has('exam') && !empty($req->input('exam'))) ? (int)$req->input('exam'):0;
+        $epart = ($req->has('epart') && !empty($req->input('epart'))) ? (int)$req->input('epart'):0;
+        $spart = ($req->has('spart') && !empty($req->input('spart'))) ? (int)$req->input('spart'):0;
         if ($type==="sets"){
             if ($sid<=0)abort(400);
             //$this->_exam_sets($sets);
             $sets_data = Sets::find($sid);
-            $_exam = $this->_Exam_Status_Check($sid);
+            //直接下個大題
+            if ($exam>0 && $epart>0 && $spart>0){
+                $_exam = new \stdclass;
+                $_exam->status = 'part';
+                $_exam->eid = $exam;
+                $_exam->esid = $epart;
+                $_exam->sid = $sid;
+                $_exam->ssid = $spart;
+                $data = $this->_next_part($_exam, $sets_data, $lime);
+                Exams::where('e_id', $epart)->update(['e_begtime_at'=> time()]);
+                return view('exam.ying', $data);
+                return;
+            }
+            $_exam = $this->_Exam_Status_Check($sid, $epart, $spart);
             if (!$sets_data->s_again){
                 //不能重覆考
                 if ($_exam->status==="ed")die('已考過');
@@ -248,6 +306,7 @@ class ExamController extends TopController
             switch ($_exam->status) {
                 case '': //第一次考
                     //主記錄先存
+                    $start_q = 0;
                     $edata = new Exams;
                     $edata->fill([
                         'e_stu' => session('epno'),
@@ -306,12 +365,12 @@ class ExamController extends TopController
                         $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $sid)
                                                 ->where('sq_part', $sid)
                                                 ->orderby('sq_sort')->get()->all();
-
                     }
                     $part_show->nums = count($first_quedata);
                     foreach ($first_quedata as $v) {
                         $qno[] = $v->sq_qid;
                     }
+                    if (!Redis::exists('s'.$sid.'|'))
                     $qno_act = ($part_show->control==="Y") ? 'onclick=go(1)':'';
                     $qno_html = '<div class="current" id="go1" '.$qno_act.'>'.str_pad(1,2,0,STR_PAD_LEFT).'</div>';
                     $i=2;
@@ -323,10 +382,10 @@ class ExamController extends TopController
                         }
                         $i++;
                     }
-                    //loading第一題資料
-                    $que = $this->_Ques_Info($first_quedata[0]->que()->first(), 1);
                     break;
                 case 'yet': //中離，從未完成的大題進來
+                    //切回測驗中
+                    Exams::where('e_id', $_exam->esid)->update(['e_status'=>'N']);
                     $eid = $_exam->eid;
                     $qno = array();
                     $part_show = new \stdclass;
@@ -346,7 +405,7 @@ class ExamController extends TopController
                         */
                         $part_show->control = $part_que->s_page;
                         $part_show->intro = nl2br(trim($part_que->s_intro));
-                        $part_show->no = 1;
+                        $part_show->no = $part_que->s_part;
                         $part_show->sub = true;
                         $first_quedata = ExamDetail::where('ed_eid', $_exam->esid)
                                                    ->orderby('ed_sort')->get()->all();
@@ -364,7 +423,7 @@ class ExamController extends TopController
                         $qno[] = $v->ed_qid;
                         if (empty($v->ed_ans) && !$start_q_chk){
                             $start_q = $i;
-                            $part_show->no = ($i+1);
+                            //$part_show->no = ($i+1);
                             $start_q_chk = true;
                         }
                         if (!empty($v->ed_ans)){
@@ -381,13 +440,23 @@ class ExamController extends TopController
                             $qno_html.= '<div '.$curr_class.' id="go'.($i+1).'" '.$qno_act.'>'.str_pad(($i+1),2,0,STR_PAD_LEFT).'</div>';    
                         }
                     }
-                    //loading第一題資料
-                    $que = $this->_Ques_Info($first_quedata[$start_q]->que()->first(), ($start_q+1));
                     break;
                 case 'ing': //正在考
                     die('您已在測驗中');
                     break;
             }
+            if ($_exam->status==="" || $_exam->status==="yet"){
+                //loading第一題資料
+                if (Redis::exists('q_info:'.$first_quedata[$start_q]->ed_qid)){
+                    $que = Redis::get('q_info:'.$first_quedata[$start_q]->ed_qid);
+                }else{
+                    $que = $this->_Ques_Info($first_quedata[$start_q]->que()->first(), ($start_q+1));
+                    Redis::set('q_info:'.$first_quedata[$start_q]->ed_qid, $que);   
+                }
+            }
+
+            $this->_aes_init();
+            $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
             $data = [
                 'sets_name' => $sets_data->s_name,
                 'type' => 'sets',
@@ -402,7 +471,8 @@ class ExamController extends TopController
                 'qno_html' => $qno_html,
                 'curr' => ($start_q+1),
                 'que' => $que,
-                'qno' => $qno
+                'qno' => $qno,
+                'token' => $token
             ];
             if ($part_show->control==="Y"){
                 return view('exam.ying', $data);
@@ -412,16 +482,89 @@ class ExamController extends TopController
             
         }
     }
+    //下個大題
+    private function _next_part($exam, $sets_data, $limetime){
+        $start_q = 0;
+        $qno = array();
+        $part_show = new \stdclass;
+        $first_que = new \stdclass;
+        $part_show->eid = $exam->esid;
+        if ($sets_data->s_sub){
+            //找大題 -> 找題目，放進exams 依大題順序
+            $part_que = Sets::find($exam->ssid);
+            /*
+            loading第一大題設定
+            可否回上頁
+            題數
+            配分
+            */
+            $part_show->control = $part_que->s_page;
+            $part_show->intro = nl2br(trim($part_que->s_intro));
+            $part_show->no = $part_que->s_part;
+            $part_show->sub = true;
+            $part_show->score = $part_que->s_percen;
+            
+            $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $exam->sid)
+                                    ->where('sq_part', $exam->ssid)
+                                    ->orderby('sq_sort')->get()->all();
+        }else{
+            $part_show->control = $sets_data->s_page;
+            $part_show->sub = false;
+            
+            $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $exam->sid)
+                                    ->where('sq_part', $exam->sid)
+                                    ->orderby('sq_sort')->get()->all();
+
+        }
+        $part_show->nums = count($first_quedata);
+        foreach ($first_quedata as $v) {
+            $qno[] = $v->sq_qid;
+        }
+        $qno_act = ($part_show->control==="Y") ? 'onclick=go(1)':'';
+        $qno_html = '<div class="current" id="go1" '.$qno_act.'>'.str_pad(1,2,0,STR_PAD_LEFT).'</div>';
+        $i=2;
+        while ($i<=$part_show->nums) {//題號的部份，以顏色區分題號的狀況
+            if ($part_show->control==="Y"){
+                $qno_html.= '<div id="go'.$i.'" onclick=go('.$i.')>'.str_pad($i,2,0,STR_PAD_LEFT).'</div>';
+            }else{
+                $qno_html.= '<div id="go'.$i.'" >'.str_pad($i,2,0,STR_PAD_LEFT).'</div>';
+            }
+            $i++;
+        }
+        //loading第一題資料
+        $que = $this->_Ques_Info($first_quedata[$start_q]->que()->first(), ($start_q+1));
+        $lime = explode(":", $limetime);
+        $this->_aes_init();
+        $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
+        $data = [
+                'sets_name' => $sets_data->s_name,
+                'type' => 'sets',
+                'sets' => $exam->sid,
+                'exam' => $exam->eid,
+                'y' => 0,
+                'hour' => $lime[0],
+                'min' => $lime[1],
+                'sec' => $lime[2],
+                'end_date' => '',
+                'first_part' => $part_show,
+                'qno_html' => $qno_html,
+                'curr' => ($start_q+1),
+                'que' => $que,
+                'qno' => $qno,
+                'token' => $token
+            ];
+        return $data;
+    }
     /*
     考試確認
     如果沒考完，還可以接續考，用e_status判斷 (N, O)
     照順序判斷，從主體->大題
-    @int 考卷id sid
+    @int 考卷id=>sid，學生卷大題=>epart，考卷大題=>spart
     return 
         status ed(考過) ing(進行中) yet(中離)
         eid 學生卷id
     */
-    private function _Exam_Status_Check($sid){
+    private function _Exam_Status_Check($sid, $epart, $spart){
         $record = Exams::where('s_id', $sid)
                            ->where('e_stu', session('epno'))
                            ->where('e_sort',0)->first();
@@ -473,9 +616,9 @@ class ExamController extends TopController
         }
         return $json;
     }
-    public function examtest($sid){
-        $this->_exam_sets($sid);
-    }
+    // public function examtest($sid){
+    //     $this->_exam_sets($sid);
+    // }
     // 格式化顯示題目
     private function _Ques_Info($que, $no){
         $data = new \stdclass;
