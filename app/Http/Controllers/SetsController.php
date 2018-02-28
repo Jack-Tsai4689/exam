@@ -213,12 +213,12 @@ class SetsController extends TopController
         $ins->fill($data);
         $ins->save();
         //大題
-        // $data['s_name'] = '';
-        // $data['s_part'] = 1;
-        // $data['s_pid'] = $ins->s_id;
-        // $sub_ins = new Sets;
-        // $sub_ins->fill($data);
-        // $sub_ins->save();
+        $data['s_name'] = '';
+        $data['s_part'] = 1;
+        $data['s_pid'] = $ins->s_id;
+        $sub_ins = new Sets;
+        $sub_ins->fill($data);
+        $sub_ins->save();
         return redirect('/sets');
     }
 
@@ -661,17 +661,34 @@ class SetsController extends TopController
         $addque = explode(',',$ques);
 
         foreach ($addque as $q) {
+            //如果大題的題目沒重覆才新增，並自動遞增序號
+            $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at) 
+            SELECT ?, ?, ?, (SELECT (Case When Max(sq_sort) is null then 0 else max(sq_sort) end)+1 from setsque 
+                WHERE sq_sid=? AND sq_part=?), ?, ? 
+            WHERE NOT EXISTS( 
+                SELECT * FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=? limit 1 
+            )";
+            DB::insert($sql, [
+                $sid, $part, $q, 
+                $sid, $part, $this->login_user, time(),
+                $sid, $part, $q]);
             //看資料是否存在，不存在會原條件返回，有存在會返回該筆資料
-            $que_exists = Setsque::firstOrNew(['sq_sid' => $sid, 'sq_part' => $part, 'sq_qid' => $q]);
-            if (!$que_exists->exists){
-                $que_exists->sq_sort = (int)Setsque::select('sq_sort')->where('sq_sid',$sid)->where('sq_part', $part)->max('sq_sort')+1;
-                $que_exists->sq_owner = $this->login_user;
-                $que_exists->updated_at = time();
-                $que_exists->save();
-            }
+            // $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at)
+            //     SELECT ?, ?, ?, (SELECT IFNULL(1, max('sq_sort')) FROM setsque WHERE sq_sid=? AND sq_part=?), ?, ? FROM setsque
+            //     WHERE NOT EXISTS(
+            //         SELECT 1 FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=? limit 1
+            //     )";
+            // $que_exists = Setsque::firstOrNew(['sq_sid' => $sid, 'sq_part' => $part, 'sq_qid' => $q]);
+            // if (!$que_exists->exists){
+            //     $que_exists->sq_sort = (int)Setsque::select('sq_sort')->where('sq_sid',$sid)->where('sq_part', $part)->max('sq_sort')+1;
+            //     $que_exists->sq_owner = $this->login_user;
+            //     $que_exists->updated_at = time();
+            //     $que_exists->save();
+            // }
         }
-        $json['Success'] = true;
-        echo json_encode($json);
+        echo true;
+        // $json['Success'] = true;
+        // echo json_encode($json);
     }
     //ajax查詢大題題目
     public function ajshow_que($sid){
@@ -692,7 +709,7 @@ class SetsController extends TopController
         $html = '';
         foreach ($que as $k => $v) {
             $data = $this->sets_review_format($v->que);
-            $html.= '<tr align="center" name="node" id="'.$v->sq_sort.'">';
+            $html.= '<tr align="center" name="node" id="'.$v->sq_qid.'">';
             $html.= '<td class="handle">: :</td>';
             $html.= '<td class="qno_ans">'.$data->q_ans.'</td>';
             $html.= '<td class="qno">'.$v->sq_sort.'</td>';

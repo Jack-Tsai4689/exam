@@ -45,10 +45,11 @@ class Sets extends Model
         return $this->hasMany($this, 's_pid')->select('s_id','s_part','s_intro','s_percen','s_page')->orderby('s_part');
     }
     //大題題目 題目排序需依考卷，而非大題
-    // public function subque(){
-    //     return $this->hasMany(Setsque::class, 'sq_sid', 's_id')
-    //                 ->join('ques', 'ques.q_id','=','setsque.sq_qid')
-    //                 ->select('ques.q_ans')
-    //                 ->orderby('sq_sort');
-    // }
+    //sets show
+    public function subque(){
+        return $this->hasMany(Setsque::class, 'sq_sid', 's_id')
+                    ->join('ques', 'ques.q_id','=','setsque.sq_qid')
+                    ->select('ques.q_ans')
+                    ->orderby('sq_sort');
+    }
 }

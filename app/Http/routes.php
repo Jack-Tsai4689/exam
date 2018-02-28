@@ -31,9 +31,15 @@ Route::group(['prefix'=>'exam'], function(){
 	Route::post('/', "ExamController@store");
 	//redis test
 	// Route::post('/podcast', "ExamController@test");
+	//考試中離記錄
 	Route::post('/quit', "ExamController@quit");
+	//看成績
+	Route::get('{id}/score', "ExamController@score");
 });
 
+Route::group(['prefix'=>'analy'], function(){
+	Route::get('{id}/concept', "AnalyController@radar");
+});
 //Route::resource('/sets', "SetsController");
 Route::group(['prefix'=>'sets'], function(){
 	Route::get('/', "SetsController@index");

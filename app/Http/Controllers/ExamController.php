@@ -100,18 +100,24 @@ class ExamController extends TopController
         $qtype = ($req->has('qtype') && !empty($req->input('qtype'))) ? trim($req->input('qtype')):'';
         $qnum = ($req->has('qnum') && (int)$req->input('qnum')>0) ? (int)$req->input('qnum'):0;
         $act = ($req->has('next_qa') && !empty($req->input('next_qa'))) ? trim($req->input('next_qa')):'';
+        $utime = ($req->has('utime') && !empty($req->input('utime'))) ? trim($req->input('utime')):0;
         $eid = $req->input('exam');
         //下個大題
         if ($act==="part"){
             //學生卷id
-            $sid = $req->input('setid');
             $hour = $req->input('hour');
             $min = $req->input('min');
             $sec = $req->input('sec');
             $sets_data = Sets::find($sid);
             $part = Exams::where('e_pid', $eid)->where('e_status','N')->orderby('e_sort')->first();
             if ($part===null){
-                Exams::where('e_id', $eid)->update(['e_status'=>'Y', 'e_endtime_at'=> time()]);
+                //加總題數進行更新
+                $sql = "UPDATE exams INNER JOIN (
+                    SELECT e_pid, SUM(e_rnum) as r, SUM(e_wnum) as w, SUM(e_nnum) as n FROM exams WHERE e_pid=?
+                ) a
+                ON exams.e_id=a.e_pid
+                SET e_rnum=a.r, e_wnum=a.w, e_nnum=a.n, e_status='Y'";
+                DB::update($sql, [$eid]);
                 die('考試結束');
             }
             $lime = $hour.":".$min.":".$sec;
@@ -154,7 +160,9 @@ class ExamController extends TopController
         }
         ExamDetail::where('ed_eid', $part)
                   ->where('ed_sort', $qno)
-                  ->update(['ed_ans'=> $ans]);
+                  ->update(['ed_ans'=> $ans])
+                  ->increment('ed_times', $utime);
+
         $finish = false;
         //讀取題目
         switch ($act) {
@@ -169,13 +177,33 @@ class ExamController extends TopController
                 break;
             case 'f': //交卷
                 $finish = true;
-                Exams::where('e_id', $part)->update([
-                    'e_status'=> "Y",
-                    'e_endtime_at' => time()
-                ]);
                 Exams::where('e_id', $eid)->update([
                     'e_endtime_at' => time()
                 ]);
+
+                $exam_sub = Exams::find($part);
+                $ans = Redis::get('s'.$sid.'|p'.$exam_sub->s_id);
+                //答案
+                $right_ans = explode("|", $ans);
+                $all_rows = count($right_ans);
+                $right_rows = 0;
+                //核對答案
+                foreach ($right_ans as $i => $v) {
+                    //會回傳筆數
+                    $right = ExamDetail::where('ed_eid', $part)
+                                       ->where('ed_ans', $v)
+                                       ->where('ed_sort', ($i+1))
+                                       ->update(['ed_right'=>1]);
+                    if ($right>0)$right_rows++;
+                }
+                // 算未答的題目
+                $no_ans = ExamDetail::where('ed_eid', $part)->where('ed_ans','')->count();
+                $exam_sub->e_rnum = $right_rows;
+                $exam_sub->e_nnum = $no_ans;
+                $exam_sub->e_wnum = $all_rows-$right_rows - $no_ans;
+                $exam_sub->e_status = 'Y';
+                $exam_sub->e_endtime_at = time();
+                $exam_sub->save();
                 echo 1;
                 return;
                 break;
@@ -370,7 +398,6 @@ class ExamController extends TopController
                     foreach ($first_quedata as $v) {
                         $qno[] = $v->sq_qid;
                     }
-                    if (!Redis::exists('s'.$sid.'|'))
                     $qno_act = ($part_show->control==="Y") ? 'onclick=go(1)':'';
                     $qno_html = '<div class="current" id="go1" '.$qno_act.'>'.str_pad(1,2,0,STR_PAD_LEFT).'</div>';
                     $i=2;
@@ -481,6 +508,28 @@ class ExamController extends TopController
             }
             
         }
+    }
+    //看成績結果
+    public function score($eid){
+        //學生卷主id
+        $eid = (int)$eid;
+        if ($eid<1)abort(400);
+        $exam = Exams::find($eid);
+        $sets = Sets::find($exam->s_id);
+        
+        $Sets_name = $sets->s_name;
+        $que = array();
+        if ($exam->e_sub){
+            $sub_exam = Exams::where('e_pid', $eid)->get()->all();
+        }
+
+        $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
+        return view('exam.result', [
+            'menu_user' => $this->menu_user,
+            'title' => '成績',
+            'Data' => $sub_exam,
+            'exam' => $exam
+        ]);
     }
     //下個大題
     private function _next_part($exam, $sets_data, $limetime){

@@ -179,6 +179,7 @@
     <input type="hidden" name="qtype" id="qtype" value="{{ $que->qtype }}">
     <input type="hidden" name="qnum" id="qnum" value="{{ $que->qnum }}">
     <input type="hidden" name="epart" id="epart" value="{{ $first_part->eid }}">
+    <input type="hidden" name="utime" id="utime">
     <div class="content" id="Q1">
         <div class="cen">
             <input type="hidden" id="Q1_no" value="{{ $que->qid }}">
@@ -225,10 +226,11 @@ $(document).mouseleave(function(e){
   }
 });
 var token = "{{ $token }}";
-    var hours = {{ $hour }};
-    var minutes = {{ $min }};
-    var seconds = {{ $sec }};
-    var cache = 59;
+var hours = {{ $hour }};
+var minutes = {{ $min }};
+var seconds = {{ $sec }};
+var cache = 59;
+var utime = 0;
 $(document).ready(function (){
     var exam_times;
     setTimeout("count()", 1000);
@@ -252,6 +254,7 @@ $(document).ready(function (){
             }else{
                 seconds = seconds-1;
             }
+            utime++;
             gb('min').value = minutes;
             gb('sec').value = seconds;
             gb('hour').value = hours;
@@ -262,6 +265,7 @@ $(document).ready(function (){
             gb('h').innerHTML = hour;
             gb('m').innerHTML = min;
             gb('s').innerHTML = sec;
+            gb('utime').innerHTML = utime;
         }
     }
 // document.onkeydown = function(event){
@@ -389,6 +393,7 @@ $('#next').click(function(){
         dataType: 'JSON',
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
+            utime = 0;
             gb("qtype").value = data.qtype;
             gb("qnum").value = data.qnum;
             if (txt=='n'){
@@ -419,6 +424,7 @@ $('#perious').click(function(){
         dataType: 'JSON',
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
+            utime = 0;
             gb("qtype").value = data.qtype;
             gb("qnum").value = data.qnum;
             if (txt=='n'){
@@ -449,6 +455,7 @@ function go(qno){
         dataType: 'JSON',
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
+            utime = 0;
             gb("qtype").value = data.qtype;
             gb("qnum").value = data.qnum;
             if (txt=='n'){
