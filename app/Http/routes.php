@@ -38,6 +38,7 @@ Route::group(['prefix'=>'exam'], function(){
 });
 
 Route::group(['prefix'=>'analy'], function(){
+	Route::get('{id}', "AnalyController@source");
 	Route::get('{id}/concept', "AnalyController@radar");
 });
 //Route::resource('/sets', "SetsController");
