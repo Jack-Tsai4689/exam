@@ -526,9 +526,11 @@ class ExamController extends TopController
         $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
         return view('exam.result', [
             'menu_user' => $this->menu_user,
-            'title' => '成績',
+            'title' => $sets->s_name.' 測驗結果',
+            'Setsname' => $sets->s_name,
             'Data' => $sub_exam,
-            'exam' => $exam
+            'exam' => $exam,
+            'Eid' => $eid
         ]);
     }
     //下個大題

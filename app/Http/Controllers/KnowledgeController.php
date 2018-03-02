@@ -148,29 +148,7 @@ class KnowledgeController extends TopController
         $loading_dnk = false;
         //刪檔
         $loading_nk = false;
-        //$epno = $_SESSION['gold']->epno;
-        // if (is_file('know/tmp/dnkrc_'.$epno.'.jpg')){
-        //     $loading_dnk = true;
-        //     //不刪檔，裁過的，直接載入
-        //     $data['Kimg'] = base_url('know/tmp/dnkrc_'.$epno.'.jpg');
-        //     $kimg_html.= '<input type="button" value="重新裁切" id="dnknow" class="btn w100 h25" onClick="uknow(this.id);" >';
-        // }else if (is_file('know/tmp/dnkr_'.$epno.'.jpg')){
-        //     $loading_dnk = true;
-        //     //不刪檔，沒裁過，跳至裁切
-        //     $kimg_html.= '<input type="button" value="載入舊圖檔" id="dnknow" class="btn w100 h25" onClick="uknow(this.id);" >';
-        // }
-        // if (!$loading_dnk){
-        //     if (is_file('know/tmp/nkrc_'.$epno.'.jpg')){
-        //         //刪檔，裁過的，直接載入
-        //         $loading_nk = true;
-        //         $data['Kimg'] = base_url('know/tmp/nkrc_'.$epno.'.jpg');
-        //     }
-        //     $kimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nknow" class="btn w160 h25" onClick="uknow(this.id)" >   ';
-        //     $kimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnknow" class="btn w160 h25" onClick="uknow(this.id)" >   ';
-        // }
-        // if ($loading_dnk || $loading_nk){
-        //     $kimg_html.= '<input type="button" value="刪除圖檔" id="dknow" class="btn w100 h25" onClick="uknow(this.id)" >   ';
-        // }
+
         $data['Kimg_html'] = $kimg_html;
         $data['menu_user'] = $this->menu_user;
         $data['title'] = '知識點 - 新增';

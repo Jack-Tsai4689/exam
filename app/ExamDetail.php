@@ -25,6 +25,6 @@ class ExamDetail extends Model
     }
     //考題來源表
     public function ques_source(){
-    	return $this->hasOne(Ques::class, 'q_id','ed_qid')->select('q_chap','q_quetype','q_ans','q_chap','q_id')->first();
+    	return $this->hasOne(Ques::class, 'q_id','ed_qid')->select('q_chap','q_quetype','q_degree','q_ans','q_chap','q_id')->first();
     }
 }
