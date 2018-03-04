@@ -33,12 +33,20 @@ Route::group(['prefix'=>'exam'], function(){
 	// Route::post('/podcast', "ExamController@test");
 	//考試中離記錄
 	Route::post('/quit', "ExamController@quit");
-	//看成績
-	Route::get('{id}/score', "ExamController@score");
 });
 
+Route::group(['prefix'=>'score'], function(){
+	//成績列表
+	Route::get('/', "ScoreController@index");
+	//個人成績
+	Route::get('{id}', "ScoreController@show");
+});
+
+//分析
 Route::group(['prefix'=>'analy'], function(){
+	//考題概念表
 	Route::get('{id}', "AnalyController@source");
+	//觀念比例圖
 	Route::get('{id}/concept', "AnalyController@radar");
 });
 //Route::resource('/sets', "SetsController");
@@ -52,9 +60,9 @@ Route::group(['prefix'=>'sets'], function(){
 	//開放考試
 	Route::put('{id}/finish', "SetsController@status_change");
 	//預覽
-	Route::get('{id}/show', "SetsController@show");
+	Route::get('/{id}', "SetsController@show");
 	//ajax更新大題
-	Route::post('{id}/subu', "SetsController@ajstore_part");
+	Route::post('/{id}/subu', "SetsController@ajstore_part");
 	//ajax編題大題
 	Route::get('{id}/subshow', "SetsController@ajedit_part");
 	//ajax更新大題順序

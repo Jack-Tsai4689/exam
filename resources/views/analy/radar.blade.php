@@ -110,8 +110,8 @@
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<div class="title_intro">
-		<input type="button" class="btn w150" name="" id="see_result" value="測驗結果">
-		<input type="button" class="btn w150" name="" id="see_analy" value="考題概念表" >
+		<input type="button" class="btn w100" id="see_result" value="成績結果">
+		<input type="button" class="btn w100" id="see_analy" value="考題概念表" >
 		<input type="button" class="btn w150" value="列印" onclick="print();">
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?'))window.close();">關閉</a></label> --}}
 	</div>
@@ -192,7 +192,7 @@ function go_ex(n,s,g,v){
     });
 }
 $("#see_result").on('click', function(){
-    location.href = "{{ url('/exam/'.$Eid.'/score') }}";
+    location.href = "{{ url('/score/'.$Eid) }}";
 });
 $("#see_analy").on('click', function(){
     location.href = "{{ url('/analy/'.$Eid) }}";

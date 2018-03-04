@@ -509,30 +509,6 @@ class ExamController extends TopController
             
         }
     }
-    //看成績結果
-    public function score($eid){
-        //學生卷主id
-        $eid = (int)$eid;
-        if ($eid<1)abort(400);
-        $exam = Exams::find($eid);
-        $sets = Sets::find($exam->s_id);
-        
-        $Sets_name = $sets->s_name;
-        $que = array();
-        if ($exam->e_sub){
-            $sub_exam = Exams::where('e_pid', $eid)->get()->all();
-        }
-
-        $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
-        return view('exam.result', [
-            'menu_user' => $this->menu_user,
-            'title' => $sets->s_name.' 測驗結果',
-            'Setsname' => $sets->s_name,
-            'Data' => $sub_exam,
-            'exam' => $exam,
-            'Eid' => $eid
-        ]);
-    }
     //下個大題
     private function _next_part($exam, $sets_data, $limetime){
         $start_q = 0;

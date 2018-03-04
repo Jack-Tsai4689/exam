@@ -113,7 +113,7 @@
     <INPUT type="hidden" name="f_subject" id="f_subject" value="">
     <INPUT type="hidden" name="f_bmenuname" id="f_bmenuname" value="">
 	<div class="title_intro">
-		<input type="button" class="btn w150" id="see_result" value="測驗結果">
+		<input type="button" class="btn w100" id="see_result" value="成績結果">
 		<input type="button" class="btn w150" id="see_concept" value="觀念答對比率圖">
 		<input type="button" class="btn w150" name="" id="" value="列印" onclick="print();">
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?')) window.close();">關閉</a></label> --}}
@@ -156,7 +156,7 @@
 @section('script')
 <script>
 	$("#see_result").on('click', function(){
-		location.href = "{{ url('/exam/'.$Eid.'/score') }}";
+		location.href = "{{ url('/score/'.$Eid) }}";
 	});
 	$("#see_concept").on('click', function(){
 		location.href = "{{ url('/analy/'.$Eid.'/concept') }}";

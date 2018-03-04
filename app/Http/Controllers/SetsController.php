@@ -137,7 +137,7 @@ class SetsController extends TopController
                     $subj_html.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
                 }
         }
-        return view('sets.create', [
+        return view('sets.create_havesub', [
             'menu_user' => $this->menu_user,
             'title' => '新增考卷',
             'Time' => $Time,
@@ -159,7 +159,7 @@ class SetsController extends TopController
     {
         if (!$this->login_status)return redirect('/login');
         $chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
-        $s_name = ($req->has('setsname')) ? $req->input('setsname'):'';
+        $s_name = ($req->has('setsname') && !empty($req->input('setsname'))) ? $req->input('setsname'):'';
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
         $s_subj = ($req->has('subject')) ? $req->input('subject'):0;
         if ($chk_date===0 || 
@@ -185,8 +185,10 @@ class SetsController extends TopController
             $data['s_begtime'] = $p_begdate.' '.$p_begTimeH.':00:00';
             $data['s_endtime'] = $p_enddate.' '.$p_endTimeH.':00:00';
         }
-        $data['s_sum'] = ($req->has('sum')) ? (int)$req->input('sum'):100;
-        $data['s_pass_score'] = ($req->has('passscore')) ? (int)$req->input('passscore'):60;
+        $s_sum = ($req->has('sum')) ? (int)$req->input('sum'):100;
+        $data['s_sum'] = $s_sum;
+        $s_pass_score = ($req->has('passscore')) ? (int)$req->input('passscore'):60;
+        $data['s_pass_score'] = $s_pass_score;
 
         //限時
         $lim = array();
@@ -208,17 +210,34 @@ class SetsController extends TopController
         $data['s_owner'] = $this->login_user;
         $data['created_at'] = time();
         $data['updated_at'] = time();
+
+        $have_sub = ($req->has('have_sub') && !empty($req->input('have_sub'))) ? trim($req->input('have_sub')):'';
+        // 有大題
+        $data['s_sub'] = (!empty($have_sub)) ? 1:0;
         //主體
         $ins = new Sets;
         $ins->fill($data);
         $ins->save();
-        //大題
-        $data['s_name'] = '';
-        $data['s_part'] = 1;
-        $data['s_pid'] = $ins->s_id;
-        $sub_ins = new Sets;
-        $sub_ins->fill($data);
-        $sub_ins->save();
+        if ($have_sub){
+            //大題
+            $sort  = ($req->has('sub_sort') && !empty($req->input('sub_sort'))) ? $req->input('sub_sort'):array();
+            $control  = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
+            $score  = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
+            $intro  = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
+            foreach ($sort as $k => $v) {
+                $data['s_name'] = '';
+                $data['s_part'] = $v;
+                $data['s_page'] = $control[$k];
+                $data['s_percen'] = $score[$k];
+                $data['s_intro'] = $intro[$k];
+                $data['s_sum'] = $s_sum * $score[$k];
+                $data['s_pass_score'] = $s_pass_score * $score[$k];
+                $data['s_pid'] = $ins->s_id;
+                $sub_ins = new Sets;
+                $sub_ins->fill($data);
+                $sub_ins->save();
+            }
+        }
         return redirect('/sets');
     }
 
@@ -282,7 +301,8 @@ class SetsController extends TopController
             'Part' => $sub,
             'Edit' => $data->s_finish,
             'FirstPart' => $first_sub,
-            'OtherPart' => $other_sub
+            'OtherPart' => $other_sub,
+            'Have_sub' => $data->s_sub
         ]);
     }
     //試卷題目預覽 格式化
@@ -421,7 +441,13 @@ class SetsController extends TopController
             $s_sel = ($data->s_subj===$v->g_id) ? 'selected':'';
             $subj_html.= '<option '.$s_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
         }
-        return view('sets.edit', [
+        //大題
+        if ($data->s_sub){
+            $sub = Sets::where('s_pid', $sid)->orderby('s_part')->get()->all();
+        }else{
+            $sub = array();
+        }
+        return view('sets.edit_havesub', [
             'menu_user' => $this->menu_user,
             'title' => '編輯考卷',
             'Sid' => $sid,
@@ -433,7 +459,9 @@ class SetsController extends TopController
             'Grade' => $gra_html,
             'Subject' => $subj_html,
             'Sum' => $data->s_sum,
-            'Pass' => $data->s_pass_score
+            'Pass' => $data->s_pass_score,
+            'Sub' => $sub,
+            'Hsub' => $data->s_sub
         ]);
     }
 

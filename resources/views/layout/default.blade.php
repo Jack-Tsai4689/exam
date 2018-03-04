@@ -13,7 +13,6 @@
 <div id="top"><a href="{{ url('/') }}" title="回首頁"><img src="{{ URL::asset('img/logo.png') }}" style="height:50px;margin-left:50px;"></a>
 	<div id="menu">
 		<ul id="navigation">
-			<li><a href="{{ url('/') }}" style="text-align:center; width:85px;">首頁</a></li>
 			@if (session('ident')==="T")
 			<li><a href="{{ url('basic') }}" style="text-align:center; width:85px;">基本設定</a></li>
 			<li>
@@ -21,9 +20,31 @@
 				<ul>
 					<li><div class="ex"><a href="{{ url('sets') }}">我的考卷</a></div></li>
 					<li><div class="ex"><a href="{{ url('ques') }}">題庫</a></div></li>
-					<li><div class="ex"><a href="{{ url('know') }}">知識點管理</a></div></li>
+					<li><div class="ex"><a href="{{ url('know') }}">知識點</a></div></li>
 				</ul>
 			</li>
+			<li>
+				<a href="javascript:void(0)">成績系統</a>
+				<ul>
+					{{-- 選班級、考卷(下拉式)，列出每個人成績 --}}
+					<li><div class="ex"><a href="{{ url('/score') }}">班級查詢</a></div></li>
+					{{-- 以學號查詢 --}}
+					<li><div class="ex"><a href="">個人查詢</a></div></li>
+				</ul>
+			</li>
+			<li>
+				<a href="javascript:void(0)">診斷系統</a>
+				<ul>
+					{{-- 選班級、考卷(下拉式)，列出每個人。或看整體分析 --}}
+					<li><div class="ex"><a href="">班級查詢</a></div></li>
+					{{-- 以學號查詢 --}}
+					<li><div class="ex"><a href="">個人查詢</a></div></li>
+				</ul>
+			</li>
+			@endif
+			@if (session('ident')==="S")
+			<li><a href="{{ url('/') }}">測驗</a></li>
+			<li><a href="{{ url('/score') }}">成績</a></li>
 			@endif
 			{{-- <li>
 				<a href="javascript:void(0)">線上測驗</a>

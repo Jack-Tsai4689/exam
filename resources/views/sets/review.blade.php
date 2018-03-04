@@ -272,13 +272,14 @@
     <div class="title_intro">
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
-        <label>限時</label>{{ $Limtime }}
+        <label>限時</label>{{ $Limtime }}　<input type="button" value="編輯">
 	</div>
+    @if($Have_sub)
     <div class="title"><label class="f17" style="float:left;" onclick="zoom()">大題</label><img style="float:left;margin-top:5px;" id="part_img" src="{{ URL::asset('img/open.png') }}" width="20" height="20"></div>
     <div id="part_div" class="title_intro" style="padding-bottom:10px;">
         <!--<input type="button" name="" id="" onclick="moreone()" class="btn w100 h25" value="增加"> -->
         @if (!$Edit)
-        <input type="button" name="" id="" onclick="edit_sub()" class="btn w100 h25" value="編輯">　
+        {{-- <input type="button" name="" id="" onclick="edit_sub()" class="btn w100 h25" value="編輯">　 --}}
         <input type="button" onclick="open_part()" class="btn w100 h25" name="" id="start_part" value="開啟排序">
         <span id="part_func"><input type="button" onclick="close_part()" class="btn w100 h25" name="" id="" value="關閉排序">　
         <input type="button" class="btn w100 h25" name="" id="save_part" value="儲存排序">　
@@ -300,7 +301,7 @@
             <input type="button" class="btn w100 h25 part" data-id="{{ $v->s_id }}" value="第{{ $v->s_part }}大題">&nbsp;
         @endforeach
     </div>
-
+    @endif
     <div name="part" id="part">
         <div id="part{{ $FirstPart->s_id }}" class="partq">
             <div class="title"><label class="f17">題目{{ $FirstPart->s_part }}</label></div>
