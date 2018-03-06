@@ -46,8 +46,8 @@
     	}
     	.list_edit tr td{
     		margin-bottom: 10px;
-    		height: 25px;
-    		line-height: 25px;
+    		/*height: 25px;
+    		line-height: 25px;*/
     		padding-left: 10px;
     		vertical-align: top;
     	}
@@ -108,6 +108,9 @@
         }
         #big_title div input, #big_title div select {
             margin-top: 3px;
+        }
+        #divsc {
+            display: inline-block;
         }
 	</style>
 @stop
@@ -192,7 +195,14 @@
                     <tr class="deep">
                         <td align="center">大題</td>
                         <td>
-                            <label><input type="checkbox" name="have_sub" id="have_sub" value="1" onclick="need_sub(this.checked)">需要大題</label>　<input type="button" id="moresub" value="新增大題" onclick="add_title()" class="btn hiden">
+                            <label><input type="checkbox" name="have_sub" id="have_sub" value="1" onclick="need_sub(this.checked)">需要大題</label>
+                            <div id="divsc">
+                                <select name="control" id="control">
+                                    <option value="Y">可回上題修改</option>
+                                    <option value="N">不可回上題修改</option>
+                                </select>
+                            </div>
+                            　<input type="button" id="moresub" value="新增大題" onclick="add_title()" class="btn hiden">
                             <div id="big_title"></div>
                         </td>
                     </tr>
@@ -252,9 +262,11 @@ function need_sub(v){
     if (v){
         $("#moresub").removeClass('hiden');
         $("#big_title").removeClass('hiden');
+        $("#divsc").css('display','none');
     }else{
         $("#moresub").addClass('hiden');
         $("#big_title").addClass('hiden');
+        $("#divsc").css('display','inline-block');
     }
 }
 // function check_all(obj,cName)

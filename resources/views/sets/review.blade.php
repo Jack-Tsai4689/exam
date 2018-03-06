@@ -272,7 +272,14 @@
     <div class="title_intro">
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
-        <label>限時</label>{{ $Limtime }}　<input type="button" value="編輯">
+        <label>限時</label>{{ $Limtime }}　@if (!$Edit)<input type="button" id="sets_edit" value="編輯">　
+        <form action="{{ url('/sets/'.$v->s_id.'/finish') }}" method="post" onsubmit="return updcheck()">
+            {{ csrf_field() }}
+            <input type="hidden" name="_method" value="PUT">
+            <input type="hidden" name="status" value="open">
+            <input type="submit" value="開放">
+        </form>
+        @endif
 	</div>
     @if($Have_sub)
     <div class="title"><label class="f17" style="float:left;" onclick="zoom()">大題</label><img style="float:left;margin-top:5px;" id="part_img" src="{{ URL::asset('img/open.png') }}" width="20" height="20"></div>
@@ -449,6 +456,13 @@
     <input type="hidden" name="npart" id="npart">
     {{ csrf_field() }}
 </form>
+<div id="structure" class="list_set">
+    <div class="set_all">
+        <img src="{{ URL::asset('img/loading.gif') }}" id="stru_status">
+        <iframe width="100%" height="100%" id="sets_ed"></iframe>
+        <div><input type="button" style="float:right;" name="" id="" value="關閉" class="btn w100" onclick="close_edit()"></div>        
+    </div>
+</div>
 <div id="sets_filed" class="list_set">
     <div class="set_all">
         <img src="{{ URL::asset('img/loading.gif') }}" id="loading_status">
@@ -550,6 +564,11 @@ $("#part").on("click", ".usort", function(){
 function save_s(id){
     
 }
+function updcheck(){
+    if (!confirm("開放後無法提前關閉，確定開放?")){
+        return false;
+    }
+}
 $('document').ready(function() {
     // for(var i=1;i<=1;i++){
       // var sort = gb('sort8');
@@ -598,6 +617,15 @@ function close_part(){
     let func = gb('part_func');
     $(func).hide();
 }
+$("#sets_edit").on("click", function(){
+    $('#structure').show();
+    $('#stru_status').show();
+    document.getElementById('sets_ed').src="{{ url('/ques/imp') }}";
+    $("#sets_ed").load(function(){
+        $('#stru_status').hide();
+        $('#sets_ed').show();
+    });
+});
 $("#save_part").on("click", function(){
     let d=Array();
     // var f=0;

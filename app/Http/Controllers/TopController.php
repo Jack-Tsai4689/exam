@@ -18,6 +18,7 @@ class TopController extends Controller
     protected $prev_page = '';
     protected $next_page = '';
     protected $group_page = '';
+    protected $curl_url = '';
 
     public function __construct(){
     	if (!empty(session('ident'))){
@@ -54,6 +55,7 @@ class TopController extends Controller
     protected function chapter($graid, $subjid){
         return Gscs::where('g_graid', $graid)->where('g_subjid', $subjid)->get()->all();
     }
+    //分頁
     protected function page_info($curr, $last, $total){
       if ($total>10){
         $prev_happened = (($curr-1)>=1) ? 'onclick="gp('.($curr-1).')"':'style="visibility: hidden;"';
@@ -72,4 +74,18 @@ class TopController extends Controller
         $this->group_page = '<option value="1">第1頁</option>';
       }
     }
+    protected function url_curl($url){
+      $ch = curl_init();
+      $options = array(
+        CURLOPT_URL=>$address,
+        CURLOPT_HEADER=>0,
+        CURLOPT_RETURNTRANSFER=>1
+        //CURLOPT_TIMEOUT_MS=> 3000 //逾時處理
+      );
+      curl_setopt_array($ch, $options);
+      $data = curl_exec($ch);
+      $error = curl_errno($ch);
+      curl_close($ch);
+      return json_decode($data);
+   }
 }

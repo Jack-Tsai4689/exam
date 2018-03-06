@@ -35,7 +35,7 @@ class ScoreController extends TopController
                 $data[$k]->gra = $s->gra->name;
                 $data[$k]->subj = $s->subj->name;
             }
-            return view('exam.score_list', [
+            return view('exam.score_slist', [
                 'menu_user' => $this->menu_user,
                 'title' => '成績',
                 'Data' => $data
@@ -44,7 +44,15 @@ class ScoreController extends TopController
         }
         //老師依班級看
         if (session('ident')==="T"){
-
+            $data = Exams::where('e_pid', 0)
+                         ->where('e_status', 'Y')
+                         ->get()->all();
+            return view('exam.score_tlist', [
+                'menu_user' => $this->menu_user,
+                'title' => '成績-班級查詢',
+                'Data' => $data
+            ]);
+            return;
         }
     }
 

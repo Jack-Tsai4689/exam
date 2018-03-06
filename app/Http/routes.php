@@ -39,7 +39,7 @@ Route::group(['prefix'=>'score'], function(){
 	//成績列表
 	Route::get('/', "ScoreController@index");
 	//個人成績
-	Route::get('{id}', "ScoreController@show");
+	Route::get('/one', "ScoreController@show");
 });
 
 //分析
@@ -75,6 +75,7 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::post("{id}/usort", "SetsController@ajupdate_sortq");
 	//ajax刪除大題題目
 	Route::delete("{id}/que", "SetsController@ajdelete_que");
+	Route::get("{id}/structure", "SetsController@ajstru");
 });
 
 Route::group(['prefix'=>'ques'], function(){
