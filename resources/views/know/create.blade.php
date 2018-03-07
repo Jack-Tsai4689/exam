@@ -95,13 +95,17 @@
                         <IMG id="kimg" src="{{ $Kimg }}" width="98%"><br>
                         <div id="kimg_content">{{ $Kimg_html }}</div>
                         <input type="hidden" id="f_kimg" name="f_kimg" value="">
-                        格式：JPG/PNG
+                        <input type="file" name="kpic" id="kpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
                     </td>
                 </tr>
                 <tr class="deep">
                     <td align="right">關鍵字</td>
-                    <td>
-                    	<input type="text" name="f_kw" id="f_kw" class="input_field w500" value="">
+                    <td>(每個最多10個字)<br>
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
                     </td>
                 </tr>
                 <tr class="shallow">

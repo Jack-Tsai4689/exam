@@ -34,6 +34,7 @@ class QueController extends TopController
         $p_subj = 0;
         $p_chap = 0;
         $p_degree = '';
+        $p_keyword = '';
         $sel_Degree = new \stdClass;
         $sel_Degree->A = '';
         $sel_Degree->E = '';
@@ -46,6 +47,8 @@ class QueController extends TopController
             $p_gra = (int)request()->input('gra');
             $p_subj = (int)request()->input('subj');
             $p_chap = (int)request()->input('chap');
+            $p_keyword = trim(request()->input('q'));
+            if (!empty($p_keyword))$query_search = true;
             $p_degree = trim(request()->input('degree'));
             $allow_degree = array('E','M','H');
             if (!empty($p_degree)){
@@ -94,6 +97,7 @@ class QueController extends TopController
             if ($p_gra>0)$ques = $ques->where('q_gra', $p_gra);
             if ($p_subj>0)$ques = $ques->where('q_subj', $p_subj);
             if ($p_chap>0)$ques = $ques->where('q_chap', $p_chap);
+            if (!empty($p_keyword))$ques = $ques->where('q_keyword','like','%|'.$p_keyword.'|%');
             $que_data = $ques->paginate(10);
         }else{
             $que_data = Ques::paginate(10);
@@ -211,7 +215,8 @@ class QueController extends TopController
             'Chapter' => $chap_html,
             'Degree' => $sel_Degree,
             'Page' => $pfunc,
-            'Num' => $que_data->total()
+            'Num' => $que_data->total(),
+            'Qkeyword' => $p_keyword
         ];
         return $data;
     }
@@ -370,7 +375,7 @@ class QueController extends TopController
         */
         $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
         $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
-        $keyword = ($req->has('f_keyword') && !empty($req->input('f_keyword'))) ? trim($req->input('f_keyword')):'';
+        $keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
         $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
@@ -543,6 +548,10 @@ class QueController extends TopController
                 }
             }           
         }
+        $key = array();
+        foreach ($keyword as $v) {
+            if (!empty($v))$key[] = $v;
+        }
         $save = [
             'q_quetype' => $que_type,
             'q_quetxt' => $quetxt,
@@ -567,7 +576,7 @@ class QueController extends TopController
             'q_know' => $know_id,
             'q_created_at' => time(),
             'q_updated_at' => time(),
-            'q_keyword' => $keyword
+            'q_keyword' => '|'.implode('|', $key).'|'
         ];
         $que_data = new Ques;
         $que_data->fill($save);
@@ -862,8 +871,21 @@ class QueController extends TopController
         $data['Qsound_html'] = $qsound_html;
         $data['Qsold'] = ($qs_upload) ? 'class="hiden"':'style="inline-block;"';
         $data['Qs_upload'] = (!$qs_upload) ? 'class="hiden"':'';
-        $data['Keyword'] = $que->q_keyword;
-        
+        $keyword = explode("|", $que->q_keyword);
+        $key = array();
+        foreach ($keyword as $v) {
+            $c = (string)$v;
+            if ($c==="")continue;
+            $key[] = $v;
+        }
+        $key_count = count($key);
+        if ($key_count<5){
+            while(5>$key_count){
+                $key[] = "";
+                $key_count++;
+            }
+        }
+        $data['Keyword'] = $key;        
         $data['Anstxt'] = $que->q_anstxt;
         $data['Aimgsrc'] = $que->q_am_src;
         $data['Aimg_html'] = $aimg_html;
@@ -922,7 +944,7 @@ class QueController extends TopController
         }
         $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
         $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
-        $keyword = ($req->has('f_keyword') && !empty($req->input('f_keyword'))) ? trim($req->input('f_keyword')):'';
+        $keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
         $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
@@ -1089,11 +1111,17 @@ class QueController extends TopController
                 }
             }           
         }
+        $key = array();
+        foreach ($keyword as $v) {
+            $c = (string)$v;
+            if ($c==="")continue;
+            $key[] = $v;
+        }
 
         $que = Ques::find($qid);
         $que->q_quetype = $que_type;
         $que->q_quetxt = $quetxt;
-        $que->q_keyword = $keyword;
+        $que->q_keyword = "|".implode("|", $key)."|";
         $que->q_gra = $graid;
         $que->q_subj = $subjid;
         $que->q_chap = $chapid;

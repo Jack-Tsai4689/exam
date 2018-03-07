@@ -273,11 +273,11 @@
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
         <label>限時</label>{{ $Limtime }}　@if (!$Edit)<input type="button" id="sets_edit" value="編輯">　
-        <form action="{{ url('/sets/'.$v->s_id.'/finish') }}" method="post" onsubmit="return updcheck()">
+        <form style="display: inline-block;" action="{{ url('/sets/'.$Sid.'/finish') }}" method="post" onsubmit="return updcheck()">
             {{ csrf_field() }}
             <input type="hidden" name="_method" value="PUT">
             <input type="hidden" name="status" value="open">
-            <input type="submit" value="開放">
+            <input type="submit" value="定案">
         </form>
         @endif
 	</div>
@@ -300,7 +300,7 @@
             <div style="display:inline-block;">
             第{{ ($i+1) }}大題({{ $v->s_percen }}%)　{{ $print_control }}
             </div>
-            {{-- <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $SETID }},{{ $v->s_id }}, {{ ($i+1) }})"> --}}
+            {{-- <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $Sid }},{{ $v->s_id }}, {{ ($i+1) }})"> --}}
             </div>
         @endforeach
         </div>
@@ -449,7 +449,7 @@
 </div>
 <form id="setsort" name="setsort">
     <input type="hidden" name="node" id="node">
-    <input type="hidden" name="s" id="s" value="{{ $SETID }}">
+    <input type="hidden" name="s" id="s" value="{{ $Sid }}">
 </form>
 <form id="joinq">
     <input type="hidden" name="ques" id="ques">
@@ -541,7 +541,7 @@ $("#part").on("click", ".usort", function(){
     $('#intro_all').show();
     $.ajax({
         type: "POST",
-        url: "{{ url('/sets/'.$SETID.'/usort') }}",
+        url: "{{ url('/sets/'.$Sid.'/usort') }}",
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         data: {node:c,s:i},
         dataType: "JSON",
@@ -565,7 +565,7 @@ function save_s(id){
     
 }
 function updcheck(){
-    if (!confirm("開放後無法提前關閉，確定開放?")){
+    if (!confirm("定案後將無法變更，確定?")){
         return false;
     }
 }
@@ -639,7 +639,7 @@ $("#save_part").on("click", function(){
     $('#intro_all').show();
     $.ajax({
         type:"POST",
-        url:'{{ url('/sets/'.$SETID.'/upsort') }}',
+        url:'{{ url('/sets/'.$Sid.'/upsort') }}',
         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
         dataType:'json',
         data: $('#setsort').serialize(),
@@ -790,7 +790,7 @@ function edit_sub(){
     $(gb('more')).html('');
     $.ajax({
         type:'GET',
-        url:'{{ url('sets/'.$SETID.'/subshow') }}',
+        url:'{{ url('sets/'.$Sid.'/subshow') }}',
         dataType:'json',
         success: function(data, textStatus, jqXHR){
             var html = '';
@@ -847,7 +847,7 @@ function check_data(){
     $('#intro_all').show();
     $.ajax({
         type:'POST',
-        url:'{{ url('/sets/'.$SETID.'/subu') }}',
+        url:'{{ url('/sets/'.$Sid.'/subu') }}',
         dataType:'json',
         data:$('#form2').serialize(),
         success: function(){
@@ -889,7 +889,7 @@ $(".ware").on('click', function(){
 function importque(){
     $.ajax({
         type: "POST",
-        url: "{{ url('/sets/'.$SETID.'/joinq') }}",
+        url: "{{ url('/sets/'.$Sid.'/joinq') }}",
         data: $("#joinq").serialize(),
         dataType: "JSON",
         success: function(){
@@ -905,7 +905,7 @@ $(".part").on('click', function(){
 function showque(id){
     $.ajax({
         type: "GET",
-        url: "{{ url('/sets/'.$SETID.'/part') }}",
+        url: "{{ url('/sets/'.$Sid.'/part') }}",
         data: {part:id},
         dataType: "JSON",
         success: function(rs){
@@ -925,7 +925,7 @@ function delq(obj){
     if (confirm('確定刪除？')){
         $.ajax({
             type: "POST",
-            url: "{{ url('/sets/'.$SETID.'/que') }}",
+            url: "{{ url('/sets/'.$Sid.'/que') }}",
             headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
             data: $(dform).serialize(),
             dataType: "JSON",

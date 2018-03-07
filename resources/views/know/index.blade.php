@@ -207,7 +207,7 @@
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<form name="form1" id="form1">
 	<div class="title_intro">
-		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/know') }}" style="margin-left:55px;">瀏覽全部</a></div>
+		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="q" id="q" value="{{ $Keyword }}"><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/know') }}" style="margin-left:55px;">瀏覽全部</a></div>
 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增知識點" onclick="location.href='{{ url('/know/create') }}'"></div>
 	</div>
 	<div class="title_intro condition">
@@ -274,8 +274,13 @@
 @section('script')
 <script type="text/javascript">
 function search_confirm(){
-  var search = $('#f_search').val();
-  //if (trim(search)!=''){form1.submit();}
+  var search = $('#q').val();
+  var pattern = new RegExp("[`~!@#$^&()=|{}':;'-+,\\[\\].<>/?~！@#￥……&*（）——|{}【】『；：」「'。，、？]");
+  var rs = "";
+  for (var i = 0; i < search.length; i++) { 
+      rs += search.substr(i, 1).replace(pattern, ''); 
+  } 
+  if (search.trim()!='')knows_find();
 }
 let g = 0;
 function getsubj(v){

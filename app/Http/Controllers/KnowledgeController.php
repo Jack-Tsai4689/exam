@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Knows;
-//use Auth;
+use URL;
+
+const UPLOAD_DIR = "uploads/know";
 class KnowledgeController extends TopController
 {
     /**
@@ -26,13 +28,15 @@ class KnowledgeController extends TopController
         $p_gra = 0;
         $p_subj = 0;
         $p_chap = 0;
-
+        $p_keyword = '';
         $_get = request()->all();
         $query_search = false;
         if (!empty($_get)){
             $p_gra = (int)request()->input('gra');
             $p_subj = (int)request()->input('subj');
             $p_chap = (int)request()->input('chap');
+            $p_keyword = trim(request()->input('q'));
+            if (!empty($p_keyword))$query_search = $query_search = true;
         }
 
         $gra_html = '';
@@ -66,6 +70,7 @@ class KnowledgeController extends TopController
             if ($p_gra>0)$knows = $knows->where('k_gra', $p_gra);
             if ($p_subj>0)$knows = $knows->where('k_subj', $p_subj);
             if ($p_chap>0)$knows = $knows->where('k_chap', $p_chap);
+            if (!empty($p_keyword))$knows = $knows->where('k_keyword','like','%|'.$p_keyword.'|%');
             $knows_data = $knows->paginate(10);
         }else{
             $knows_data = Knows::paginate(10);
@@ -77,8 +82,8 @@ class KnowledgeController extends TopController
             $kcont[] = '<strong>'.trim($v->k_name).'</strong>';
             if (!empty($v->k_content)) $kcont[] = nl2br(trim($v->k_content));
             //圖檔
-            if(!empty($v->k_pic)){
-                if (is_file($v->k_pic))$kcont[] = '<IMG class="know" src="'.$v->k_pic.'" width="98%">';
+            if(!empty($v->k_picpath)){
+                if (is_file($v->k_picpath))$kcont[] = '<IMG class="know" src="'.URL::asset($v->k_picpath).'" width="98%">';
             }
             $knows_data[$k]->k_content = implode("<br>", $kcont);
         }
@@ -101,7 +106,8 @@ class KnowledgeController extends TopController
             'Subject' => $subj_html,
             'Chapter' => $chap_html,
             'Page' => $pfunc,
-            'Num' => $knows_data->total()
+            'Num' => $knows_data->total(),
+            'Keyword' => $p_keyword
         ];
         return $data;
     }
@@ -171,11 +177,13 @@ class KnowledgeController extends TopController
         if (!$this->login_status)return redirect('/login');
         $k_name = ($req->has('f_kname') && !empty($req->input('f_kname'))) ? trim($req->input('f_kname')):'';
         $k_content = ($req->has('f_kcont') && !empty($req->input('f_kcont'))) ? trim($req->input('f_kcont')):'';
-        $k_keyword = ($req->has('f_kw') && !empty($req->input('f_kw'))) ? trim($req->input('f_kw')):'';
+        $k_keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
         $chapid = ($req->has('f_chapter') && (int)$req->input('f_chapter')>0) ? (int)$req->input('f_chapter'):0;
 
+        if (!is_dir("uploads"))mkdir("uploads", 777);
+        if (!is_dir("uploads/know"))mkdir("uploads/know", 777);
         // if ($graid===0 || $subjid===0 || $chapid===0){
         //  $this->_errmsg(400);
         //  return;
@@ -191,15 +199,38 @@ class KnowledgeController extends TopController
         //         $kname = $new_name;
         //     }
         // }
+        $km_src = '';
+        $km_name = '';
+        $km_file = $req->file('kpic');
+        if ($km_file!=null){
+            $file_error = false;
+            if ($req->hasFile('kpic')){
+                $mime = $km_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','impage/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    $uuid = md5($km_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$km_file->getClientOriginalExtension();
+                    $km_src = UPLOAD_DIR.'/'.$file;
+                    $km_file->move(UPLOAD_DIR, $file);
+                    $km_name = $km_file->getClientOriginalName();
+                }
+            }
+        }
+        $key = array();
+        foreach ($k_keyword as $v) {
+            if (!empty($v))$key[] = $v;
+        }
         $data = [
             'k_name' => $k_name,
-            'k_pic' => '',//$kname,
+            'k_pic' => $km_name,
+            'k_picpath' => $km_src,
             'k_gra' => $graid,
             'k_subj' => $subjid,
             'k_chap' => $chapid,
             'k_content' => $k_content,
-            'k_owner' => Auth::user()->e_epno,
-            'k_keyword' => $k_keyword,
+            'k_owner' => session('epno'),
+            'k_keyword' => '|'.implode('|', $key).'|',
             'created_at' => time(),
             'updated_at' => time()
         ];
@@ -271,6 +302,9 @@ class KnowledgeController extends TopController
         $del_qimg = '';
         $data['Kimg'] = '';
         $data['Kimg_src'] = '';
+        if (!empty($know->k_picpath)){
+            if (is_file($know->k_picpath))$data['Kimg'] = URL::asset($know->k_picpath);
+        }
         // if (!empty($know->K_PIC)){
         //     if (is_file($know->K_PIC)){
         //         $data['Kimg'] = base_url($know->K_PIC);
@@ -288,7 +322,24 @@ class KnowledgeController extends TopController
         $data['Owner'] = $know->k_owner;
         $data['Kname'] = $know->k_name;
         $data['Kcontent'] = $know->k_content;
-        $data['Kkeword'] = $know->k_keyword;
+
+        $keyword = explode("|", $know->k_keyword);
+        $key = array();
+        foreach ($keyword as $v) {
+            $c = (string)$v;
+            if ($c==="")continue;
+            $key[] = $v;
+        }
+        $key_count = count($key);
+        if ($key_count<5){
+            while(5>$key_count){
+                $key[] = "";
+                $key_count++;
+            }
+        }
+
+
+        $data['Kkeword'] = $key;
         $data['Grade'] = $grade_html;
         $data['Subject'] = $subject_html;
         $data['Chapter'] = $chapter_html;

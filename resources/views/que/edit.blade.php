@@ -5,7 +5,7 @@
 	<style type="text/css">
     	#all {
     		margin: 20px auto;
-    		width: 1152px;
+    		max-width: 1152px;
     	}
     	.cen {
     		margin: 0 auto;
@@ -41,7 +41,7 @@
     	}
     	.input_field {
     		margin:0px;
-            width: 500px;
+            /*width: 500px;*/
     	}
     	.btn {
     		font-size: 14px;
@@ -231,7 +231,11 @@
                 </TR>
                 <tr class="deep">
                     <td align="right">關鍵字</td>
-                    <td><input type="text" class="input_field w250" id="f_keyword" name="f_keyword" value="{{ $Keyword }}">　(請用","逗號隔開，最多5個)</td>
+                    <td>(每個最多10個字)<br>
+                        @foreach($Keyword as $k)
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10" value="{{ $k }}">
+                        @endforeach
+                    </td>
                 </tr>
                 <tr class="shallow">
                     <td align="right">知識點</td>
@@ -365,8 +369,7 @@
             <div style="text-align:left;">
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
-                    <input type="submit" class="btn w150 h30" value="存檔，出下一題" name="save_next" id="save_next">
-                    <input type="submit" class="btn w150 h30" value="存檔，離開" name="save_close" id="save_close">
+                    <input type="submit" class="btn w150 h30" value="確定">
             </div>
         </div>
     </div>

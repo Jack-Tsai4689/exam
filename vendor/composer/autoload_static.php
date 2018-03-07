@@ -272,6 +272,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'AlterExamsSort' => __DIR__ . '/../..' . '/database/migrations/2018_02_20_193355_alter_exams_sort.php',
         'AlterExamsStatus' => __DIR__ . '/../..' . '/database/migrations/2018_02_20_170554_alter_exams_status.php',
         'AlterKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_222725_alter_know.php',
+        'AlterKnowPic' => __DIR__ . '/../..' . '/database/migrations/2018_03_07_004732_alter_know_pic.php',
         'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
         'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
         'AlterStus' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_174855_alter_stus.php',

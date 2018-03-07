@@ -21,7 +21,7 @@
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<form name="form1" id="form1">
 	<div class="title_intro">
-		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="f_search" id="f_search" value=""><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/ques') }}" style="margin-left:55px;">瀏覽全部</a></div>
+		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="q" id="q" value="{{ $Qkeyword }}"><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/ques') }}" style="margin-left:55px;">瀏覽全部</a></div>
 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<a href=""><input type="button" class="btn f16 w150" name="" id="" value="Excel匯入"></a></div>
 		<label class="f16" id="choice_fie"><a href="javascript:void(0)" onclick="open_field();">選擇欄位</a></label>
 	</div>
@@ -118,13 +118,13 @@ function check_all(obj,cName){
     for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
 }
 function search_confirm(){
-  var search = $('#f_search').val();
+  var search = $('#q').val();
   var pattern = new RegExp("[`~!@#$^&()=|{}':;'-+,\\[\\].<>/?~！@#￥……&*（）——|{}【】『；：」「'。，、？]");
   var rs = "";
   for (var i = 0; i < search.length; i++) { 
       rs += search.substr(i, 1).replace(pattern, ''); 
   } 
-  //if (search.trim()!=''){form1.submit();}
+  if (search.trim()!='')ques_find();
 }
 
 let g = 0;

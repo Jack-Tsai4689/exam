@@ -122,7 +122,7 @@
 									{{ csrf_field() }}
 									<input type="hidden" name="_method" value="PUT">
 									<input type="hidden" name="status" value="open">
-                            		<input type="submit" value="開放">
+                            		<input type="submit" value="定案">
                             	</form>
 							</div>
 							<div>
@@ -231,7 +231,7 @@ function show_icon(){ $('#intro_icon').show()}
 function hide_icon(){ $('#intro_icon').hide();}
 
 function updcheck(){
-	if (!confirm("開放後無法提前關閉，確定開放?")){
+	if (!confirm("定案後將無法變更，確定?")){
 		return false;
 	}
 }

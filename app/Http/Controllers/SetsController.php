@@ -298,7 +298,7 @@ class SetsController extends TopController
         return view('sets.review', [
             'menu_user' => $this->menu_user,
             'title' => $data->s_name.' - 題目預覽',
-            'SETID' => $sid,
+            'Sid' => $sid,
             'Set_name' => $data->s_name,
             'Sum' => $data->s_sum,
             'Pass' => $data->s_pass_score,

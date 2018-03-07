@@ -10,6 +10,7 @@ return array(
     'AlterExamsSort' => $baseDir . '/database/migrations/2018_02_20_193355_alter_exams_sort.php',
     'AlterExamsStatus' => $baseDir . '/database/migrations/2018_02_20_170554_alter_exams_status.php',
     'AlterKnow' => $baseDir . '/database/migrations/2018_02_01_222725_alter_know.php',
+    'AlterKnowPic' => $baseDir . '/database/migrations/2018_03_07_004732_alter_know_pic.php',
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
     'AlterStus' => $baseDir . '/database/migrations/2018_02_06_174855_alter_stus.php',

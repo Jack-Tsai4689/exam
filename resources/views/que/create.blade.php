@@ -5,7 +5,7 @@
 	<style type="text/css">
     	#all {
     		margin: 20px auto;
-    		width: 1152px;
+    		max-width: 1152px;
     	}
     	.cen {
     		margin: 0 auto;
@@ -41,7 +41,7 @@
     	}
     	.input_field {
     		margin:0px;
-            width: 500px;
+            /*width: 500px;*/
     	}
     	.btn {
     		font-size: 14px;
@@ -230,7 +230,13 @@
                 </TR>
                 <tr class="deep">
                     <td align="right">關鍵字</td>
-                    <td><input type="text" class="input_field w250" id="f_keyword" name="f_keyword" value="">　(請用","逗號隔開，最多5個)</td>
+                    <td>(每個最多10個字)<br>
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                        <input type="text" class="input_field w150" name="fk[]" maxlength="10">
+                    </td>
                 </tr>
                 <tr class="shallow">
                     <td align="right">知識點</td>
