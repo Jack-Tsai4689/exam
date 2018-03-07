@@ -65,6 +65,9 @@
             width: 960px;
             text-align: center;
         }
+        .hiden {
+            display: none;
+        }
 	</style>
 @stop
 @section('content')
@@ -92,10 +95,9 @@
                 <tr class="shallow">
                     <td align="right">圖檔</td>
                     <td>
-                    	<IMG id="kimg" src="{{ $Kimg }}" width="98%"><br>
-                        <input type="hidden" id="f_kimg" name="f_kimg" value="{{ $Kimg_src }}">
-                        <input type="file" name="kpic" id="kpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
-                        <div id="kimg_content">{{ $Kimg_html }}</div>
+                        <div id="kmold" {!! $Kmsold !!}><IMG id="kimg" src="{{ $Kimg }}" width="98%"><br>{!! $Kimg_html !!}</div>
+                        <div id="kmup" {!! $Km_upload !!}><input type="file" name="kpic" id="kpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
+                        <input type="hidden" id="km_src" name="km_src" value="{{ $Kimgsrc }}"></div>
                     </td>
                 </tr>
                 <tr class="deep">
@@ -138,6 +140,14 @@
 @stop
 @section('script')
 <script type="text/javascript">
+function rem(v){
+    if (confirm('確定刪除?')){
+        gb('km_src').value = '';
+        $("#kmup").removeClass("hiden");
+        gb("kmold").innerHTML = '';
+        $("#kmold").hide();
+    }
+}
 function subj_c(v){
     $.ajax({
         type:"GET",

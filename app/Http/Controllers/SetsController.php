@@ -73,9 +73,9 @@ class SetsController extends TopController
         $pfunc->next = $this->next_page;
         $pfunc->pg = $this->group_page;
 
-        return view('sets.index', [
+        return view('sets.index_set', [
             'menu_user' => $this->menu_user,
-            'title' => '考卷列表',
+            'title' => '試卷列表',
             'Grade' => $gra_html,
             'Subject' => $subj_html,
             'Data' => $sets_data,
@@ -137,9 +137,9 @@ class SetsController extends TopController
                     $subj_html.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
                 }
         }
-        return view('sets.create_havesub', [
+        return view('sets.create_set', [
             'menu_user' => $this->menu_user,
-            'title' => '新增考卷',
+            'title' => '新增試卷',
             'Time' => $Time,
             'Lim' => $Lim,
             'Grade' => $gra_html,
@@ -246,7 +246,66 @@ class SetsController extends TopController
         }
         return redirect('/sets');
     }
+    public function store_set(Request $req)
+    {
+        if (!$this->login_status)return redirect('/login');
+        $s_name = ($req->has('setsname') && !empty($req->input('setsname'))) ? $req->input('setsname'):'';
+        $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
+        $s_subj = ($req->has('subject')) ? $req->input('subject'):0;
+        if ($s_gra===0 || 
+            $s_subj===0 || 
+            empty($s_name))abort(400);
+        $s_intro = ($req->has('intro')) ? $req->input('intro'):'';
+        $data = array();
+        $data['s_name'] = $s_name;
+        $data['s_intro'] = $s_intro;
+        $data['s_begtime'] = '';
+        $data['s_endtime'] = '';
+        $data['s_gra'] = $s_gra;
+        $data['s_subj'] = $s_subj;
+        $s_sum = ($req->has('sum')) ? (int)$req->input('sum'):100;
+        $data['s_sum'] = $s_sum;
+        $s_pass_score = ($req->has('passscore')) ? (int)$req->input('passscore'):60;
+        $data['s_pass_score'] = $s_pass_score;
+        $data['s_owner'] = $this->login_user;
+        $data['created_at'] = time();
+        $data['updated_at'] = time();
 
+        $have_sub = ($req->has('have_sub') && !empty($req->input('have_sub'))) ? trim($req->input('have_sub')):'';
+        // 有大題
+        if (!empty($have_sub)) {
+            $s_page = ($req->has('control') && !empty($req->input('control'))) ? trim($req->input('control')):'N';
+            $data['s_page'] = $s_page;
+            $data['s_sub'] = 1; 
+        }else{
+            $data['s_sub'] = 0; 
+        }
+        //主體
+        $ins = new Sets;
+        $ins->fill($data);
+        $ins->save();
+        if ($have_sub){
+            //大題
+            $sort  = ($req->has('sub_sort') && !empty($req->input('sub_sort'))) ? $req->input('sub_sort'):array();
+            $control  = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
+            $score  = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
+            $intro  = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
+            foreach ($sort as $k => $v) {
+                $data['s_name'] = '';
+                $data['s_part'] = $v;
+                $data['s_page'] = $control[$k];
+                $data['s_percen'] = $score[$k];
+                $data['s_intro'] = $intro[$k];
+                $data['s_sum'] = $s_sum * $score[$k];
+                $data['s_pass_score'] = $s_pass_score * $score[$k];
+                $data['s_pid'] = $ins->s_id;
+                $sub_ins = new Sets;
+                $sub_ins->fill($data);
+                $sub_ins->save();
+            }
+        }
+        return redirect('/sets');
+    }
     /**
      * Display the specified resource.
      *
@@ -471,7 +530,48 @@ class SetsController extends TopController
             'Page' => $data->s_page
         ]);
     }
+    public function edit_set($sid)
+    {
+        if (!$this->login_status)return redirect('/login');
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        $data = Sets::find($sid);
 
+        $gra_html = '';
+        $subj_html = '';
+        $grade_data = $this->grade();
+        foreach ($grade_data as $v) {
+            $g_sel = ($data->s_gra===$v->g_id) ? 'selected':'';
+            $gra_html.= '<option '.$g_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+        }
+
+        $subject_data = $this->subject($data->s_gra);
+        foreach ($subject_data as $v) {
+            $s_sel = ($data->s_subj===$v->g_id) ? 'selected':'';
+            $subj_html.= '<option '.$s_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+        }
+        //大題
+        if ($data->s_sub){
+            $sub = Sets::where('s_pid', $sid)->orderby('s_part')->get()->all();
+        }else{
+            $sub = array();
+        }
+        return view('sets.edit_set', [
+            'menu_user' => $this->menu_user,
+            'title' => '編輯考卷',
+            'Sid' => $sid,
+            'Setsname' => $data->s_name,
+            'Intro' => $data->s_intro,
+            'Grade' => $gra_html,
+            'Subject' => $subj_html,
+            'Sum' => $data->s_sum,
+            'Pass' => $data->s_pass_score,
+            'Sub' => $sub,
+            'Hsub' => $data->s_sub,
+            'Page' => $data->s_page
+        ]);
+    }
     /**
      * Update the specified resource in storage.
      *
@@ -906,5 +1006,12 @@ class SetsController extends TopController
     //ajax編輯試卷 (iframe open show)
     public function ajstru($sid){
 
+    }
+    public function ajpublish(){
+        $_get = Input::all();
+        if (!empty($_get)){
+            $gra = request()->input('g');
+            $subj = request()->input('s');
+        }
     }
 }

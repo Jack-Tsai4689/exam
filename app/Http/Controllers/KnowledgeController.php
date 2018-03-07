@@ -301,10 +301,21 @@ class KnowledgeController extends TopController
         $kimg_html = '';
         $del_qimg = '';
         $data['Kimg'] = '';
+        $km_upload = true;
         $data['Kimg_src'] = '';
         if (!empty($know->k_picpath)){
-            if (is_file($know->k_picpath))$data['Kimg'] = URL::asset($know->k_picpath);
+            $kimg_html = '檔名：'.$know->k_pic;
+            if (is_file($know->k_picpath)){
+                $kimg_html.= '　<input type="button" value="刪除圖片" class="btn w100" id="delkm" onclick="rem(this.id)">';
+                $km_upload = false;
+            }else{
+                $kimg_html.= '　<font color="red">檔案遺失</font>';
+            }
+            $data['Kimg'] = URL::asset($know->k_picpath);
         }
+        $data['Kimgsrc'] = $know->k_picpath;
+        $data['Kmsold'] = ($km_upload) ? 'class="hiden"':'style="inline-block;"';
+        $data['Km_upload'] = (!$km_upload) ? 'class="hiden"':'';
         // if (!empty($know->K_PIC)){
         //     if (is_file($know->K_PIC)){
         //         $data['Kimg'] = base_url($know->K_PIC);
@@ -315,7 +326,7 @@ class KnowledgeController extends TopController
         // $kimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nknow" class="btn w160 h25" onClick="uknow(this.id)" >   ';
         // $kimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnknow" class="btn w160 h25" onClick="uknow(this.id)" >   ';
         // $kimg_html.= $del_qimg;
-        $data['Kimgsrc'] = $know->k_pic;
+        //$data['Kimgsrc'] = $know->k_pic;
         $data['Kimg_html'] = $kimg_html;
 
         $data['Kid'] = $kid;
@@ -372,12 +383,44 @@ class KnowledgeController extends TopController
 
         $k_name = ($req->has('f_kname') && !empty($req->input('f_kname'))) ? trim($req->input('f_kname')):'';
         $k_content = ($req->has('f_kcont') && !empty($req->input('f_kcont'))) ? trim($req->input('f_kcont')):'';
-        $k_keyword = ($req->has('f_kw') && !empty($req->input('f_kw'))) ? trim($req->input('f_kw')):'';
+        $k_keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
         $k_pic = ($req->has('f_kpic') && !empty($req->input('f_kpic'))) ? trim($req->input('f_kpic')):'';
         $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
         $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
         $chapid = ($req->has('f_chapter') && (int)$req->input('f_chapter')>0) ? (int)$req->input('f_chapter'):0;
 
+
+        $km_src = '';
+        $km_name = '';
+        $km_file = $req->file('kpic');
+        if ($km_file!=null){
+            $file_error = false;
+            if ($req->hasFile('kpic')){
+                $mime = $km_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','impage/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    $uuid = md5($km_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$km_file->getClientOriginalExtension();
+                    $km_src = UPLOAD_DIR.'/'.$file;
+                    $km_file->move(UPLOAD_DIR, $file);
+                    $km_name = $km_file->getClientOriginalName();
+                }
+            }
+        }
+        $kmold_src = ($req->has('km_src') && !empty($req->input('km_src'))) ? trim($req->input('km_src')):'';
+
+
+        $know = Knows::find($kid);
+
+        //刪舊的或本來就沒有
+        if (empty($kmold_src)){
+            if (!empty($know->k_picpath)){
+                if (is_file($know->k_picpath)){ if (unlink($know->k_picpath)){} }
+            }
+            $know->k_picpath = $km_src;
+            $know->k_pic = $km_name;
+        }
         // if ($graid===0 || $subjid===0 || $chapid===0){
         //  $this->_errmsg(400);
         //  return;
@@ -406,13 +449,19 @@ class KnowledgeController extends TopController
         //         if (unlink($know->K_PIC)){}
         //     }
         // }
-        $know = Knows::find($kid);
+        $key = array();
+        foreach ($k_keyword as $v) {
+            $c = (string)$v;
+            if ($c==="")continue;
+            $key[] = $v;
+        }
+        
         $know->k_name = $k_name;
         $know->k_gra = $graid;
         $know->k_subj = $subjid;
         $know->k_chap = $chapid;
         $know->k_content = $k_content;
-        $know->k_keyword = $k_keyword;
+        $know->k_keyword = "|".implode("|", $key)."|";
         $know->updated_at = time();
         $know->save();
         return redirect('/know');
