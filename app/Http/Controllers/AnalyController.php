@@ -23,6 +23,7 @@ class AnalyController extends TopController
     考題來源表
     */
     public function source($eid){
+        if (!$this->login_status)return redirect('/login');
         $eid = (int)$eid;
         $exam = Exams::find($eid);
         $sets_set = Sets::find($exam->s_id);
@@ -79,6 +80,7 @@ class AnalyController extends TopController
     觀念答對比率圖
     */
     public function radar($eid){
+        if (!$this->login_status)return redirect('/login');
         $eid = (int)$eid;
         $eid = (int)$eid;
         $exam = Exams::find($eid);

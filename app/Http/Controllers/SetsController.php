@@ -59,7 +59,7 @@ class SetsController extends TopController
                 $sets_data[$k]->s_again = ($v->s_again) ? "O":"X";
                 $sets_data[$k]->updated_at = date('Y/m/d H:i:s', $v->updated_at);
                 $sets_data[$k]->time = (!empty($v->s_begtime)) ? $v->s_begtime.' - '.$v->s_endtime:'不限';
-                $sets_data[$k]->finish = ($v->s_finish) ? '已開放':'未開放';
+                $sets_data[$k]->finish = ($v->s_finish) ? '定案':'可編輯';
             }
         }
 
@@ -75,7 +75,7 @@ class SetsController extends TopController
 
         return view('sets.index_set', [
             'menu_user' => $this->menu_user,
-            'title' => '試卷列表',
+            'title' => '試卷庫',
             'Grade' => $gra_html,
             'Subject' => $subj_html,
             'Data' => $sets_data,
@@ -1012,6 +1012,31 @@ class SetsController extends TopController
         if (!empty($_get)){
             $gra = request()->input('g');
             $subj = request()->input('s');
+            if (!is_numeric($gra) || !is_numeric($subj))abort(400);
+            $g = (int)$gra;
+            $s = (int)$subj;
+            if ($g<=0 || $s<=0)return;
+            if (!$this->login_status)abort(400);
+            $data = Sets::select('s_id','s_name')
+                        ->where('s_gra', $g)
+                        ->where('s_subj', $s)
+                        ->where('s_finish', 1)
+                        ->get()->all();
+            $sets = array();
+            if (empty($data)){
+                $tmp = new \stdClass;
+                $tmp->ID = 0;
+                $tmp->NAME = '無考卷';
+                array_push($sets, $tmp);
+            }else{
+                foreach ($data as $v) {
+                    $tmp = new \stdClass;
+                    $tmp->ID = $v->s_id;
+                    $tmp->NAME = $v->s_name;
+                    array_push($sets, $tmp);
+                }
+            }
+            echo json_encode($sets);
         }
     }
 }

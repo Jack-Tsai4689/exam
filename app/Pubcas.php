@@ -13,7 +13,6 @@ class Pubcas extends Model
     	'p_id',
 		'pc_class',
 		'pc_classa',
-		'pc_webid',
-		'pc_again'
+		'pc_webid'
     ];
 }

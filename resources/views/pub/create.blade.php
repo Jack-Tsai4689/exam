@@ -111,10 +111,44 @@
 @section('content')
 <div id="all">
 	<div class="title"><label class="f17">{{ $title }}</label></div>
-    <form name="form1" id="form1" method="post" action="{{ url('sets') }}" onsubmit="return check_data()">
+    <form name="form1" id="form1" method="post" action="{{ url('pub') }}" onsubmit="return check_data()">
     	<div class="content">
     		<div class="cen last">
     			<table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td align="left"><label class="f17">使用試卷</label></td>
+                        <td></td>
+                    </tr>
+                    <tr class="deep">
+                        <td align="center">年級</td>
+                        <td>
+                            <select name="grade" id="grade" onchange="subj_c(this.value)">
+                                @foreach($Grade as $g)
+                                <option {{ ($g->g_id===$Sel->gra) ? 'selected':null }} value="{{ $g->g_id }}">{{ $g->g_name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="shallow">
+                        <td align="center">科目</td>
+                        <td>
+                            <select name="subj" id="subj" onchange="sets_c(this.value)">
+                                @foreach($Subject as $su)
+                                <option {{ ($su->g_id===$Sel->subj) ? 'selected':null }} value="{{ $su->g_id }}">{{ $su->g_name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                    </tr>
+                    <tr class="deep">
+                        <td align="center">派卷</td>
+                        <td>
+                            <select name="sets" id="sets">
+                                @foreach($Sets as $s)
+                                <option {{ ($s->s_id===$Sel->sid) ? 'selected':null }} value="{{ $s->s_id }}">{{ $s->s_name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                    </tr>
                     <tr>
                         <td align="left"><label class="f17">適用範圍</label></td>
                         <td></td>
@@ -138,42 +172,8 @@
                     <tr class="deep">
                         <td align="center">考卷</td>
                         <td>
-                        	<select name="sets" id="sets">
+                        	<select name="wsets" id="wsets">
                                 <option></option>   
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td align="left"><label class="f17">使用試卷</label></td>
-                        <td></td>
-                    </tr>
-                    <tr class="deep">
-                        <td align="center">年級</td>
-                        <td>
-                            <select name="grade" id="grade" onchange="subj_c(this.value)">
-                                @foreach($Grade as $g)
-                                <option value="{{ $g->g_id }}">{{ $g->g_name }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                    </tr>
-                    <tr class="shallow">
-                        <td align="center">科目</td>
-                        <td>
-                            <select name="subj" id="subj" onchange="sets_c(this.value)">
-                                @foreach($Subject as $su)
-                                <option value="{{ $su->g_id }}">{{ $su->g_name }}</option>
-                                @endforeach
-                            </select>
-                        </td>
-                    </tr>
-                    <tr class="deep">
-                        <td align="center">派卷</td>
-                        <td>
-                            <select name="sets" id="sets">
-                                @foreach($Sets as $s)
-                                <option value="{{ $s->s_id }}">{{ $s->s_name }}</option>
-                                @endforeach
                             </select>
                         </td>
                     </tr>
@@ -295,6 +295,7 @@ function subj_c(v){
                 html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
             $("#subj").html(html);
+            sets_c(gb('subj').value);
         }
     });
 }
@@ -307,12 +308,12 @@ function sets_c(v){
         type:"GET",
         url:"{{ url('sets/pfetch') }}",
         dataType:"JSON",
-        data:{'g':gb('grade').value, 's':gb('subj').value},
+        data:{'g':gb('grade').value, 's':v},
         success: function(rs){
             $("#sets").html('');
             var html = '';
             for(var i in rs){
-                html+= '<option value="'+rs[i].ID+'">'.rs[i].NAME+'</option>';
+                html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
             $("#sets").html(html);
         }

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
-use App\Http\Controllers\Controller;
 use App\Exams;
 use App\Sets;
 
@@ -23,11 +22,13 @@ class ScoreController extends TopController
     // 成績列表
     public function index()
     {
+        if (!$this->login_status)return redirect('/login');
         //學生只看自己的
         if (session('ident')==="S"){
             $data = Exams::where('e_stu', session('epno'))
                          ->where('e_pid', 0)
                          ->where('e_status', 'Y')
+                         ->orwhere('e_status','O')
                          ->get()->all();
             foreach ($data as $k => $v) {
                 $s = Sets::find($v->s_id);
@@ -45,7 +46,6 @@ class ScoreController extends TopController
         //老師依班級看
         if (session('ident')==="T"){
             $data = Exams::where('e_pid', 0)
-                         ->where('e_status', 'Y')
                          ->get()->all();
             return view('exam.score_tlist', [
                 'menu_user' => $this->menu_user,

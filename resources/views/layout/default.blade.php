@@ -18,8 +18,8 @@
 			<li>
 				<a href="javascript:void(0)">出題系統</a>
 				<ul>
-					<li><div class="ex"><a href="{{ url('sets') }}">試卷管理</a></div></li>
-					<li><div class="ex"><a href="{{ url('pub') }}">發佈測驗</a></div></li>
+					<li><div class="ex"><a href="{{ url('sets') }}">試卷庫</a></div></li>
+					<li><div class="ex"><a href="{{ url('pub') }}">發佈記錄</a></div></li>
 					<li><div class="ex"><a href="{{ url('ques') }}">題庫</a></div></li>
 					<li><div class="ex"><a href="{{ url('know') }}">知識點管理</a></div></li>
 				</ul>

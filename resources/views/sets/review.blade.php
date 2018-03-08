@@ -272,7 +272,7 @@
     <div class="title_intro">
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
-        <label>限時</label>{{ $Limtime }}　@if (!$Edit)<input type="button" id="sets_edit" value="編輯">　
+        {{-- <label>限時</label>{{ $Limtime }} --}}　@if (!$Edit)<input type="button" id="sets_edit" value="編輯">　
         <form style="display: inline-block;" action="{{ url('/sets/'.$Sid.'/finish') }}" method="post" onsubmit="return updcheck()">
             {{ csrf_field() }}
             <input type="hidden" name="_method" value="PUT">

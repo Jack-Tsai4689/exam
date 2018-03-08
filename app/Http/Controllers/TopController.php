@@ -87,5 +87,20 @@ class TopController extends Controller
       $error = curl_errno($ch);
       curl_close($ch);
       return json_decode($data);
-   }
+    }
+    //串接班級
+    protected function GetClass(){
+      //$this->url_curl();
+      //return;
+    }
+    //串接班別
+    protected function GetClassa(){
+      //$this->url_curl();
+      //return;
+    }
+    //串接考卷
+    protected function GetSets(){
+      //$this->url_curl();
+      //return;
+    }
 }

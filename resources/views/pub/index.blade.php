@@ -57,10 +57,16 @@
 		類別：
 		<select name="gra" onchange="getsubj(this.value)">
 			<option value="0">全部</option>
+			@foreach($Grade as $g)
+			<option value="{{ $g->g_id }}">{{ $g->g_name}}</option>
+			@endforeach
 		</select>
 		科目：
 		<select name="subj" id="subj">
 			<option value="0">全部</option>
+			@foreach($Subject as $s)
+			<option value="{{ $s->g_id }}">{{ $s->g_name}}</option>
+			@endforeach
 		</select>
 		<input type="button" id="cond" value="篩選">
 		<input type="hidden" name="page" id="urlpage" value="">
@@ -72,38 +78,38 @@
 				<thead>
 					<tr>
 						<th>派卷名稱</th>
-						<th>擁有者</th>
+						<th>發佈者</th>
 						<th>類別</th>
 						<th>科目</th>
-						<th>班級<br>
-							<font class="f12">應測人數(<font class="class_examed">已測</font>/<font class="class_notexam">未測</font>/<font class="class_examing">測驗中</font>)</font>
-						</th>
+						<th>班級</th>
 						<th>班別</th>
 						<th>考卷</th>
-						<th>重覆考</th>
-						<th>考試期間</th>
-						<th>發表時間</th>
-						<th>考試限時</th>
+						<th width="80">重覆考</th>
+						<th width="180">考試期間</th>
+						<th width="180">發表時間</th>
+						<th width="100">考試限時</th>
 						<th width="60">狀態</th>
-						<th class="last">題目預覽</th>
+						<th width="100">考卷預覽</th>
+						<th class="last">動作</th>
 					</tr>
 				</thead>
 				<tbody>
 				@foreach ($Data as $i => $v)
 				<tr class="{{ ($i%2==0) ? 'deep':'shallow' }}">
 					<td name="setsname" class="left">{{ $v->s_name }}</td>
-					<td>{{ $v->s_owner }}</td>
-					<td>{{ $v->gra->name }}</td>
-					<td>{{ $v->subj->name }}</td>
+					<td>{{ $v->p_owner }}</td>
+					<td>{{ $v->gra }}</td>
+					<td>{{ $v->subj }}</td>
 	                <td></td>
 					<td></td>
 					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
-					<td></td>
+					<td>{{ ($v->p_again) ? "O":"X" }}</td>
+					<td>{!! $v->exam_day !!}</td>
+					<td>{{ date('Y/m/d H:i:s', $v->p_created_at) }}</td>
+					<td>{{ $v->p_limtime }}</td>
+					<td>View</td>
+					<td>View</td>
+					<td><input type="button" value="暫停"></td>
 				</tr>
 				@endforeach
 				</tbody>

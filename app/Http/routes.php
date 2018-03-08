@@ -71,6 +71,8 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::put('{id}', "SetsController@update");
 	//開放考試
 	Route::put('{id}/finish', "SetsController@status_change");
+	//派卷
+	Route::get("/pfetch", "SetsController@ajpublish");
 	//預覽
 	Route::get('/{id}', "SetsController@show");
 	//ajax更新大題
@@ -90,8 +92,6 @@ Route::group(['prefix'=>'sets'], function(){
 	//ajax 編輯考卷設定
 	Route::get("{id}/structure", "SetsController@ajstru");
 
-	//派卷
-	Route::get("/pfetch", "SetsController@ajpublish");
 });
 //題目
 Route::group(['prefix'=>'ques'], function(){

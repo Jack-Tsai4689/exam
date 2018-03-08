@@ -105,8 +105,8 @@
 					<td>{{ $v->finish }}</td>
 					<td><a id="sets_link" href="sets/{{ $v->s_id }}">題目預覽</a></td>
 					<td class="last">
-						<div class="edit_group btn" onclick="open_edit({{ $v->s_id }})">編輯</div>
 						@if (!$v->s_finish)
+						<div class="edit_group btn" onclick="open_edit({{ $v->s_id }})">編輯</div>
 						<div id="edit_func_{{ $v->s_id }}" class="edit_func" name="edit_group">
 							<div><input type="button" onclick="location.href='{{ url('sets/'.$v->s_id.'/edit') }}'" value="修改"></div>
 							<div>
@@ -127,6 +127,8 @@
 {{--                             <div><a href="javascript:void(0)" onclick="copyfrom()">複製</a></div>
  --}}					
 						</div>
+						@else
+						<input type="button" value="發佈測驗" class="pub" data-id="{{ $v->s_id }}">
 						@endif
 					</td>
 				</tr>
@@ -265,5 +267,9 @@ function gp(p){
 function sets_find(){
 	location.href = '{{ url('/sets')}}?'+$("#search").serialize();	
 }
+$(".pub").on('click', function(){
+	let sid = $(this).data('id');
+	location.href = "{{ url('/pub/create') }}?sid="+sid;
+});
 </script>
 @stop
