@@ -179,6 +179,7 @@
     <input type="hidden" name="qtype" id="qtype" value="{{ $que->qtype }}">
     <input type="hidden" name="qnum" id="qnum" value="{{ $que->qnum }}">
     <input type="hidden" name="epart" id="epart" value="{{ $first_part->eid }}">
+    <input type="hidden" name="spart" id="spart" value="{{ $first_part->sid }}">
     <input type="hidden" name="utime" id="utime">
     <div class="content" id="Q1">
         <div class="cen">
@@ -265,7 +266,7 @@ $(document).ready(function (){
             gb('h').innerHTML = hour;
             gb('m').innerHTML = min;
             gb('s').innerHTML = sec;
-            gb('utime').innerHTML = utime;
+            gb('utime').value = utime;
         }
     }
 // document.onkeydown = function(event){
@@ -338,7 +339,8 @@ function storeans(){
             var qnum = gb('qnum').value;
             var i = 1;
             while(i<=qnum){
-                oans.push($('input[name="ans'+current+'_'+i+'[]"]:checked').val()); 
+                let ans = $('input[name="ans'+current+'_'+i+'"]:checked').val();
+                if (typeof ans !=="undefined")oans.push(ans);
                 i++;
             }
             break;
@@ -355,8 +357,6 @@ function storeans(){
             n--;    y++;
             gb('n').innerHTML = n;
             gb('y').innerHTML = y;
-            // $('#n').html(n);
-            // $('#y').html(y);
         }
         stu_ans[current-1] = ans;
     } 
@@ -366,13 +366,11 @@ function storeans(){
         if (du_check[current-1]==''){
             du_check[current-1] = 1;
             r++;
-            // $('#r').html(r);
         }
     }else{
         if (du_check[current-1]==1){
             du_check[current-1] = '';
             r--;
-            // $('#r').html(r);
             $('#go'+current).removeClass('chk');
         }
     }
@@ -459,8 +457,8 @@ function go(qno){
             gb("qtype").value = data.qtype;
             gb("qnum").value = data.qnum;
             if (txt=='n'){
-                gb('Q'+current+'_main').innerHTML = data.qcont;
-                gb('A'+current+'_main').innerHTML = data.ans;
+                gb('Q'+qno+'_main').innerHTML = data.qcont;
+                gb('A'+qno+'_main').innerHTML = data.ans;
             }
         }
     });

@@ -174,6 +174,7 @@
                 act_end();
             },
             error: function(){
+                alert('同時只能進行一份測驗');
                 act_end();
             }
         });

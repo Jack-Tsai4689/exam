@@ -78,9 +78,12 @@ class ExamController extends TopController
         Redis::del($token);
         Redis::del($io);
         $exam_data = explode("|", $user);
+        $exam = Exams::find($exam_data[1]);
         Exams::where('e_id', $exam_data[1])
              ->where('e_stu', $exam_data[0])
              ->where('e_status', 'N')
+             ->update(['e_status' => 'O', 'e_endtime_at' => time() ]);
+        Exams::where('e_id', $exam->e_pid)
              ->update(['e_status' => 'O', 'e_endtime_at' => time() ]);
         //Event::fire(new PushNotification($this->login_user, '123'));
     }
@@ -96,11 +99,12 @@ class ExamController extends TopController
         // dd($req->all());
         $sid = ($req->has('setid') && (int)$req->input('setid')>0) ? (int)$req->input('setid'):0;
         $part = ($req->has('epart') && (int)$req->input('epart')>0) ? (int)$req->input('epart'):0;
+        $spart = ($req->has('spart') && (int)$req->input('spart')>0) ? (int)$req->input('spart'):0;
         $qno = ($req->has('current_qno') && (int)$req->input('current_qno')>0) ? (int)$req->input('current_qno'):0;
         $qtype = ($req->has('qtype') && !empty($req->input('qtype'))) ? trim($req->input('qtype')):'';
         $qnum = ($req->has('qnum') && (int)$req->input('qnum')>0) ? (int)$req->input('qnum'):0;
         $act = ($req->has('next_qa') && !empty($req->input('next_qa'))) ? trim($req->input('next_qa')):'';
-        $utime = ($req->has('utime') && !empty($req->input('utime'))) ? trim($req->input('utime')):0;
+        $utime = ($req->has('utime') && !empty($req->input('utime'))) ? (int)$req->input('utime'):0;
         $eid = $req->input('exam');
         //下個大題
         if ($act==="part"){
@@ -144,24 +148,27 @@ class ExamController extends TopController
                 $n = 1;
                 $ans_arr = array();
                 while($n<=$qnum){
-                    $ans_arr[] = $req->input('ans'.$qno.'_'.$n);
+                    if ($req->has('ans'.$qno.'_'.$n))$ans_arr[] =  $req->input('ans'.$qno.'_'.$n);                    
                     $n++;
                 }
                 $ans = implode(",", $ans_arr);
                 break;
             case 'S':
             case 'R':
-                $ans = $req->input('ans'.$qno);
+                if ($req->has('ans'.$qno)) $ans = $req->input('ans'.$qno);
                 break;
             case 'D':
-                $ans_arr = $req->input('ans'.$qno);
-                $ans = implode(",", $ans_arr);
+                if ($req->has('ans'.$qno)){
+                    $ans_arr = $req->input('ans'.$qno);
+                    $ans = implode(",", $ans_arr);
+                }
                 break;
         }
-        ExamDetail::where('ed_eid', $part)
-                  ->where('ed_sort', $qno)
-                  ->update(['ed_ans'=> $ans])
-                  ->increment('ed_times', $utime);
+        DB::update("UPDATE exam_details SET ed_ans=?, ed_times=ed_times+? WHERE ed_eid=? AND ed_sort=?", [$ans, $utime, $part, $qno]);
+        // ExamDetail::where('ed_eid', $part)
+        //           ->where('ed_sort', $qno)
+        //           ->update(['ed_ans'=> $ans])
+        //           ->increment('ed_times', $utime);
 
         $finish = false;
         //讀取題目
@@ -211,16 +218,19 @@ class ExamController extends TopController
                 abort(400);
                 break;
         }
-        $que = ExamDetail::select('ed_qid')
-                         ->where('ed_eid', $part)
-                         ->where('ed_sort', $qno)->first();
-        if (Redis::exists('q_info:'.$que->ed_qid)){
-            $quedata = Redis::get('q_info:'.$que->ed_qid);
+        $que = Pubsque::where('pq_part', $spart)
+                      ->where('pq_sort', $qno)->first();
+        // $que = ExamDetail::select('ed_qid')
+        //                  ->where('ed_eid', $part)
+        //                  ->where('ed_sort', $qno)->first();
+        if (Redis::exists('q_info:'.$que->pq_qid)){
+            $quedata = Redis::get('q_info:'.$que->pq_qid);
         }else{
-            $quedata = $this->_Ques_Info($que->que()->first(), $qno);
-            Redis::set('q_info:'.$que->ed_qid, $quedata);
+            $data = $this->_Ques_Info($que, $qno);
+            $quedata = json_encode($data);
+            Redis::set('q_info:'.$que->pq_qid, $quedata);
         }
-        echo json_encode($quedata);
+        echo $quedata;
     }
     //session 傳值
     public function init_check(Request $req){
@@ -238,7 +248,7 @@ class ExamController extends TopController
         if (session('type')==="sets"){
             $exam_type = 'sets';
             $p_id = session('sets');
-            session()->forget('token');
+            //session()->forget('token');
             session()->forget('type');
             session()->forget('sets');
             $pubs = Pubs::find($p_id);
@@ -250,7 +260,7 @@ class ExamController extends TopController
                     //答案存redis
                     $key = 's'.$p_id.'|p'.$v->p_id;
                     if (!Redis::exists($key)){
-                        $subq = Pubsque::where('p_id', $v->p_id)
+                        $subq = Pubsque::where('pq_pid', $v->p_id)
                                        ->select('pq_ans')
                                        ->orderby('pq_sort')
                                        ->get()->all();
@@ -298,75 +308,87 @@ class ExamController extends TopController
         $subj = ($req->has('subj') && (int)$req->input('subj')>0) ? (int)$req->input('subj'):0;
         $chap = ($req->has('chap') && (int)$req->input('chap')>0) ? (int)$req->input('chap'):0;
         $degree = ($req->has('degree') && !empty($req->input('degree'))) ? trim($req->input('degree')):'';
-        $sid = ($req->has('sets') && (int)$req->input('sets')>0) ? (int)$req->input('sets'):0;
+        $pid = ($req->has('sets') && (int)$req->input('sets')>0) ? (int)$req->input('sets'):0;
         $lime = ($req->has('lime') && !empty($req->input('lime'))) ? trim($req->input('lime')):'';
         $exam = ($req->has('exam') && !empty($req->input('exam'))) ? (int)$req->input('exam'):0;
         $epart = ($req->has('epart') && !empty($req->input('epart'))) ? (int)$req->input('epart'):0;
         $spart = ($req->has('spart') && !empty($req->input('spart'))) ? (int)$req->input('spart'):0;
         if ($type==="sets"){
-            if ($sid<=0)abort(400);
+            if ($pid<=0)abort(400);
             //$this->_exam_sets($sets);
-            $sets_data = Sets::find($sid);
+            $pubs_data = Pubs::find($pid);
             //直接下個大題
             if ($exam>0 && $epart>0 && $spart>0){
                 $_exam = new \stdclass;
                 $_exam->status = 'part';
                 $_exam->eid = $exam;
                 $_exam->esid = $epart;
-                $_exam->sid = $sid;
+                $_exam->sid = $pid;
                 $_exam->ssid = $spart;
-                $data = $this->_next_part($_exam, $sets_data, $lime);
+                $data = $this->_next_part($_exam, $pubs_data, $lime);
                 Exams::where('e_id', $epart)->update(['e_begtime_at'=> time()]);
                 return view('exam.ying', $data);
                 return;
             }
-            $_exam = $this->_Exam_Status_Check($sid, $epart, $spart);
-            if (!$sets_data->s_again){
+            $_exam = $this->_Exam_Status_Check($pid, $epart, $spart);
+            if (!$pubs_data->p_again){
                 //不能重覆考
                 if ($_exam->status==="ed")die('已考過');
             }
             $time = time();
-            $lime = explode(":", $sets_data->s_limtime);
+            $lime = explode(":", $pubs_data->p_limtime);
             $already_ans = 0;
             switch ($_exam->status) {
                 case '': //第一次考
                     //主記錄先存
                     $start_q = 0;
-                    $edata = new Exams;
-                    $edata->fill([
+                    $edata = Exams::create([
                         'e_stu' => session('epno'),
-                        's_id' => $sid,
+                        's_id' => $pid,
                         'e_pid' => 0,
-                        'e_sub' => $sets_data->s_sub,
+                        'e_sub' => $pubs_data->p_sub,
                         'e_begtime_at' => $time
                     ]);
-                    $edata->save();
                     $eid = $edata->e_id;
                     $qno = array();
                     $part_show = new \stdclass;
                     $first_que = new \stdclass;
-                    if ($sets_data->s_sub){
+                    if ($pubs_data->p_sub){
                         //找大題 -> 找題目，放進exams 依大題順序
-                        $part_que = Sets::where('s_pid', $sid)->orderby('s_part')->get()->all();
-                        foreach ($part_que as $pk => $pv) {
+                        $part = Pubs::where('p_pid', $pid)->orderby('p_part')->get()->all();
+                        foreach ($part as $pk => $pv) {
                             //新增大題
-                            $e_part = new Exams;
-                            $e_part->fill([
+                            $e_part = Exams::create([
                                 'e_stu' => session('epno'),
-                                's_id' => $pv->s_id,
+                                's_id' => $pv->p_id,
                                 'e_pid' => $eid,
                                 'e_sub' => 0,
                                 'e_sort' => ($pk+1),
                                 'e_begtime_at' => $time
+                            ]);
+                            $que = Pubsque::select('pq_sort','pq_qid')
+                                          ->where('pq_pid', $pid)
+                                          ->where('pq_part', $pv->p_id)
+                                          ->orderby('pq_sort')->get()->all();
+                            foreach ($que as $pqk => $pqv) {
+                                ExamDetail::create([
+                                    's_id' => $pv->p_id,
+                                    'ed_eid' => $e_part->e_id,
+                                    'ed_sort' => $pqv->pq_sort,
+                                    'ed_qid' => $pqv->pq_qid
                                 ]);
-                            $e_part->save();
+                            }
+                            
                             //把題目寫一份到學生卷 exam_details
-                            DB::insert("INSERT INTO exam_details(s_id, ed_eid, ed_sort, ed_qid) 
-                                SELECT ?, ?, sq_sort, sq_qid 
-                                FROM setsque 
-                                WHERE sq_sid=? AND sq_part =? 
-                                ORDER BY sq_sort", [$pv->s_id, $e_part->e_id, $sid, $pv->s_id]);
-                            if ($pk===0)$part_show->eid = $e_part->e_id;
+                            // DB::insert("INSERT INTO exam_details(s_id, ed_eid, ed_sort, ed_qid) 
+                            //     SELECT ?, ?, sq_sort, sq_qid 
+                            //     FROM setsque 
+                            //     WHERE sq_sid=? AND sq_part =? 
+                            //     ORDER BY sq_sort", [$pv->s_id, $e_part->e_id, $pid, $pv->s_id]);
+                            if ($pk===0){
+                                $part_show->eid = $e_part->e_id;
+                                $part_show->sid = $pv->p_id;
+                            }
                         }
                         /*
                         loading第一大題設定
@@ -374,26 +396,26 @@ class ExamController extends TopController
                         題數
                         配分
                         */
-                        $part_show->control = $part_que[0]->s_page;
-                        $part_show->intro = nl2br(trim($part_que[0]->s_intro));
+                        $part_show->control = $part[0]->p_page;
+                        $part_show->intro = nl2br(trim($part[0]->p_intro));
                         $part_show->no = 1;
                         $part_show->sub = true;
-                        $part_show->score = $part_que[0]->s_percen;
+                        $part_show->score = $part[0]->p_percen;
                         
-                        $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $sid)
-                                                ->where('sq_part', $part_que[0]->s_id)
-                                                ->orderby('sq_sort')->get()->all();
+                        $first_quedata = Pubsque::select('pq_qid')->where('pq_pid', $pid)
+                                                ->where('pq_part', $part[0]->p_id)
+                                                ->orderby('pq_sort')->get()->all();
                     }else{
-                        $part_show->control = $sets_data->s_page;
+                        $part_show->control = $pubs_data->s_page;
                         $part_show->sub = false;
                         
-                        $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $sid)
-                                                ->where('sq_part', $sid)
-                                                ->orderby('sq_sort')->get()->all();
+                        $first_quedata = Pubsque::select('pq_qid')->where('pq_pid', $pid)
+                                                ->where('pq_part', $pid)
+                                                ->orderby('pq_sort')->get()->all();
                     }
                     $part_show->nums = count($first_quedata);
                     foreach ($first_quedata as $v) {
-                        $qno[] = $v->sq_qid;
+                        $qno[] = $v->pq_qid;
                     }
                     $qno_act = ($part_show->control==="Y") ? 'onclick=go(1)':'';
                     $qno_html = '<div class="current" id="go1" '.$qno_act.'>'.str_pad(1,2,0,STR_PAD_LEFT).'</div>';
@@ -418,34 +440,40 @@ class ExamController extends TopController
                     $start_q = 0;
                     $start_q_chk = false;
                     $curr_q_chk = false;
-                    if ($sets_data->s_sub){
+                    if ($pubs_data->p_sub){
                         $part_show->eid = $_exam->esid;
-                        $part_que = Sets::find($_exam->ssid);
+                        $part_show->sid = $_exam->ssid;
+                        $part_que = Pubs::find($_exam->ssid);
                         /*
                         loading第一大題設定
                         可否回上頁
                         題數
                         配分
                         */
-                        $part_show->control = $part_que->s_page;
-                        $part_show->intro = nl2br(trim($part_que->s_intro));
-                        $part_show->no = $part_que->s_part;
+                        $part_show->control = $part_que->p_page;
+                        $part_show->intro = nl2br(trim($part_que->p_intro));
+                        $part_show->no = $part_que->p_part;
                         $part_show->sub = true;
-                        $first_quedata = ExamDetail::where('ed_eid', $_exam->esid)
-                                                   ->orderby('ed_sort')->get()->all();
+                        $first_quedata = Pubsque::where('pq_part', $_exam->ssid)
+                                                ->orderby('pq_sort')->get()->all();
+                        // $first_quedata = ExamDetail::where('ed_eid', $_exam->esid)
+                        //                            ->orderby('ed_sort')->get()->all();
                         $part_show->nums = count($first_quedata);
-                        $part_show->score = $part_que->s_percen;
+                        $part_show->score = $part_que->p_percen;
                     }else{
-                        $part_show->control = $sets_data->s_page;
+                        $part_show->control = $pubs_data->p_page;
                         $part_show->sub = false;
-                        $first_quedata = ExamDetail::where('ed_eid', $_exam->eid)
-                                                     ->where('s_id', $sid)
-                                                     ->orderby('ed_sort')->get()->all();
+                        $first_quedata = Pubsque::where('pq_part', $_exam->sid)
+                                                ->orderby('pq_sort')->get()->all();
+                        // $first_quedata = ExamDetail::where('ed_eid', $_exam->eid)
+                        //                              ->where('s_id', $pid)
+                        //                              ->orderby('ed_sort')->get()->all();
                         $part_show->nums = count($first_quedata);
                     }
                     foreach ($first_quedata as $i => $v) {
-                        $qno[] = $v->ed_qid;
-                        if (empty($v->ed_ans) && !$start_q_chk){
+                        $qno[] = $v->pq_qid;
+                        //if (empty($v->ed_ans) && !$start_q_chk){
+                        if (!$start_q_chk){
                             $start_q = $i;
                             //$part_show->no = ($i+1);
                             $start_q_chk = true;
@@ -470,21 +498,23 @@ class ExamController extends TopController
                     break;
             }
             if ($_exam->status==="" || $_exam->status==="yet"){
-                //loading第一題資料
-                if (Redis::exists('q_info:'.$first_quedata[$start_q]->ed_qid)){
-                    $que = Redis::get('q_info:'.$first_quedata[$start_q]->ed_qid);
+                // loading第一題資料
+                if (Redis::exists('q_info:'.$first_quedata[$start_q]->pq_qid)){
+                    $qdata = Redis::get('q_info:'.$first_quedata[$start_q]->pq_qid);
+                    $que = json_decode($qdata);
                 }else{
-                    $que = $this->_Ques_Info($first_quedata[$start_q]->que()->first(), ($start_q+1));
-                    Redis::set('q_info:'.$first_quedata[$start_q]->ed_qid, $que);   
+                    $que = $this->_Ques_Info($first_quedata[$start_q], ($start_q+1));
+                    $json_que = json_encode($que);
+                    Redis::set('q_info:'.$first_quedata[$start_q]->pq_qid, $json_que);
                 }
             }
 
             $this->_aes_init();
             $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
             $data = [
-                'sets_name' => $sets_data->s_name,
+                'sets_name' => $pubs_data->p_name,
                 'type' => 'sets',
-                'sets' => $sid,
+                'sets' => $pid,
                 'exam' => $eid,
                 'y' => $already_ans,
                 'hour' => $lime[0],
@@ -513,36 +543,36 @@ class ExamController extends TopController
         $part_show = new \stdclass;
         $first_que = new \stdclass;
         $part_show->eid = $exam->esid;
-        if ($sets_data->s_sub){
+        if ($sets_data->p_sub){
             //找大題 -> 找題目，放進exams 依大題順序
-            $part_que = Sets::find($exam->ssid);
+            $part_que = Pubs::find($exam->ssid);
             /*
             loading第一大題設定
             可否回上頁
             題數
             配分
             */
-            $part_show->control = $part_que->s_page;
-            $part_show->intro = nl2br(trim($part_que->s_intro));
-            $part_show->no = $part_que->s_part;
+            $part_show->control = $part_que->p_page;
+            $part_show->intro = nl2br(trim($part_que->p_intro));
+            $part_show->no = $part_que->p_part;
             $part_show->sub = true;
-            $part_show->score = $part_que->s_percen;
+            $part_show->score = $part_que->p_percen;
             
-            $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $exam->sid)
-                                    ->where('sq_part', $exam->ssid)
-                                    ->orderby('sq_sort')->get()->all();
+            $first_quedata = Pubsque::where('pq_pid', $exam->sid)
+                                    ->where('pq_part', $exam->ssid)
+                                    ->orderby('pq_sort')->get()->all();
         }else{
-            $part_show->control = $sets_data->s_page;
+            $part_show->control = $sets_data->p_page;
             $part_show->sub = false;
             
-            $first_quedata = Setsque::select('sq_qid')->where('sq_sid', $exam->sid)
-                                    ->where('sq_part', $exam->sid)
-                                    ->orderby('sq_sort')->get()->all();
+            $first_quedata = Pubsque::where('pq_pid', $exam->sid)
+                                    ->where('pq_part', $exam->sid)
+                                    ->orderby('pq_sort')->get()->all();
 
         }
         $part_show->nums = count($first_quedata);
         foreach ($first_quedata as $v) {
-            $qno[] = $v->sq_qid;
+            $qno[] = $v->pq_qid;
         }
         $qno_act = ($part_show->control==="Y") ? 'onclick=go(1)':'';
         $qno_html = '<div class="current" id="go1" '.$qno_act.'>'.str_pad(1,2,0,STR_PAD_LEFT).'</div>';
@@ -556,7 +586,7 @@ class ExamController extends TopController
             $i++;
         }
         //loading第一題資料
-        $que = $this->_Ques_Info($first_quedata[$start_q]->que()->first(), ($start_q+1));
+        $que = $this->_Ques_Info($first_quedata[$start_q], ($start_q+1));
         $lime = explode(":", $limetime);
         $this->_aes_init();
         $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
@@ -588,8 +618,8 @@ class ExamController extends TopController
         status ed(考過) ing(進行中) yet(中離)
         eid 學生卷id
     */
-    private function _Exam_Status_Check($sid, $epart, $spart){
-        $record = Exams::where('s_id', $sid)
+    private function _Exam_Status_Check($pid, $epart, $spart){
+        $record = Exams::where('s_id', $pid)
                            ->where('e_stu', session('epno'))
                            ->where('e_sort',0)->first();
         $json = new \stdclass;
@@ -605,8 +635,8 @@ class ExamController extends TopController
                         $json->status = 'ing';
                         $json->eid = $record->e_id;
                         $json->esid = $record->e_id;
-                        $json->sid = $sid;
-                        $json->ssid = $sid;
+                        $json->sid = $pid;
+                        $json->ssid = $pid;
                         return $json;
                     }
                     $sub_record = Exams::where('e_pid', $record->e_id)->orderby('e_sort')->get()->all();
@@ -618,7 +648,7 @@ class ExamController extends TopController
                             $json->status = 'yet';
                             $json->eid = $record->e_id;
                             $json->esid = $sv->e_id;
-                            $json->sid = $sid;
+                            $json->sid = $pid;
                             $json->ssid = $sv->s_id;
                             break;
                         }
@@ -633,8 +663,8 @@ class ExamController extends TopController
                     }
                     $json->eid = $record->e_id;
                     $json->esid = $record->e_id;
-                    $json->sid = $sid;
-                    $json->ssid = $sid;
+                    $json->sid = $pid;
+                    $json->ssid = $pid;
                     break;
             }
         }
@@ -647,29 +677,29 @@ class ExamController extends TopController
     private function _Ques_Info($que, $no){
         $data = new \stdclass;
         $data->ans = '';
-        $data->qid = $que->q_id;
-        $data->qtype = $que->q_quetype;
+        $data->qid = $que->pq_id;
+        $data->qtype = $que->pq_quetype;
         $data->qnum = 0;
         $qcont = array();
-        if (!empty($que->q_quetxt))$qcont[] = nl2br(trim($que->q_quetxt));
-        if (!empty($que->q_qm_src)){
-            if (is_file($que->q_qm_src))$qcont[] = '<img class="pic" src="'.URL::asset($que->q_qm_src).'">';
+        if (!empty($que->pq_quetxt))$qcont[] = nl2br(trim($que->pq_quetxt));
+        if (!empty($que->pq_qm_src)){
+            if (is_file($que->pq_qm_src))$qcont[] = '<img class="pic" src="'.URL::asset($que->pq_qm_src).'">';
         }
-        if (!empty($que->q_qs_src)){
-            if (is_file($que->q_qs_src))$qcont[] = '<span class="qs" data-id="S'.$no.'" onclick="QS(this)">播放</span><audio id="S'.$no.'" preload>
-                        <source src="'.URL::asset($que->q_qs_src).'" type="audio/mpeg">
+        if (!empty($que->pq_qs_src)){
+            if (is_file($que->pq_qs_src))$qcont[] = '<span class="qs" data-id="S'.$no.'" onclick="QS(this)">播放</span><audio id="S'.$no.'" preload>
+                        <source src="'.URL::asset($que->pq_qs_src).'" type="audio/mpeg">
                         <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
                       </audio>';
         }
         $data->qcont = implode("<br>", $qcont);
-        switch ($que->q_quetype) {
+        switch ($que->pq_quetype) {
             case 'S': 
             case 'D': 
                 $ans_i = 1;
                 $ans_html = '';
-                $qtype = ($que->q_quetype==="S") ? 'radio':'checkbox';
-                $qname = ($que->q_quetype==="S") ? $no:$no.'[]';
-                while ($ans_i<=$que->q_num) {
+                $qtype = ($que->pq_quetype==="S") ? 'radio':'checkbox';
+                $qname = ($que->pq_quetype==="S") ? $no:$no.'[]';
+                while ($ans_i<=$que->pq_num) {
                     $ans_html.= '<label><input name="ans'.$qname.'" type="'.$qtype.'" value="'.$ans_i.'"><font id="ans_'.$ans_i.'">'.chr($ans_i+64).'</font></label>';
                     $ans_i++;
                 }
@@ -681,7 +711,7 @@ class ExamController extends TopController
                 $data->ans = $ans_html;
                 break;
             case 'M': 
-                $ans = explode(',', $que->q_ans);
+                $ans = explode(',', $que->pq_ans);
                 $ans_math = '';
                 $data->qnum = count($ans);
                 foreach ($ans as $i => $o) {

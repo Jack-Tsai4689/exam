@@ -424,3 +424,40 @@
 	.profile_pay:active {
 		border: 1px gray dashed;
 	}
+	#intro_open {
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        position: fixed;
+        opacity: 0.8;
+        z-index: 3;
+        background:-moz-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+        background: -ms-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+        background: -webkit-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
+        filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr='#66000000',endColorstr='#e6000000',GradientType=1)";
+        -ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+        display: none;
+    }
+    #intro_all {
+        width: 100%;
+        position: fixed;
+        z-index: 5;
+        top: 0px;
+        margin: 7% auto;
+        display: none;
+    }
+    #intro_content {
+        width: 500px;
+        margin: 0% auto;
+        position: relative;
+        float: none;
+        height: 150px;
+        border-radius: 10px;
+        height: 80px;
+    }
+    #intro_title {
+        font-size: 20px;
+        text-align: center;
+        line-height: 80px;
+    }

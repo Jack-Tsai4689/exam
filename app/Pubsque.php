@@ -10,11 +10,12 @@ class Pubsque extends Model
     protected $table = 'pubsque';
     protected $primaryKey = 'pq_id';
     protected $fillable = [
-    	'p_id',
-    	'pq_sid',
+    	'pq_pid',
+    	'pq_part',
     	'pq_sort',
     	'pq_qid',
 		'pq_ans',
+		'pq_num',
 		'pq_quetype',
 		'pq_quetxt',
 		'pq_qm_src',

@@ -262,17 +262,18 @@ class PubController extends TopController
                     'p_updated_at' => time(),
                 ]);
                 //題目
-                $que = Setsque::select('sq_qid','q_ans','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap')
+                $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap')
                               ->where('sq_part', $s->s_id)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
                 foreach ($que as $i => $q) {
                     Pubsque::create([
-                        'p_id' => $pubs->p_id,
-                        'pq_sid' => 0,
+                        'pq_pid' => $pub->p_id,
+                        'pq_part' => $pubs->p_id,
                         'pq_sort' => ($i+1),
                         'pq_qid' => $q->sq_qid,
                         'pq_ans' => $q->q_ans,
+                        'pq_num' => $q->q_num,
                         'pq_quetype' => $q->q_quetype,
                         'pq_quetxt' => $q->q_quetxt,
                         'pq_qm_src' => $q->q_qm_src,
@@ -303,8 +304,8 @@ class PubController extends TopController
                               ->orderby('sq_sort')->get()->all();
             foreach ($que as $i => $q) {
                 Pubsque::create([
-                    'p_id' => $pubs->p_id,
-                    'pq_sid' => 0,
+                    'pq_pid' => $pub->p_id,
+                    'pq_part' => $pub->p_id,
                     'pq_sort' => ($i+1),
                     'pq_qid' => $q->sq_qid,
                     'pq_ans' => $q->q_ans,

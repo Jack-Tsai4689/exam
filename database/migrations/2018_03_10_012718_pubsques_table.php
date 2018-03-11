@@ -15,11 +15,12 @@ class PubsquesTable extends Migration
         Schema::create('pubsque', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('pq_id');
-            $table->integer('p_id');
-            $table->integer('pq_sid');
+            $table->integer('pq_pid');
+            $table->integer('pq_part');
             $table->integer('pq_sort');
             $table->integer('pq_qid');
             $table->string('pq_ans', 50)->default('');
+            $table->integer('pq_num');
             $table->char('pq_quetype', 1);
             $table->string('pq_quetxt', 2000)->default('');
             $table->string('pq_qm_src', 100)->default('');

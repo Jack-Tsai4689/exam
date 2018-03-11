@@ -99,13 +99,6 @@
             border: 0.5px #D2D5D5 solid;
             padding: 5px;
         }
-        #ad {
-            top: 0px;
-            left: 0px;
-            display: none;
-            width: 0px;
-            height: 0px;
-        }
 	</style>
 @stop
 @section('content')
@@ -238,6 +231,12 @@
     	</div>
     </form>
 </div>
+<div id="intro_open"></div>
+<div id="intro_all">
+    <div id="intro_content" class="set_content">
+        <div id="intro_title">處理中...</div>
+    </div>
+</div>
 @stop
 @section('script')
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
@@ -280,16 +279,21 @@ function check_data(obj){
         alert('總分有誤'); return false;
     }
     if (confirm("確定發佈？")){
+        $('#intro_open').show();
+        $('#intro_all').show();
         $.ajax({
             type:"POST",
             url: "{{ url('pub') }}",
             data: $(obj).serialize(),
             dataType:"JSON",
             success: function(rs){
+                alert('發佈完成');
                 location.href = "{{ url('pub') }}";
             },
             error: function(rs){
                 if (rs.status===406)alert('配分錯誤');
+                $('#intro_open').hide();
+                $('#intro_all').hide();
             }
         });
     }
