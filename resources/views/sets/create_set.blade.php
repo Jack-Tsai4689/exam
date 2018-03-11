@@ -245,19 +245,19 @@ function check_data(){
         if (percen!=100){
             alert('分數比例總和需為100'); return false;
         }
-        $(".subintro").each(function(){
-            if (this.value==''){
-                error = true;
-                alert('大題說明請確實填寫');
-                return false;
-            }
-        });
+        // $(".subintro").each(function(){
+        //     if (this.value==''){
+        //         error = true;
+        //         alert('大題說明請確實填寫');
+        //         return false;
+        //     }
+        // });
         if (error)return false;
     }
     if (setsname==''){
-        alert('考試名稱有誤'); return false;
+        alert('考試名稱不得空值'); return false;
     }else if (!isNaN(setsname)){
-        alert('[考卷名稱]不能都是數字喔'); return false;
+        alert('考卷名稱不能都是數字'); return false;
     }
     var date = $('input[name=chk_date]:checked').val();
     if (date==0){
@@ -265,19 +265,24 @@ function check_data(){
             alert('考試結束時間需大於等於考試起始時間!'); return false;
         }
     }
-    var limTimeH = gb('limTimeH').value;
-    var limTimeM = gb('limTimeM').value;
-    var limTimeS = gb('limTimeS').value;
-    if (limTimeH==0 && limTimeM==0 && limTimeS==0){
-        alert('考試限時不可以都是0!'); return false;
-    }
+    // var limTimeH = gb('limTimeH').value;
+    // var limTimeM = gb('limTimeM').value;
+    // var limTimeS = gb('limTimeS').value;
+    // if (limTimeH==0 && limTimeM==0 && limTimeS==0){
+    //     alert('考試限時不可以都是0!'); return false;
+    // }
     var passscore = gb('passscore').value;
     if (passscore<=0 || isNaN(passscore)){
         alert('及格分數有誤'); return false;
     }
+    passscore = Number(passscore);
     var sum_score = gb('sum').value;
     if (sum_score<=0 || isNaN(sum_score)){
         alert('總分有誤'); return false;
+    }
+    sum_score = Number(sum_score);
+    if (sum_score<passscore){
+        alert('分數錯誤'); return false;
     }
 }
 function subj_c(v){

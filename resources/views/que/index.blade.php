@@ -92,7 +92,7 @@
 		</div>
 	</div>
 	<div id="page" class="content">
-		<label class="all_rows">共{{ $Num }}筆資料</label>
+		<label class="all_rows">共 {{ $Num }} 筆資料</label>
 		<div class="each">
 			{!! $Page->prev !!}
 			<select id="pagegroup" onchange="gp(this.value)">{!! $Page->pg !!}</select>

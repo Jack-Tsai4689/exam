@@ -231,7 +231,7 @@
     			</table>
                 <div>
                     {{ csrf_field() }}
-                	<div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="發佈" name="save" id="save">　<font color="red">*發佈後，如有學生已進行考試，將無法調整</font></div>
+                	<div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="發佈" name="save" id="save">　<font color="red">*發佈後，無法變更考卷架構</font></div>
     				<div style="text-align:right; height:30px; line-height:30px;"><a href="{{ url('pub') }}"><font class="f15">返回上一層</font></a></div>
     			</div>
             </div>
@@ -258,9 +258,7 @@ function publish(v){
     }
 }
 function check_data(obj){
-    var setsname = trim(gb('setsname').value);//名稱
     var error = false;
-    var percen = 0;
     var date = $('input[name=chk_date]:checked').val();
     if (date==0){
         if (gb('begdate').value > gb('enddate').value){
@@ -281,19 +279,20 @@ function check_data(obj){
     if (sum_score<=0 || isNaN(sum_score)){
         alert('總分有誤'); return false;
     }
-    $.ajax({
-        type:"POST",
-        url: "{{ url('pub') }}",
-        data: $(obj).serialize(),
-        dataType:"JSON",
-        success: function(rs){
-            location.href = "{{ url('pub') }}";
-        },
-        error: function(rs){
-            if (rs.status===406)alert('配分錯誤');
-        }
-
-    });
+    if (confirm("確定發佈？")){
+        $.ajax({
+            type:"POST",
+            url: "{{ url('pub') }}",
+            data: $(obj).serialize(),
+            dataType:"JSON",
+            success: function(rs){
+                location.href = "{{ url('pub') }}";
+            },
+            error: function(rs){
+                if (rs.status===406)alert('配分錯誤');
+            }
+        });
+    }
     return false;
 }
 function subj_c(v){

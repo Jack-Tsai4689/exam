@@ -102,7 +102,7 @@
 	</div>
 	</form>
 	<div id="page" class="content">
-		<label class="all_rows">共{{ $Num }}筆資料</label>
+		<label class="all_rows">共 {{ $Num }} 筆資料</label>
 		<div class="each">
 			{{ $Page->prev }}
 			<select id="pagegroup" onchange="gp(this.value)">{{ $Page->pg }}</select>
@@ -111,32 +111,32 @@
 	</div>
 </div>
 <script type="text/javascript">
-function chk_all(){
-	$('input:checkbox[name=choice_f]').prop('checked',true);
-}
-function notchk_all(){
-	$('input:checkbox[name=choice_f]').prop('checked',false);	
-}
-function field_change(){
-	var chk,attribute;
-	var real = $('input:checkbox[name=choice_f]:checked').val();
-	if (real==null){
-		document.getElementById('field_msg').innerHTML = '至少選一個';
-	}else{
-		$('input:checkbox[name=choice_f]').each(function(){
-			chk = $(this).prop('checked');
-			attribute = $(this).val();
-			if (chk){
-				$('th[name="'+attribute+'"]').css('display','table-cell');
-				$('td[name="'+attribute+'"]').css('display','table-cell');
-			}else{
-				$('th[name="'+attribute+'"]').css('display','none');
-				$('td[name="'+attribute+'"]').css('display','none');
-			}
-		});
-		close_field();
-	}
-}
+// function chk_all(){
+// 	$('input:checkbox[name=choice_f]').prop('checked',true);
+// }
+// function notchk_all(){
+// 	$('input:checkbox[name=choice_f]').prop('checked',false);	
+// }
+// function field_change(){
+// 	var chk,attribute;
+// 	var real = $('input:checkbox[name=choice_f]:checked').val();
+// 	if (real==null){
+// 		document.getElementById('field_msg').innerHTML = '至少選一個';
+// 	}else{
+// 		$('input:checkbox[name=choice_f]').each(function(){
+// 			chk = $(this).prop('checked');
+// 			attribute = $(this).val();
+// 			if (chk){
+// 				$('th[name="'+attribute+'"]').css('display','table-cell');
+// 				$('td[name="'+attribute+'"]').css('display','table-cell');
+// 			}else{
+// 				$('th[name="'+attribute+'"]').css('display','none');
+// 				$('td[name="'+attribute+'"]').css('display','none');
+// 			}
+// 		});
+// 		close_field();
+// 	}
+// }
 function page(p){
 	form1.action='ex_set.php?p='+p;
 	form1.submit();
@@ -162,37 +162,34 @@ function check_all(obj,cName){
     var checkboxs = document.getElementsByName(cName);
     for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
 }
-function goo2(epno,f_fields) {
-  var rtn_data = window.open("fieldlist.php?f_pno=ex_set&self=true&epno="+epno+"&f_fields="+f_fields,"result","width=1026,height=768,resizable=yes,scrollbars=yes,location=no");
-}
-function delete_one(value){
-  if (confirm('您確定要刪除此題目？')){
-    location.href="ex_set.php?action=delete&qid="+value+"&p="+document.getElementById('p').value;
-  }
-}
-function chk(value){//选择确认 (删题目/改分享)
-  var que = new Array();
-  var choice = 0;
-  $('input:checkbox:checked[name="chkbox[]"]').each(function(i) { 
-    if ($(this).val()!=''){
-      choice = 1;
-      return false;
-    }
-  });
-  if (!choice){
-    alert('您尚未勾選題目');
-  }else{
-    if (value=='delete'){
-      if (confirm('您確定要刪除所勾選的題目？')){
-        $('#action').val('deletenums');
-        form1.submit();
-      }
-    }else if (value=='change'){
-      $('#action').val(value);
-      form1.submit();
-    }
-  }
-}
+// function delete_one(value){
+//   if (confirm('您確定要刪除此題目？')){
+//     location.href="ex_set.php?action=delete&qid="+value+"&p="+document.getElementById('p').value;
+//   }
+// }
+// function chk(value){//选择确认 (删题目/改分享)
+//   var que = new Array();
+//   var choice = 0;
+//   $('input:checkbox:checked[name="chkbox[]"]').each(function(i) { 
+//     if ($(this).val()!=''){
+//       choice = 1;
+//       return false;
+//     }
+//   });
+//   if (!choice){
+//     alert('您尚未勾選題目');
+//   }else{
+//     if (value=='delete'){
+//       if (confirm('您確定要刪除所勾選的題目？')){
+//         $('#action').val('deletenums');
+//         form1.submit();
+//       }
+//     }else if (value=='change'){
+//       $('#action').val(value);
+//       form1.submit();
+//     }
+//   }
+// }
 function search_confirm(){
   var search = $('#f_search').val();
   var pattern = new RegExp("[`~!@#$^&()=|{}':;'-+,\\[\\].<>/?~！@#￥……&*（）——|{}【】『；：」「'。，、？]");

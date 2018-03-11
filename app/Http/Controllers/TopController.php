@@ -67,11 +67,11 @@ class TopController extends Controller
         $p = 1;
         while($p<=$last){
             $sel_page = ($curr===$p) ? 'selected':'';
-            $this->group_page.= '<option '.$sel_page.' value="'.$p.'">第'.$p.'頁</option>';
+            $this->group_page.= '<option '.$sel_page.' value="'.$p.'">第 '.$p.' 頁</option>';
             $p++;
         }
       }else{
-        $this->group_page = '<option value="1">第1頁</option>';
+        $this->group_page = '<option value="1">第 1 頁</option>';
       }
     }
     protected function url_curl($url){

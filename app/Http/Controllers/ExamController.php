@@ -237,58 +237,55 @@ class ExamController extends TopController
         $can_exam = true;
         if (session('type')==="sets"){
             $exam_type = 'sets';
-            $s_id = session('sets');
+            $p_id = session('sets');
             session()->forget('token');
             session()->forget('type');
             session()->forget('sets');
-            $sets = Sets::find($s_id);
-            if ($sets->s_sub){
-                $sub = $sets->sub()->get()->all();
+            $pubs = Pubs::find($p_id);
+            if ($pubs->p_sub){
+                $sub = $pubs->sub()->get()->all();
                 //大題
                 foreach ($sub as $k => $v) {
-                    $sub[$k]->back = ($v->s_page==='N') ? '不':'';
+                    $sub[$k]->back = ($v->p_page==='N') ? '不':'';
                     //答案存redis
-                    $key = 's'.$s_id.'|p'.$v->s_id;
+                    $key = 's'.$p_id.'|p'.$v->p_id;
                     if (!Redis::exists($key)){
-                        $subq = Setsque::where('sq_sid', $s_id)
-                                       ->where('sq_part', $v->s_id)
-                                       ->join('ques','ques.q_id','=','setsque.sq_qid')
-                                       ->select('q_ans')
-                                       ->orderby('sq_sort')
+                        $subq = Pubsque::where('p_id', $v->p_id)
+                                       ->select('pq_ans')
+                                       ->orderby('pq_sort')
                                        ->get()->all();
                         $ans = array();
                         foreach ($subq as $sk => $sv) {
                             $ans[] = $sv->q_ans;
                         }
-                        Redis::set('s'.$s_id.'|p'.$v->s_id, implode("|", $ans));
+                        Redis::set('s'.$p_id.'|p'.$v->p_id, implode("|", $ans));
                     }
                 }
             }else{
                 $sub = array();
             }
-            $time = ($sets->s_again) ? '可重複考':'僅限一次';
-            $exam_name = $sets->s_name;
-            $lime = explode(":", $sets->s_limtime);
+            $time = ($pubs->p_again) ? '可重複考':'僅限一次';
+            $lime = explode(":", $pubs->p_limtime);
             $limetime = '';
             if ($lime[0]>0) $limetime.= (int)$lime[0].'小時';
             if ($lime[1]>0) $limetime.= (int)$lime[1].'分';
             if ($lime[2]>0) $limetime.= (int)$lime[2].'秒';
 
             return view('exam.info', [
-                'title' => $exam_name,
+                'title' => $pubs->p_name,
                 'type' => 'sets',
                 'exnum' => '',
                 'gra' => '',
                 'subj' => '',
                 'chap' => '',
                 'degree' => '',
-                'sets' => $s_id,
-                'lime' => $sets->s_limtime,
+                'sets' => $p_id,
+                'lime' => $pubs->p_limtime,
                 'score_open' => '',
-                'Sum' => $sets->s_sum,
+                'Sum' => $pubs->p_sum,
                 'Limetime' => $limetime,
                 'Sub_info' => $sub,
-                'Pass_core' => $sets->s_pass_score,
+                'Pass_core' => $pubs->p_pass_score,
                 'Times' => $time
             ]);
         }

@@ -365,7 +365,9 @@
 	}
 	.set_all{
 		margin: 15% auto;
-		width: 800px;
+		/*width: 800px;*/
+		width: 90%;
+        height: 80%;
 	}
 	.set_title {
 		height: 40px;

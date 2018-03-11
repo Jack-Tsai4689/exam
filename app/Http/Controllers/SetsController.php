@@ -581,12 +581,11 @@ class SetsController extends TopController
     public function update(Request $req, $sid)
     {
         if (!$this->login_status)return redirect('/login');
-        $chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
+        //$chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
         $s_name = ($req->has('setsname')) ? $req->input('setsname'):'';
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
         $s_subj = ($req->has('subject')) ? $req->input('subject'):0;
-        if ($chk_date===0 || 
-            $sid===0 ||
+        if ($sid===0 ||
             $s_gra===0 || 
             $s_subj===0 || 
             empty($s_name))abort(400);
@@ -601,36 +600,37 @@ class SetsController extends TopController
         $data['s_endtime'] = '';
         $data['s_gra'] = $s_gra;
         $data['s_subj'] = $s_subj;
-        if ($chk_date===1){
-            $p_begdate = ($req->has('begdate')) ? trim($req->input('begdate')):'';
-            $p_begTimeH = ($req->has('begTimeH')) ? (int)$req->input('begTimeH'):0;
-            $p_begTimeH = str_pad($p_begTimeH,2,0,STR_PAD_LEFT);
+        // if ($chk_date===1){
+        //     $p_begdate = ($req->has('begdate')) ? trim($req->input('begdate')):'';
+        //     $p_begTimeH = ($req->has('begTimeH')) ? (int)$req->input('begTimeH'):0;
+        //     $p_begTimeH = str_pad($p_begTimeH,2,0,STR_PAD_LEFT);
 
-            $p_enddate = ($req->has('enddate')) ? trim($req->input('enddate')):'';
-            $p_endTimeH = ($req->has('endTimeH')) ? (int)$req->input('endTimeH'):0;
-            $p_endTimeH = str_pad($p_endTimeH,2,0,STR_PAD_LEFT);
-            $data['s_begtime'] = $p_begdate.' '.$p_begTimeH.':00:00';
-            $data['s_endtime'] = $p_enddate.' '.$p_endTimeH.':00:00';
-        }
+        //     $p_enddate = ($req->has('enddate')) ? trim($req->input('enddate')):'';
+        //     $p_endTimeH = ($req->has('endTimeH')) ? (int)$req->input('endTimeH'):0;
+        //     $p_endTimeH = str_pad($p_endTimeH,2,0,STR_PAD_LEFT);
+        //     $data['s_begtime'] = $p_begdate.' '.$p_begTimeH.':00:00';
+        //     $data['s_endtime'] = $p_enddate.' '.$p_endTimeH.':00:00';
+        // }
         $data['s_sum'] = ($req->has('sum')) ? (int)$req->input('sum'):100;
         $data['s_pass_score'] = ($req->has('passscore')) ? (int)$req->input('passscore'):60;
 
         //限時
-        $lim = array();
-        $p_limTimeH = ($req->has('limTimeH')) ? (int)$req->input('limTimeH'):1;
-        $lim[] = str_pad($p_limTimeH,2,0,STR_PAD_LEFT);
-        $p_limTimeM = ($req->has('limTimeM')) ? (int)$req->input('limTimeM'):0;
-        $lim[] = str_pad($p_limTimeM,2,0,STR_PAD_LEFT);
-        $p_limTimeS = ($req->has('limTimeS')) ? (int)$req->input('limTimeS'):0;
-        $lim[] = str_pad($p_limTimeS,2,0,STR_PAD_LEFT);
-        $data['s_limtime'] = implode(":", $lim);
-        if ($p_limTimeH<=0 && $p_limTimeM<=0 && $p_limTimeS<=0){
-            $this->_errmsg(400);
-            return;
-        }
+        // $lim = array();
+        // $p_limTimeH = ($req->has('limTimeH')) ? (int)$req->input('limTimeH'):1;
+        // $lim[] = str_pad($p_limTimeH,2,0,STR_PAD_LEFT);
+        // $p_limTimeM = ($req->has('limTimeM')) ? (int)$req->input('limTimeM'):0;
+        // $lim[] = str_pad($p_limTimeM,2,0,STR_PAD_LEFT);
+        // $p_limTimeS = ($req->has('limTimeS')) ? (int)$req->input('limTimeS'):0;
+        // $lim[] = str_pad($p_limTimeS,2,0,STR_PAD_LEFT);
+        // $data['s_limtime'] = implode(":", $lim);
+        // if ($p_limTimeH<=0 && $p_limTimeM<=0 && $p_limTimeS<=0){
+        //     $this->_errmsg(400);
+        //     return;
+        // }
+
         //次數 2=>1次(again=0) 1=>多次
-        $p_again = ($req->has('f_times')) ? (int)$req->input('f_times'):2;
-        $data['s_again'] = ($p_again===2) ? 0:1;
+        // $p_again = ($req->has('f_times')) ? (int)$req->input('f_times'):2;
+        // $data['s_again'] = ($p_again===2) ? 0:1;
         
         $data['s_owner'] = $this->login_user;
         $data['updated_at'] = time();
@@ -667,18 +667,22 @@ class SetsController extends TopController
         if (!empty($del)){
             $id = explode(",", $del);
             foreach ($id as $v) {
-                $sid = (int)$v;
-                if ($sid>0){
-                    Sets::destroy($sid);
+                $part_sid = (int)$v;
+                if ($part_sid>0){
+                    Sets::destroy($part_sid);
                     //刪題目
-                    Setsque::where('sq_part', $sid)->delete();
+                    Setsque::where('sq_part', $part_sid)->delete();
                 }
             }
         }
         $data['s_finish'] = 0;
-        Sets::where('s_id', $sid)
-            ->update($data);        
-        return redirect('/sets');
+        Sets::where('s_id', $sid)->update($data);
+        $act = ($req->has('_act') && !empty($req->input('_act'))) ? trim($req->input('_act')):'';
+        if ($act==="aj"){
+            echo true;
+        }else{
+            return redirect('/sets');    
+        }        
     }
 
     /**
@@ -1025,7 +1029,45 @@ class SetsController extends TopController
     }
     //ajax編輯試卷 (iframe open show)
     public function ajstru($sid){
+        if (!$this->login_status)return redirect('/login');
+        if (!is_numeric($sid))abort(400);
+        $sid = (int)$sid;
+        if ($sid<=0)abort(400);
+        $data = Sets::find($sid);
+        if ($data===null)abort(400);
+        $gra_html = '';
+        $subj_html = '';
+        $grade_data = $this->grade();
+        foreach ($grade_data as $v) {
+            $g_sel = ($data->s_gra===$v->g_id) ? 'selected':'';
+            $gra_html.= '<option '.$g_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+        }
 
+        $subject_data = $this->subject($data->s_gra);
+        foreach ($subject_data as $v) {
+            $s_sel = ($data->s_subj===$v->g_id) ? 'selected':'';
+            $subj_html.= '<option '.$s_sel.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
+        }
+        //大題
+        if ($data->s_sub){
+            $sub = Sets::where('s_pid', $sid)->orderby('s_part')->get()->all();
+        }else{
+            $sub = array();
+        }
+        return view('sets.ajedit_set', [
+            'menu_user' => $this->menu_user,
+            'title' => '編輯考卷',
+            'Sid' => $sid,
+            'Setsname' => $data->s_name,
+            'Intro' => $data->s_intro,
+            'Grade' => $gra_html,
+            'Subject' => $subj_html,
+            'Sum' => $data->s_sum,
+            'Pass' => $data->s_pass_score,
+            'Sub' => $sub,
+            'Hsub' => $data->s_sub,
+            'Page' => $data->s_page
+        ]);
     }
     public function ajpublish(){
         $_get = Input::all();

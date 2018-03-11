@@ -208,7 +208,7 @@ class QueController extends TopController
         
         $data = [
             'menu_user' => $this->menu_user,
-            'title' => '題庫',
+            'title' => '我的題庫',
             'Data' => $que_data,
             'Grade' => $gra_html,
             'Subject' => $subj_html,

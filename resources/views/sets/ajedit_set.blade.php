@@ -1,10 +1,11 @@
-@extends('layout.default')
-@section('style')
-    <link rel="stylesheet" type="text/css" href="{{ URL::asset('/cssfunc/ex_sets.css') }}">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    @include('layout.sub')
 	<style type="text/css">
     	#all {
-    		width: 1280px;
+    		max-width: 1280px;
+            margin: 20px auto;
     	}
     	.cen {
     		margin: 0 auto;
@@ -122,11 +123,11 @@
             margin-top: 8px;
         }
 	</style>
-@stop
-@section('content')
+</head>
+<body>
 <div id="all">
 		<div class="title"><label class="f17">{{ $title }}</label></div>
-		<form name="form1" id="form1" method="post" action="{{ url('/sets/'.$Sid) }}" onsubmit="return check_data()">
+		<form name="form1" onsubmit="return check_data(this)">
 		<div class="content">
 			<div class="cen last">
 				<table class="list_edit" border="0" width="100%" cellpadding="0" cellspacing="0">
@@ -206,16 +207,16 @@
                 <div>
                     {{ csrf_field() }}
                     <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="_act" value="aj">
                     <input type="hidden" name="delsub" id="delsub">
                 	<div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="儲存" name="save" id="save"></div>
-					<div style="text-align:right; height:30px; line-height:30px;"><a href="{{ url('/sets') }}"><font class="f15">返回上一層</font></a></div>
 				</div>
             </div>
 		</div>
     </form>
 </div>
-@stop
-@section('script')
+</body>
+</html>
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <script src="{{ URL::asset('/js/jquery-ui.js') }}"></script>
 <script type="text/javascript">
@@ -278,7 +279,7 @@ function need_sub(v){
 //         var checkboxs = document.getElementsByName(cName);
 //         for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
 //     }
-function check_data(){
+function check_data(obj){
     var setsname = trim(gb('setsname').value);//名稱
     var error = false;
     var percen = 0;
@@ -324,20 +325,39 @@ function check_data(){
             alert('考試結束時間需大於等於考試起始時間!'); return false;
         }
     }
-    var limTimeH = gb('limTimeH').value;
-    var limTimeM = gb('limTimeM').value;
-    var limTimeS = gb('limTimeS').value;
-    if (limTimeH==0 && limTimeM==0 && limTimeS==0){
-        alert('考試限時不可以都是0!'); return false;
-    }
+    // var limTimeH = gb('limTimeH').value;
+    // var limTimeM = gb('limTimeM').value;
+    // var limTimeS = gb('limTimeS').value;
+    // if (limTimeH==0 && limTimeM==0 && limTimeS==0){
+    //     alert('考試限時不可以都是0!'); return false;
+    // }
     var passscore = gb('passscore').value;
     if (passscore<=0 || isNaN(passscore)){
         alert('及格分數有誤'); return false;
     }
+    passscore = Number(passscore);
     var sum_score = gb('sum').value;
     if (sum_score<=0 || isNaN(sum_score)){
         alert('總分有誤'); return false;
     }
+    sum_score = Number(sum_score);
+    if (sum_score<passscore){
+        alert('分數錯誤'); return false;
+    }
+    $.ajax({
+        type:"POST",
+        url:"{{ url('/sets/'.$Sid) }}",
+        data:$(obj).serialize(),
+        dataType:"JSON",
+        success: function(rs){
+            alert('更新成功');
+            parent.document.location.reload();
+        },
+        error: function(){
+
+        }
+    });
+    return false;
 }
 function subj_c(v){
     $.ajax({
@@ -356,4 +376,3 @@ function subj_c(v){
     });
 }
 </script>
-@stop

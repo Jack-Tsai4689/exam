@@ -142,7 +142,7 @@
                             <td class="last">
                                 <form onsubmit="return examinit(this)">
                                     {{ csrf_field() }}
-                                    <input type="hidden" name="sets" class="sets" value="{{ $v->s_id }}">
+                                    <input type="hidden" name="sets" class="sets" value="{{ $v->p_id }}">
                                     <input type="submit" class="btn w100" name="goin" value="進入">
                                 </form>
                             </td>

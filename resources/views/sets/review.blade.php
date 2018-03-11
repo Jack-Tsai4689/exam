@@ -610,15 +610,6 @@ function close_part(){
     let func = gb('part_func');
     $(func).hide();
 }
-$("#sets_edit").on("click", function(){
-    $('#structure').show();
-    $('#stru_status').show();
-    document.getElementById('sets_ed').src="{{ url('/ques/imp') }}";
-    $("#sets_ed").load(function(){
-        $('#stru_status').hide();
-        $('#sets_ed').show();
-    });
-});
 $("#save_part").on("click", function(){
     let d=Array();
     // var f=0;
@@ -912,6 +903,19 @@ function showque(id){
 function close_pic(){
     $('#sets_filed').hide();
     $('#que_pic').hide();
+}
+$("#sets_edit").on("click", function(){
+    $('#structure').show();
+    $('#stru_status').show();
+    document.getElementById('sets_ed').src="{{ url('/sets/'.$Sid.'/structure') }}";
+    $("#sets_ed").load(function(){
+        $('#stru_status').hide();
+        $('#sets_ed').show();
+    });
+});
+function close_edit(){
+    $('#structure').hide();
+    $('#sets_ed').hide();
 }
 function delq(obj){
     let dform = obj.parentElement;

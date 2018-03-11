@@ -55,7 +55,7 @@
 					@foreach ($Sub_info as $key => $v)
 	                <tr>
 						<td></td>
-						<td>第{{ ($key+1) }}大題&nbsp;-&nbsp;配分&nbsp;<strong><font color="blue">{{ $v->s_percen }}</font></strong>%&nbsp;　{{ $v->back }}可回上題修改</td>
+						<td>第{{ ($key+1) }}大題&nbsp;-&nbsp;配分&nbsp;<strong><font color="blue">{{ $v->p_percen }}</font></strong>%&nbsp;　{{ $v->back }}可回上題修改</td>
 					</tr>
 					<tr>
 						<td></td>
@@ -77,8 +77,8 @@
 				</table>
                 <div>總分　<strong><font color="blue">{{ $Sum }}</font></strong>分</div>
                 @foreach ($Sub_info as $key => $v)
-                	<div class="sub">第{{ ($key+1) }}大題&nbsp;-&nbsp;配分&nbsp;<strong><font color="blue">{{ $v->s_percen }}</font></strong>%&nbsp;　{{ $v->back }}可回上題修改</div>
-{{--                 	<div class="sub_intro">{{ $v->s_intro }}</div> --}}
+                	<div class="sub">第{{ ($key+1) }}大題&nbsp;-&nbsp;配分&nbsp;<strong><font color="blue">{{ $v->p_percen }}</font></strong>%&nbsp;　{{ $v->back }}可回上題修改</div>
+{{--                 	<div class="sub_intro">{{ $v->p_intro }}</div> --}}
                 @endforeach
                 <div>及格　<strong><font color="blue">{{ $Pass_core }}</font></strong>分</div>
                 <div>限時　{{ $Limetime }}</div>
