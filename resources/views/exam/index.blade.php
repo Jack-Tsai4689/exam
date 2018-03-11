@@ -134,7 +134,7 @@
                     @foreach ($Data as $i => $v)
                         @php $class = ($i%2==0) ? 'deep':'shallow'; @endphp
                         <tr align="center" class="{{ $class }}">
-                            <td>{{ $v->s_name }}</td>
+                            <td>{{ $v->p_name }}</td>
                             <td>{{ $v->gra->name }}</td>
                             <td>{{ $v->subj->name }}</td>
                             <td>{{ $v->days }}</td>

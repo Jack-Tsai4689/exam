@@ -268,11 +268,11 @@
 @section('content')
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<div class="title"><label class="f17">{{ $Set_name }} 摘要</label></div>
+	<div class="title"><label class="f17">{{ $Set_name }} 測驗卷 - 摘要</label></div>
     <div class="title_intro">
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
-        {{-- <label>限時</label>{{ $Limtime }} --}}　<input type="button" id="sets_edit" value="編輯">　
+        <label>限時</label>{{ $Limtime }}
 	</div>
     @if($Have_sub)
     <div class="title"><label class="f17" style="float:left;" onclick="zoom()">大題</label><img style="float:left;margin-top:5px;" id="part_img" src="{{ URL::asset('img/open.png') }}" width="20" height="20"></div>
@@ -287,33 +287,33 @@
         @endif
         <div id="part_section">
         @foreach($Part as $i => $v)
-            @php $print_control = ($v->s_page=='Y') ? '可回上頁修改':'不可回上頁修改'; @endphp
-            <div name="node" id="{{ $v->s_id }}">
+            @php $print_control = ($v->p_page=='Y') ? '可回上頁修改':'不可回上頁修改'; @endphp
+            <div name="node" id="{{ $v->p_id }}">
             <div class="part_sort">: :</div>
             <div style="display:inline-block;">
-            第{{ ($i+1) }}大題({{ $v->s_percen }}%)　{{ $print_control }}
+            第{{ ($i+1) }}大題({{ $v->p_percen }}%)　{{ $print_control }}
             </div>
-            {{-- <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $Sid }},{{ $v->s_id }}, {{ ($i+1) }})"> --}}
+            {{-- <img title="刪除" class="sub_del" src="{{ URL::asset('img/icon_op_f.png') }}" width="15" onclick="del_ask({{ $Sid }},{{ $v->p_id }}, {{ ($i+1) }})"> --}}
             </div>
         @endforeach
         </div>
         @foreach($Part as $i => $v)
-            <input type="button" class="btn w100 h25 part" data-id="{{ $v->s_id }}" value="第{{ $v->s_part }}大題">&nbsp;
+            <input type="button" class="btn w100 h25 part" data-id="{{ $v->p_id }}" value="第{{ $v->p_part }}大題">&nbsp;
         @endforeach
     </div>
     @endif
     <div name="part" id="part">
-        <div id="part{{ $FirstPart->s_id }}" class="partq">
-            <div class="title"><label class="f17">題目{{ $FirstPart->s_part }}</label></div>
+        <div id="part{{ $FirstPart->p_id }}" class="partq">
+            <div class="title"><label class="f17">題目{{ $FirstPart->p_part }}</label></div>
             @if (!$Edit)
             <div class="title_intro">
                 <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
-                <input type="button" class="btn w150 esort" data-part="{{ $FirstPart->s_id }}" name="esort" id="esort{{ $FirstPart->s_id }}" value="開啟排序">
-                <div class="tip" id="tip_esort{{ $FirstPart->s_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
-                <input type="button" class="btn w150 hidden" data-part="{{ $FirstPart->s_id }}" onclick="close_s({{ $FirstPart->s_id }})" name="csort" id="csort{{ $FirstPart->s_id }}" value="關閉排序">
-                <div class="tip" id="tip_csort{{ $FirstPart->s_id }}">※關閉排序，但不儲存</div>
-                <input type="button" class="btn w150 usort hidden" data-part="{{ $FirstPart->s_id }}" name="usort" id="usort{{ $FirstPart->s_id }}" value="儲存排序">
-                <div class="tip" id="tip_usort{{ $FirstPart->s_id }}">※儲存並關閉排序</div>
+                <input type="button" class="btn w150 esort" data-part="{{ $FirstPart->p_id }}" name="esort" id="esort{{ $FirstPart->p_id }}" value="開啟排序">
+                <div class="tip" id="tip_esort{{ $FirstPart->p_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
+                <input type="button" class="btn w150 hidden" data-part="{{ $FirstPart->p_id }}" onclick="close_s({{ $FirstPart->p_id }})" name="csort" id="csort{{ $FirstPart->p_id }}" value="關閉排序">
+                <div class="tip" id="tip_csort{{ $FirstPart->p_id }}">※關閉排序，但不儲存</div>
+                <input type="button" class="btn w150 usort hidden" data-part="{{ $FirstPart->p_id }}" name="usort" id="usort{{ $FirstPart->p_id }}" value="儲存排序">
+                <div class="tip" id="tip_usort{{ $FirstPart->p_id }}">※儲存並關閉排序</div>
             </div>
             @endif
         	<div class="content">
@@ -325,26 +325,15 @@
                                 <th>答案</th>
                                 <th>題號</th>
                                 <th>題目</th>
-                                @if (!$Edit)<th></th>@endif
                             </tr>
                         </thead>
-                        <tbody id="sort{{ $FirstPart->s_id }}">
+                        <tbody id="sort{{ $FirstPart->p_id }}">
                         @foreach($FirstPart->que as $q)
-                            <tr align="center" name="node" id="{{ $q->sq_qid }}">
+                            <tr align="center" name="node" id="{{ $q->pq_qid }}">
                                 <td class="handle">: :</td>
-                                <td class="qno_ans">{{ $q->q_ans }}</td>
-                                <td class="qno">{{ $q->sq_sort }}</td>
-                                <td align="left" class="que">{!! $q->q_qcont !!}</td>
-                                @if (!$Edit)
-                                <td width="30">
-                                    <form>
-                                        <input type="hidden" name="part" value="{{ $FirstPart->s_id }}">
-                                        <input type="hidden" name="que" value="{{ $q->sq_qid }}">
-                                        <input type="hidden" name="_method" value="DELETE">
-                                        <a href="javascript:void(0)" onclick="delq(this)"><img src="{{ URL::asset('img/icon_op_f.png') }}" width="20"></a>
-                                    </form>
-                                </td>
-                                @endif
+                                <td class="qno_ans">{{ $q->pq_ans }}</td>
+                                <td class="qno">{{ $q->pq_sort }}</td>
+                                <td align="left" class="que">{!! $q->pq_qcont !!}</td>
             				</tr>
                         @endforeach
                         </tbody>
@@ -353,17 +342,17 @@
         	</div>
         </div>
         @foreach ($OtherPart as $k => $v)
-        <div id="part{{ $v->s_id }}" class="hidden partq">
-            <div class="title"><label class="f17">題目(第{{ $v->s_part }}大題)</label></div>
+        <div id="part{{ $v->p_id }}" class="hidden partq">
+            <div class="title"><label class="f17">題目(第{{ $v->p_part }}大題)</label></div>
             @if (!$Edit)
             <div class="title_intro">
                 <div><input type="button" class="btn w100" value="新增題目" onclick='window.open("{{ url("/que/create") }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");'>　<input type="button" class="btn w100 ware" value="從題庫加入"></div>
-                <input type="button" class="btn w150 esort" data-part="{{ $v->s_id }}" name="esort" id="esort{{ $v->s_id }}" value="開啟排序">
-                <div class="tip" id="tip_esort{{ $v->s_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
-                <input type="button" class="btn w150 hidden" data-part="{{ $v->s_id }}" onclick="close_s({{ $v->s_id }})" name="csort" id="csort{{ $v->s_id }}" value="關閉排序">
-                <div class="tip" id="tip_csort{{ $v->s_id }}">※關閉排序，但不儲存</div>
-                <input type="button" class="btn w150 usort hidden" data-part="{{ $v->s_id }}" name="usort" id="usort{{ $v->s_id }}" value="儲存排序">
-                <div class="tip" id="tip_usort{{ $v->s_id }}">※儲存並關閉排序</div>
+                <input type="button" class="btn w150 esort" data-part="{{ $v->p_id }}" name="esort" id="esort{{ $v->p_id }}" value="開啟排序">
+                <div class="tip" id="tip_esort{{ $v->p_id }}">※開啟排序，按住每題題號可以拖曳喔</div>
+                <input type="button" class="btn w150 hidden" data-part="{{ $v->p_id }}" onclick="close_s({{ $v->p_id }})" name="csort" id="csort{{ $v->p_id }}" value="關閉排序">
+                <div class="tip" id="tip_csort{{ $v->p_id }}">※關閉排序，但不儲存</div>
+                <input type="button" class="btn w150 usort hidden" data-part="{{ $v->p_id }}" name="usort" id="usort{{ $v->p_id }}" value="儲存排序">
+                <div class="tip" id="tip_usort{{ $v->p_id }}">※儲存並關閉排序</div>
                 {{-- <input type="button" class="btn w150 hidden" name="rsort" id="rsort0" onclick="rand_sort(0)" value="隨機排序">
                 <input type="button" class="btn w150 hidden" name="nsort" id="nsort0" onclick="recover_sort(0);" value="回復排序"> --}}
             </div>
@@ -379,59 +368,13 @@
                                 <th>題目</th>
                             </tr>
                         </thead>
-                        <tbody id="sort{{ $v->s_id }}">
+                        <tbody id="sort{{ $v->p_id }}">
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
         @endforeach
-    </div>
-</div>
-<div id="sub_title" class="list_set">
-    <div class="set_all">
-        <div class="title"><label class="f17">編輯大題</label></div>
-        <div class="set_content">
-            <div class="set_cen">
-                <div class="cen last">
-                    <form name="form2" id="form2">
-                    <input type="button" name="" id="" onclick="moreone()" class="btn w100 h25" value="增加">　<font color="red">*有題目的大題無法刪除</font>
-                    <div style="max-height:490px; overflow:auto; overflow-x:hidden; margin:10px 0px 10px 0px;">
-                        <table class="list" id="more" border="0" width="100%" cellpadding="0" cellspacing="0">
-                            <tr>
-                                <td align="left"><label class="f17">大題</label></td>
-                                <td><input type="hidden" name="sub[]" value=""></td>
-                            </tr>
-                            <tr class="deep">
-                                <td align="right">分數比重</td>
-                                <td><input style="width:40px; text-align:center;" value="" type="text" class="input_field" name="sub_score[]" maxlength="4">%</td>
-                            </tr>
-                            <tr class="shallow">
-                                <td align="right">翻頁控制</td>
-                                <td>
-                                    <select name="sub_control[]">
-                                        <option value="Y">可回上題修改</option>
-                                        <option value="N">不可回上題修改</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr class="deep">
-                                <td align="right" style="vertical-align:top;">大題說明</td>
-                                <td>
-                                    <textarea name="sub_intro[]" placeholder="範例：1-20題是非題，21-40題選擇題，共40題。" value=""></textarea>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <div>
-                        {{ csrf_field() }}
-                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="儲存" onclick="check_data()" name="update" id="update"></div>
-                        <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" onclick="cancel('u')"><font class="f15">取消</font></a></div>
-                    </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 <div id="intro_open"></div>
@@ -898,7 +841,7 @@ $(".part").on('click', function(){
 function showque(id){
     $.ajax({
         type: "GET",
-        url: "{{ url('/sets/'.$Sid.'/part') }}",
+        url: "{{ url('/pub/'.$Sid.'/part') }}",
         data: {part:id},
         dataType: "JSON",
         success: function(rs){
@@ -912,22 +855,6 @@ function showque(id){
 function close_pic(){
     $('#sets_filed').hide();
     $('#que_pic').hide();
-}
-function delq(obj){
-    let dform = obj.parentElement;
-    if (confirm('確定刪除？')){
-        $.ajax({
-            type: "POST",
-            url: "{{ url('/sets/'.$Sid.'/que') }}",
-            headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-            data: $(dform).serialize(),
-            dataType: "JSON",
-            success: function(){
-                let tr = dform.parentElement.parentElement;
-                $(tr).remove();
-            }
-        });
-    }
 }
 </script>
 @stop

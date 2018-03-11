@@ -12,10 +12,10 @@ class AlterQuesImg extends Migration
      */
     public function up()
     {
-        Schema::table('ques', function (Blueprint $table) {
-            $table->string('q_am_src', 100)->default('');
-            $table->string('q_am_name', 255)->default('');
-        });
+        // Schema::table('ques', function (Blueprint $table) {
+        //     $table->string('q_am_src', 100)->default('');
+        //     $table->string('q_am_name', 255)->default('');
+        // });
     }
 
     /**

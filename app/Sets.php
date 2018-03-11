@@ -47,9 +47,9 @@ class Sets extends Model
     //大題題目 題目排序需依考卷，而非大題
     //sets show
     public function subque(){
-        return $this->hasMany(Setsque::class, 'sq_sid', 's_id')
+        return $this->hasMany(Setsque::class, 'sq_part', 's_id')
                     ->join('ques', 'ques.q_id','=','setsque.sq_qid')
-                    ->select('ques.q_ans')
+                    ->select('sq_sort','q_id','q_ans','q_quetype','q_num','q_qm_src','q_qs_src')
                     ->orderby('sq_sort');
     }
 }

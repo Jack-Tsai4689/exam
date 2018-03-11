@@ -149,13 +149,16 @@
                     <tbody>
                     @foreach ($Data as $i => $v)
                         <tr align="center" class="{{ ($i%2==0) ? 'deep':'shallow' }}">
-                            <td class="see_rs" id="{{ $v->e_id }}">{{ $v->sets }}</td>
-                            <td>{{ $v->gra }}</td>
-                            <td>{{ $v->subj }}</td>
+                            <td class="see_rs" id="{{ $v->e_id }}">{{ $v->e_stu }}</td>
+                            <td>{{ $v->stu()->name }}</td>
                             <td>{{ (float)$v->e_score }}</td>
                             <td>{{ date('Y/m/d H:i:s', $v->e_begtime_at) }}</td>
-                            <td>{{ date('Y/m/d H:i:s', $v->e_endtime_at) }}</td>
-                            <td class="last"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a><br><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></td>
+                            <td>{{ ($v->e_status==="Y") ? date('Y/m/d H:i:s', $v->e_endtime_at):'' }}</td>
+                            <td class="last">
+                                @if ($v->e_status==="Y")
+                                <span style="float:left; margin-right: 1em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>

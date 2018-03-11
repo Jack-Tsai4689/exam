@@ -111,7 +111,7 @@
 @section('content')
 <div id="all">
 	<div class="title"><label class="f17">{{ $title }}</label></div>
-    <form name="form1" id="form1" method="post" action="{{ url('pub') }}" onsubmit="return check_data()">
+    <form name="form1" onsubmit="return check_data(this)">
     	<div class="content">
     		<div class="cen last">
     			<table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
@@ -201,7 +201,7 @@
                         </TD>
                     </TR>
                     <tr class="shallow">
-                        <TD align="center">重覆測試</TD>
+                        <TD align="center">重覆測驗</TD>
                         <td>
                     		<label><input type="radio" name="f_times" value="2">不行</label>
                     		<label><input type="radio" name="f_times" value="1" checked>可以</label>
@@ -257,7 +257,7 @@ function publish(v){
         gb('score_view').style.display = 'none';
     }
 }
-function check_data(){
+function check_data(obj){
     var setsname = trim(gb('setsname').value);//名稱
     var error = false;
     var percen = 0;
@@ -281,6 +281,20 @@ function check_data(){
     if (sum_score<=0 || isNaN(sum_score)){
         alert('總分有誤'); return false;
     }
+    $.ajax({
+        type:"POST",
+        url: "{{ url('pub') }}",
+        data: $(obj).serialize(),
+        dataType:"JSON",
+        success: function(rs){
+            location.href = "{{ url('pub') }}";
+        },
+        error: function(rs){
+            if (rs.status===406)alert('配分錯誤');
+        }
+
+    });
+    return false;
 }
 function subj_c(v){
     $.ajax({

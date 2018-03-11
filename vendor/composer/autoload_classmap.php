@@ -504,6 +504,7 @@ return array(
     'PHP_Token_YIELD_FROM' => $vendorDir . '/phpunit/php-token-stream/src/Token.php',
     'PubCas' => $baseDir . '/database/migrations/2018_03_07_142549_pub_cas.php',
     'PubsTable' => $baseDir . '/database/migrations/2018_03_07_122202_pubs_table.php',
+    'PubsquesTable' => $baseDir . '/database/migrations/2018_03_10_012718_pubsques_table.php',
     'QuesTable' => $baseDir . '/database/migrations/2018_01_30_163833_ques_table.php',
     'SebastianBergmann\\Comparator\\ArrayComparator' => $vendorDir . '/sebastian/comparator/src/ArrayComparator.php',
     'SebastianBergmann\\Comparator\\Comparator' => $vendorDir . '/sebastian/comparator/src/Comparator.php',

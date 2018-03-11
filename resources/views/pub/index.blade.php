@@ -49,7 +49,7 @@
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<div class="title_intro">
-		<div><input type="button" class="btn f16 w150" name="" id="" value="建立測驗" onclick="location.href='{{ url('pub/create') }}'"></div>
+		<div><input type="button" class="btn f16 w150" name="" id="" value="發佈測驗" onclick="location.href='{{ url('pub/create') }}'"></div>
 	</div>
 	<form id="search">
 	<div class="title_intro condition">
@@ -89,17 +89,17 @@
 						<th width="180">發表時間</th>
 						<th width="100">考試限時</th>
 						<th width="60">狀態</th>
-						<th width="100">考卷預覽</th>
+						<th width="100">題目預覽</th>
 						<th class="last">動作</th>
 					</tr>
 				</thead>
 				<tbody>
 				@foreach ($Data as $i => $v)
 				<tr class="{{ ($i%2==0) ? 'deep':'shallow' }}">
-					<td name="setsname" class="left">{{ $v->s_name }}</td>
+					<td name="setsname" class="left">{{ $v->p_name }}</td>
 					<td>{{ $v->p_owner }}</td>
-					<td>{{ $v->gra }}</td>
-					<td>{{ $v->subj }}</td>
+					<td>{{ $v->gra->name }}</td>
+					<td>{{ $v->subj->name }}</td>
 	                <td></td>
 					<td></td>
 					<td></td>
@@ -107,8 +107,8 @@
 					<td>{!! $v->exam_day !!}</td>
 					<td>{{ date('Y/m/d H:i:s', $v->p_created_at) }}</td>
 					<td>{{ $v->p_limtime }}</td>
-					<td>View</td>
-					<td>View</td>
+					<td>開放中</td>
+					<td><a href="{{ url('/pub/'.$v->p_id) }}">瀏覽</a></td>
 					<td><input type="button" value="暫停"></td>
 				</tr>
 				@endforeach

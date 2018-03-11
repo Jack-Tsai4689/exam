@@ -10,8 +10,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 
-use App\Sets;
-use App\Setsque;
+use App\Pubs;
+use App\Pubsque;
 use App\Exams;
 use App\ExamDetail;
 use DB;
@@ -35,17 +35,17 @@ class ExamController extends TopController
     public function index()
     {
         if (!$this->login_status)return redirect('/login');
-        $sets = Sets::where('s_finish',1)->get()->all();
-        foreach ($sets as $k => $v) {
-            $sets[$k]->days = (!empty($v->s_begtime)) ? $v->s_begtime.' - '.$v->s_endtime:'不限';
-            $lime = explode(":", $v->s_limtime);
-            $sets[$k]->lim = (int)$lime[0].'時'.(int)$lime[1].'分'.(int)$lime[2].'秒';
+        $pubs = Pubs::where('p_pid',0)->get()->all();
+        foreach ($pubs as $k => $v) {
+            $pubs[$k]->days = (!empty($v->p_begtime)) ? $v->p_begtime.' - '.$v->p_endtime:'不限';
+            $lime = explode(":", $v->p_limtime);
+            $pubs[$k]->lim = (int)$lime[0].'時'.(int)$lime[1].'分'.(int)$lime[2].'秒';
 
         }
         return view('exam.index', [
             'menu_user' => $this->menu_user,
             'title' => '測驗',
-            'Data' => $sets
+            'Data' => $pubs
         ]);
     }
     // aes初始化

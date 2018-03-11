@@ -87,7 +87,6 @@
 						<th id="subj" name="subj">科目</th>
 						<th width="70">總分</th>
 						<th id="createtime" name="createtime">建立時間</th>
-						<th width="60">狀態</th>
 						<th id="sets_view">題目預覽</th>
 						<th class="last" style="width:82px;">編輯</th>
 					</tr>
@@ -102,21 +101,13 @@
 					<td name="subj">{{ $v->subj->name }}</td>
 					<td>{{ $v->s_sum }}</td>
 					<td name="createtime">{{ $v->updated_at }}</td>
-					<td>{{ $v->finish }}</td>
 					<td><a id="sets_link" href="sets/{{ $v->s_id }}">題目預覽</a></td>
 					<td class="last">
 						@if (!$v->s_finish)
 						<div class="edit_group btn" onclick="open_edit({{ $v->s_id }})">編輯</div>
 						<div id="edit_func_{{ $v->s_id }}" class="edit_func" name="edit_group">
 							<div><input type="button" onclick="location.href='{{ url('sets/'.$v->s_id.'/edit') }}'" value="修改"></div>
-							<div>
-								<form action="{{ url('/sets/'.$v->s_id.'/finish') }}" method="post" onsubmit="return updcheck()">
-									{{ csrf_field() }}
-									<input type="hidden" name="_method" value="PUT">
-									<input type="hidden" name="status" value="open">
-                            		<input type="submit" value="定案">
-                            	</form>
-							</div>
+							<div><input type="button" value="發佈測驗" class="pub" data-id="{{ $v->s_id }}"></div>
 							<div>
                             	<form action="{{ url('/sets/'.$v->s_id) }}" method="post" onsubmit="return delcheck()">
 									{{ csrf_field() }}
@@ -127,8 +118,6 @@
 {{--                             <div><a href="javascript:void(0)" onclick="copyfrom()">複製</a></div>
  --}}					
 						</div>
-						@else
-						<input type="button" value="發佈測驗" class="pub" data-id="{{ $v->s_id }}">
 						@endif
 					</td>
 				</tr>

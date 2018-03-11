@@ -56,6 +56,10 @@ Route::group(['prefix'=>'pub'], function(){
 	Route::get('create', "PubController@create");
 	//儲存頁
 	Route::post('/', "PubController@store");
+	//預覽
+	Route::get('/{id}', "PubController@show");
+	//ajax讀取大題題目
+	Route::get("/{id}/part", "PubController@ajshow_que");
 });
 //考卷編輯
 Route::group(['prefix'=>'sets'], function(){
@@ -70,8 +74,8 @@ Route::group(['prefix'=>'sets'], function(){
 	Route::delete('{id}', "SetsController@destroy");
 	Route::put('{id}', "SetsController@update");
 	//開放考試
-	Route::put('{id}/finish', "SetsController@status_change");
-	//派卷
+	//Route::put('{id}/finish', "SetsController@status_change");
+	//派卷用
 	Route::get("/pfetch", "SetsController@ajpublish");
 	//預覽
 	Route::get('/{id}', "SetsController@show");

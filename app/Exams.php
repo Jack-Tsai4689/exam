@@ -145,4 +145,8 @@ class Exams extends Model
     public function sets_info(){
         return $this->hasone(Sets::class, 's_id','s_id')->first();
     }
+    //關聯學生
+    public function stu(){
+        return $this->hasone(Stus::class, 'st_no', 'e_stu')->select('st_name as name')->first();
+    }
 }

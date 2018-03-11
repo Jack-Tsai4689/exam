@@ -347,13 +347,12 @@ class SetsController extends TopController
             // $first_sub->s_part = '';
         }
         //$first_sub->que = $this->sets_review_format($first_sub->subque);
-        foreach ($first_sub->subque as $k => $v) {
+        foreach ($first_sub->subque as $v) {
             $first_sub->que[] = $this->sets_review_format($v);
         }
         // foreach ($other_sub as $k => $v) {
         //     $other_sub[$k]->que = $this->sets_review_format($v->subque);
         // }
-
         return view('sets.review', [
             'menu_user' => $this->menu_user,
             'title' => $data->s_name.' - 題目預覽',
@@ -587,9 +586,13 @@ class SetsController extends TopController
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
         $s_subj = ($req->has('subject')) ? $req->input('subject'):0;
         if ($chk_date===0 || 
+            $sid===0 ||
             $s_gra===0 || 
             $s_subj===0 || 
             empty($s_name))abort(400);
+        $sets = Sets::find($sid);
+        $sets->s_finish = 2;
+        $sets->save();
         $s_intro = ($req->has('intro')) ? $req->input('intro'):'';
         $data = array();
         $data['s_name'] = $s_name;
@@ -672,6 +675,7 @@ class SetsController extends TopController
                 }
             }
         }
+        $data['s_finish'] = 0;
         Sets::where('s_id', $sid)
             ->update($data);        
         return redirect('/sets');
@@ -686,6 +690,8 @@ class SetsController extends TopController
     public function destroy($id)
     {
         if (!$this->login_status)return redirect('/login');
+        //先鎖住
+        Sets::where('s_id',$id)->update(['s_finish'=>2]);
         //刪大題題目
         Setsque::where('sq_sid', $id)->delete();
         //刪大題
@@ -703,7 +709,8 @@ class SetsController extends TopController
         $sub_intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
 
         $sets = Sets::find($sid);
-        if ($sets->s_finish)abort(403);
+        $sets->s_finish = 2;
+        $sets->save();
         
         //先查全部大題的id，照順序
         $all_sub_id = array();
@@ -793,6 +800,7 @@ class SetsController extends TopController
                 Sets::where('s_id', $sid)->update(['s_sub' => 0]);
             }
         }
+        Sets::where('s_id', $sid)->update(['s_finish' => 0]);
         $json['Success'] = true;
         echo json_encode($json);
     }
@@ -826,10 +834,11 @@ class SetsController extends TopController
         if (!$this->login_status)abort(401);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
-
+        if ($sid<1)abort(400);
         $sets = Sets::find($sid);
-        if ($sets->s_finish)abort(403);
+        if ($sets===null)abort(400);
+        $sets->s_finish = 2;
+        $sets->save();
         $ques = ($req->has('ques') && !empty($req->input('ques'))) ? $req->input('ques'):'';
         $part = ($req->has('npart') && (int)$req->input('npart')>0) ? (int)$req->input('npart'):0;
         if (empty($ques) || $part===0)abort(400);
@@ -861,6 +870,7 @@ class SetsController extends TopController
             //     $que_exists->save();
             // }
         }
+        Sets::where('s_id', $sid)->update(['s_finish'=>0]);
         echo true;
         // $json['Success'] = true;
         // echo json_encode($json);
@@ -870,13 +880,14 @@ class SetsController extends TopController
         if (!$this->login_status)abort(401);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
-        $part_id = Input::get('part');
+        if ($sid<1)abort(400);
+        $part_id = request()->input('part');
         if (!is_numeric($part_id))abort(400);
         $part_id = (int)$part_id;
-        if ($part_id<=0)abort(400);
+        if ($part_id<1)abort(400);
 
         $sets = Sets::find($sid);
+        if ($sets===null)abort(400);
         $que = Setsque::select('sq_qid','sq_sort')
                         ->where('sq_sid', $sid)
                         ->where('sq_part', $part_id)
@@ -889,15 +900,12 @@ class SetsController extends TopController
             $html.= '<td class="qno_ans">'.$data->q_ans.'</td>';
             $html.= '<td class="qno">'.$v->sq_sort.'</td>';
             $html.= '<td align="left" class="que">'.$data->q_qcont.'</td>';
-            //開放時不給用
-            if (!$sets->s_finish){
-                $html.= '<td><form>';
-                $html.= '<input type="hidden" name="part" value="'.$part_id.'">';
-                $html.= '<input type="hidden" name="que" value="'.$v->sq_qid.'">';
-                $html.= '<input type="hidden" name="_method" value="DELETE">';
-                $html.= '<a href="javascript:void(0)" onclick="delq(this)"><img src="'.URL::asset('img/icon_op_f.png').'" width="20"></a>';
-                $html.= '</form></td>';
-            }
+            $html.= '<td><form>';
+            $html.= '<input type="hidden" name="part" value="'.$part_id.'">';
+            $html.= '<input type="hidden" name="que" value="'.$v->sq_qid.'">';
+            $html.= '<input type="hidden" name="_method" value="DELETE">';
+            $html.= '<a href="javascript:void(0)" onclick="delq(this)"><img src="'.URL::asset('img/icon_op_f.png').'" width="20"></a>';
+            $html.= '</form></td>';
             $html.= '</tr>';
         }
         $json['html'] = $html;
@@ -908,8 +916,11 @@ class SetsController extends TopController
         if (!$this->login_status)abort(401);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
-
+        if ($sid<1)abort(400);
+        $sets = Sets::find($sid);
+        if ($sets===null)abort(400);
+        $sets->s_finish = 2;
+        $sets->save();
         $node = ($req->has('node') && !empty($req->input('node'))) ? json_decode(trim($req->input('node'))):array();
         $part = ($req->has('s') && (int)$req->input('s')>0) ? (int)$req->input('s'):0;
         if ($part===0)abort(400);
@@ -921,6 +932,7 @@ class SetsController extends TopController
             // $query = sprintf("UPDATE iftex_exsets_sort SET sort_no=%d WHERE sub_qid=%d AND listseq=%d;", $position+1, $item, $setsid);
             // $db->query($query);
         }
+        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
         echo '1';
     }
     //ajax更新大題順序
@@ -928,12 +940,16 @@ class SetsController extends TopController
         if (!$this->login_status)abort(401);
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
-
+        if ($sid<1)abort(400);
+        $sets = Sets::find($sid);
+        if ($sets===null)abort(400);
+        $sets->s_finish = 2;
+        $sets->save();
         $node = ($req->has('node') && !empty($req->input('node'))) ? json_decode(trim($req->input('node'))):array();
         foreach ($node as $position => $item) {
             Sets::where('s_id', $item)->where('s_pid', $sid)->update(['s_part'=>($position+1)]);
         }
+        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
         echo '1';
     }
     //ajax刪除題目
@@ -942,7 +958,10 @@ class SetsController extends TopController
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
-
+        $sets = Sets::find($sid);
+        if ($sets===null)abort(400);
+        $sets->s_finish = 2;
+        $sets->save();
         $part = ($req->has('part') && (int)$req->input('part')>0) ? (int)$req->input('part'):0;
         $que = ($req->has('que') && (int)$req->input('que')>0) ? (int)$req->input('que'):0;
         if ($part===0 || $que===0)abort(400);
@@ -951,6 +970,7 @@ class SetsController extends TopController
                ->where('sq_part', $part)
                ->where('sq_qid', $que)
                ->delete();
+        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
         echo '1';
     }
     //切換試卷狀態
@@ -1020,7 +1040,8 @@ class SetsController extends TopController
             $data = Sets::select('s_id','s_name')
                         ->where('s_gra', $g)
                         ->where('s_subj', $s)
-                        ->where('s_finish', 1)
+                        ->where('s_pid', 0)
+                        ->where('s_finish', 0)
                         ->get()->all();
             $sets = array();
             if (empty($data)){

@@ -766,6 +766,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'PHP_Token_YIELD_FROM' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PubCas' => __DIR__ . '/../..' . '/database/migrations/2018_03_07_142549_pub_cas.php',
         'PubsTable' => __DIR__ . '/../..' . '/database/migrations/2018_03_07_122202_pubs_table.php',
+        'PubsquesTable' => __DIR__ . '/../..' . '/database/migrations/2018_03_10_012718_pubsques_table.php',
         'QuesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_163833_ques_table.php',
         'SebastianBergmann\\Comparator\\ArrayComparator' => __DIR__ . '/..' . '/sebastian/comparator/src/ArrayComparator.php',
         'SebastianBergmann\\Comparator\\Comparator' => __DIR__ . '/..' . '/sebastian/comparator/src/Comparator.php',
