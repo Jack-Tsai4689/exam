@@ -371,6 +371,11 @@ class SetsController extends TopController
     }
     //試卷題目預覽 格式化
     protected function sets_review_format($data){
+        $que = new \stdClass;
+        $que->q_ans = '';
+        $que->q_qcont = '';
+        $que->sq_qid = $data->q_id;
+        $que->sq_sort = $data->sq_sort;
         //foreach ($data as $k => $v) {
             //題型
             switch ($data->q_quetype) {
@@ -384,10 +389,10 @@ class SetsController extends TopController
                     foreach ($ans as $o) {
                         $ans_html[] = chr($o+64);
                     }
-                    $data->q_ans = implode(", ", $ans_html);
+                    $que->q_ans = implode(", ", $ans_html);
                     break;
                 case "R": 
-                    $data->q_ans = ($data->q_ans==="1") ? "O":"X";
+                    $que->q_ans = ($data->q_ans==="1") ? "O":"X";
                     break;
                 case "M": 
                     $ans = array();
@@ -400,7 +405,7 @@ class SetsController extends TopController
                             $ans_html[] = $o;
                         }
                     }
-                    $data->q_ans = implode(", ", $ans_html);
+                    $que->q_ans = implode(", ", $ans_html);
                     break;
             }
             $qcont =  array();
@@ -418,9 +423,9 @@ class SetsController extends TopController
                     $qcont[] = '<font color="red">題目音訊遺失 X</font>';
                 }
             }
-            $data->q_qcont = implode("<br>", $qcont);
+            $que->q_qcont = implode("<br>", $qcont);
         //}
-        return $data;
+        return $que;
     }
 
     /**
@@ -936,7 +941,7 @@ class SetsController extends TopController
             // $query = sprintf("UPDATE iftex_exsets_sort SET sort_no=%d WHERE sub_qid=%d AND listseq=%d;", $position+1, $item, $setsid);
             // $db->query($query);
         }
-        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
+        Sets::where('s_id', $sid)->update(['s_finish'=>0]);
         echo '1';
     }
     //ajax更新大題順序
@@ -953,7 +958,7 @@ class SetsController extends TopController
         foreach ($node as $position => $item) {
             Sets::where('s_id', $item)->where('s_pid', $sid)->update(['s_part'=>($position+1)]);
         }
-        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
+        Sets::where('s_id', $sid)->update(['s_finish'=>0]);
         echo '1';
     }
     //ajax刪除題目
@@ -962,19 +967,18 @@ class SetsController extends TopController
         if (!is_numeric($sid))abort(400);
         $sid = (int)$sid;
         if ($sid<=0)abort(400);
+        $part = ($req->has('part') && (int)$req->input('part')>0) ? (int)$req->input('part'):0;
+        $que = ($req->has('que') && (int)$req->input('que')>0) ? (int)$req->input('que'):0;
+        if ($part===0 || $que===0)abort(400);
         $sets = Sets::find($sid);
         if ($sets===null)abort(400);
         $sets->s_finish = 2;
         $sets->save();
-        $part = ($req->has('part') && (int)$req->input('part')>0) ? (int)$req->input('part'):0;
-        $que = ($req->has('que') && (int)$req->input('que')>0) ? (int)$req->input('que'):0;
-        if ($part===0 || $que===0)abort(400);
-
         Setsque::where('sq_sid', $sid)
                ->where('sq_part', $part)
                ->where('sq_qid', $que)
                ->delete();
-        Sets::where('s_id', $sid)->update(['s_finish'=>2]);
+        Sets::where('s_id', $sid)->update(['s_finish'=>0]);
         echo '1';
     }
     //切換試卷狀態
