@@ -22,8 +22,8 @@
 	<form name="form1" id="form1">
 	<div class="title_intro">
 		<div class="top_search"><label style="margin-left:5px;">關鍵字搜尋</label><input type="text" class="input_field" name="q" id="q" value="{{ $Qkeyword }}"><div class="glass_div" onclick="search_confirm()"><img src="{{ URL::asset('img/icon_op_glass.png') }}"></div><a href="{{ url('/ques') }}" style="margin-left:55px;">瀏覽全部</a></div>
-		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<a href=""><input type="button" class="btn f16 w150" name="" id="" value="Excel匯入"></a></div>
-		<label class="f16" id="choice_fie"><a href="javascript:void(0)" onclick="open_field();">選擇欄位</a></label>
+		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" class="btn f16 w150" name="" id="" value="Excel匯入(敬請期待)"></div>
+		{{-- <label class="f16" id="choice_fie"><a href="javascript:void(0)" onclick="open_field();">選擇欄位</a></label> --}}
 	</div>
 	<div class="title_intro condition">
 		<div>
@@ -84,7 +84,7 @@
 						<td name="deg">{{ $v->q_degree }}</td>
 						<td></td>
 						<td>{{ $v->q_update }}</td>
-						<td class="last"><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/edit') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="編輯"></td>
+						<td class="last"><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="明細"><br><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/edit') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="編輯"></td>
 					</tr>
 				@endforeach
 				</tbody>

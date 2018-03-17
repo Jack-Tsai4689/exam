@@ -184,6 +184,9 @@
         .show {
             display: block;
         }
+        #match_opt > div {
+            display: inline-block;
+        }
 	</style>
 </head>
 <body>
@@ -337,6 +340,49 @@
                     <td align="right">正確解答<font color="red">＊</font></td>
                     <td id="correct_ans_math">
                         <div id="a1"><span>No.1</span><label><input type="radio" name="ans1" value="1">1</label><label><input type="radio" name="ans1" value="2">2</label><label><input type="radio" name="ans1" value="3">3</label><label><input type="radio" name="ans1" value="4">4</label><label><input type="radio" name="ans1" value="5">5</label><label><input type="radio" name="ans1" value="6">6</label><label><input type="radio" name="ans1" value="7">7</label><label><input type="radio" name="ans1" value="8">8</label><label><input type="radio" name="ans1" value="9">9</label><label><input type="radio" name="ans1" value="0">0</label><label><input type="radio" name="ans1" value="a">-</label><label><input type="radio" name="ans1" value="b">±</label>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="shallow match">
+                    <td align="right">配合方式</td>
+                    <td><label><input type="radio" name="gmatch" class="gtype" checked value="1">1 v.s. 1 (1組 對應 1個選項)</label>　
+                        <label><input type="radio" name="gmatch" class="gtype" value="2">1 v.s. 多 (1組 對應 多個選項)</label>
+                    </td>
+                </tr>
+                <tr class="deep match">
+                    <td align="right">選項群</td>
+                    <td id="match_opt">
+                        <input type="button" name="" value="增加選項"><br>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">1. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">2. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">3. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">4. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">5. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">6. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">7. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">8. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">9. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">10. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">11. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                        <div><input type="checkbox" class="opt"><label class="opt_no">12. </label><input type="text" class="opt_txt" name="opttxt[]"></div>
+                    </td>
+                </tr>
+                <tr class="shallow match">
+                    <td align="right">對應組別</td>
+                    <td>
+                        <div style="display: inline-block;">
+                            <div><input type="text" name="cg[]" class="cgroup" placeholder="組別1"></div>
+                            <div><input type="button" name="joino" class="btn_joino" data-id="1" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="1" value="移除"></div>
+                            <div>
+                                <select multiple class="cg_ans" name="cg_ans1[]"></select>
+                            </div>
+                        </div>
+                        <div style="display: inline-block;">
+                            <div><input type="text" name="cg[]" class="cgroup" placeholder="組別1"></div>
+                            <div><input type="button" name="joino" class="btn_joino" data-id="2" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="2" value="移除"></div>
+                            <div>
+                                <select multiple class="cg_ans" name="cg_ans2[]"></select>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -551,7 +597,52 @@ $(function() {
 //     }
 // }
 var rows_m = 1;
+$(".btn_joino").on('click', function(){
+    let id = $(this).data('id');
+    let ans = $('select[name="cg_ans'+id+'[]"]');
+    // let ans = $('#cg_ans'+id);
+    $(".opt:checked").each(function(){
+        let i = $(".opt").index(this);
+        let v = $(".opt_no")[i].innerHTML+$(".opt_txt")[i].value;
+        if (v=="")return;
+        let have = false;
+        ans.find("option").each(function(){
+            let nv = Number($(this).val());
+            if (nv===i){
+                have = true;
+                return false;
+            }
+        });
+        if (!have)ans.append(new Option(v, i));
+    });
+    let cg = ans.find('option');
+    cg.detach().sort(function(a,b){
+        let av = Number(a.value);
+        let bv = Number(b.value);
+        return (av > bv)?1:((av < bv)?-1:0);
+    });
+    cg.appendTo(ans);
+});
 
+$(".btn_removeo").on('click', function(){
+    let id = $(this).data('id');
+    $('select[name="cg_ans'+id+'[]"]').find(":selected").remove();
+    // $('#cg_ans'+id).find(":selected").remove();
+});
+$(".opt_txt").on('blur', function(){
+    let obj = this;
+    let gans = [];
+    let id = $(".opt_txt").index(obj);
+    $(".cg_ans").each(function(){
+        $(this).find("option").each(function(){
+            if (this.value==id){
+                let no = $(".opt_no")[id].innerHTML;
+                $(this).text(no+obj.value);
+                return false;
+            }
+        });
+    });
+});
 function subj_c(v){
     $.ajax({
         type:"GET",
@@ -746,6 +837,26 @@ function check(act){
     var q=0;
     var error = false;//data_check();
     if (!error){
+        var gcrows = Number($(".gtype").val());
+        $(".cg_ans").each(function(){
+            var grows = this.options.length;
+            if (grows===0){
+                error = true;
+                alert("設定錯誤");
+                return false;
+            }
+            if (gcrows===1){
+                if (grows!=1){
+                    error = true;
+                    alert("設定錯誤");
+                    return false;
+                }
+            }
+        });
+        if (error)return false;
+        $(".cg_ans").find("option").each(function(){
+            this.selected = true;
+        });
         //背景post
         $('#posting').show();
         var type = 'a';

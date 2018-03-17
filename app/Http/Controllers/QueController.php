@@ -590,9 +590,127 @@ class QueController extends TopController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($qid)
     {
-        //
+        if (!preg_match("/^[0-9]*$/", $qid))abort(400);
+        $qdata = Ques::find($qid);
+        //題型、答案
+        switch ($qdata->q_quetype) {
+            case "S": 
+                $Quetype = "單選題"; 
+                $Ans = chr($qdata->q_ans+64);
+                break;
+            case "D": 
+                $Quetype = "複選題";
+                $ans = array();
+                $ans = explode(",", $qdata->q_ans);
+                $ans_html = array();
+                foreach ($ans as $o) {
+                    $ans_html[] = chr($o+64);
+                }
+                $Ans = implode(", ", $ans_html);
+                break;
+            case "R": 
+                $Quetype = "是非題";
+                $Ans = ($v->q_ans==="1") ? "O":"X";
+                break;
+            case "M": 
+                $Quetype = "選填題";
+                $ans = array();
+                $ans = explode(",", $v->q_ans);
+                $ans_html = array();
+                foreach ($ans as $o) {
+                    if (!preg_match("/^[0-9]*$/", $o)){
+                        $ans_html[] = ($o==="a") ? '-':'±';
+                    }else{
+                        $ans_html[] = $o;
+                    }
+                }
+                $Ans = implode(", ", $ans_html);
+                break;
+        }
+        $qcont =  array();
+        //題目文字
+        if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($qdata->q_quetxt));
+        //題目圖檔
+        if (!empty($qdata->q_qm_src)){
+            if(is_file($qdata->q_qm_src))$qcont[] = '<IMG class="pic" src="'.URL::asset($qdata->q_qm_src).'">';
+        }
+        //題目聲音檔
+        if (!empty($qdata->q_qs_src)){
+            $qs_name = '音訊檔名：'.$qdata->q_qs_name;
+            if(is_file($qdata->q_qs_src)){
+                $qcont[] = $qs_name.'<br><audio controls preload oncontextmenu="return false;">
+                        <source src="'.URL::asset($qdata->q_qs_src).'" type="audio/mpeg">
+                        <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
+                      </audio>';
+            }else{
+                $qcont[] = $qs_name.'<font color="red">(遺失)</font>';
+            }
+        }
+        $Que_content = implode("<br>", $qcont);
+
+        $acont = array();
+        //詳解文字
+        if (!empty($qdata->q_anstxt)) $acont[] = nl2br(trim($qdata->q_anstxt));
+        //詳解圖檔
+        if(!empty($qdata->q_am_src)){
+            if (is_file($qdata->q_am_src))$acont[] = '<IMG class="pic" src="'.URL::asset($qdata->q_am_src).'">';
+        }
+        $amedia = array();
+        //詳解聲音檔
+        if(!empty($qdata->q_as_src)){
+            $as_name = '音訊檔名：'.$qdata->q_as_name;
+            if(is_file($qdata->q_as_src)){
+                $amedia[] = $as_name.'<br><audio controls preload oncontextmenu="return false;">
+                        <source src="'.URL::asset($qdata->q_as_src).'" type="audio/mpeg">
+                        <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
+                      </audio>';
+            }else{
+                $amedia[] = $as_name.'<font color="red">(遺失)</font>';
+            }
+        }
+        //詳解影片檔
+        if(!empty($qdata->q_av_src)){
+            $av_name = '音訊檔名：'.$qdata->q_av_name;
+            if(is_file($qdata->q_av_src)){
+                $amedia[] = $av_name.'<br><audio controls preload oncontextmenu="return false;">
+                        <source src="'.URL::asset($qdata->q_av_src).'" type="audio/mpeg">
+                        <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
+                      </audio>';
+            }else{
+                $amedia[] = '<font color="red">(遺失)</font>';
+            }
+        }
+        $acont[] = implode(' | ', $amedia);
+        $Ans_content = '詳解<br>'.implode("<br>", $acont);
+        //難度
+        switch ($qdata->q_degree) {
+            case "M": $Degree = "中等"; break;
+            case "H": $Degree = "困難"; break;
+            case "E": $Degree = "容易"; break;
+            default: $Degree = "容易"; break;
+        }
+        $Know_content = ($qdata->q_know!==0) ? '知識點：'.$qdata->knows->name:'';
+
+        $Grade = $qdata->gra->name;
+        $Subject = $qdata->subj->name;
+        $Chapter = $qdata->chap->name;
+        $Owner = $qdata->q_owner;
+
+        $keyword = explode("|", $qdata->q_keyword);
+        $key = array();
+        foreach ($keyword as $v) {
+            $c = (string)$v;
+            if ($c==="")continue;
+            $key[] = $v;
+        }
+        $Keyword = implode(", ", $key);
+        $title = '預覽題目';
+        return view("que.info", 
+            compact("qid", "title", "Owner", "Quetype", "Que_content", 
+                    "Know_content", "Grade", "Subject", "Chapter", "Degree", 
+                    "Ans", "Ans_content", "Keyword"));
     }
 
     /**
@@ -604,9 +722,8 @@ class QueController extends TopController
     public function edit($qid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($qid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $qid))abort(400);
         $qid = (int)$qid;
-        if ($qid<=0)abort(400);
         if (session('ident')!=="T"){
             echo '很抱歉，權限不足';
             return;
@@ -935,9 +1052,8 @@ class QueController extends TopController
     public function update(Request $req, $qid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($qid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $qid))abort(400);
         $qid = (int)$qid;
-        if ($qid<=0)abort(400);
         if (session('ident')!=="T"){
             die('很抱歉，權限不足');
             return;

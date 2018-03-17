@@ -380,7 +380,7 @@ class SetsController extends TopController
             //題型
             switch ($data->q_quetype) {
                 case "S": 
-                    $data->q_ans = chr($data->q_ans+64);
+                    $que->q_ans = chr($data->q_ans+64);
                     break;
                 case "D": 
                     $ans = array();
@@ -641,7 +641,7 @@ class SetsController extends TopController
         $data['updated_at'] = time();
         
         $have_sub = ($req->has('have_sub') && !empty($req->input('have_sub'))) ? trim($req->input('have_sub')):'';
-
+        $data['s_sub'] = 0;
         if (!empty($have_sub)){
             $no = ($req->has('sub_no') && !empty($req->input('sub_no'))) ? $req->input('sub_no'):array();
             $sort = ($req->has('sub_sort') && !empty($req->input('sub_sort'))) ? $req->input('sub_sort'):array();
@@ -650,13 +650,20 @@ class SetsController extends TopController
             $intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
             foreach ($no as $k => $v) {
                 if (empty($v)){
-                    $sub_ins = new Sets;
-                    $sub_ins->s_part = $sort[$k];
-                    $sub_ins->s_page = $control[$k];
-                    $sub_ins->s_percen =  $score[$k];
-                    $sub_ins->s_intro = $intro[$k];
-                    $sub_ins->s_pid = $sid;
-                    $sub_ins->save();
+                    Sets::create([
+                        's_part'=> $sort[$k],
+                        's_page'=> $control[$k],
+                        's_percen'=> $score[$k],
+                        's_intro'=> $intro[$k],
+                        's_pid'=> $sid
+                    ]);
+                    // $sub_ins = new Sets;
+                    // $sub_ins->s_part = $sort[$k];
+                    // $sub_ins->s_page = $control[$k];
+                    // $sub_ins->s_percen =  $score[$k];
+                    // $sub_ins->s_intro = $intro[$k];
+                    // $sub_ins->s_pid = $sid;
+                    // $sub_ins->save();
                 }else{
                     Sets::where('s_id', $v)
                         ->update([
@@ -666,6 +673,7 @@ class SetsController extends TopController
                             's_intro' => $intro[$k]
                         ]);
                 }
+                $data['s_sub'] = 1;
             }
         }
         $del = ($req->has('delsub') && !empty($req->input('delsub'))) ? trim($req->input('delsub')):'';
@@ -857,14 +865,15 @@ class SetsController extends TopController
             //如果大題的題目沒重覆才新增，並自動遞增序號
             $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at) 
             SELECT ?, ?, ?, (SELECT (Case When Max(sq_sort) is null then 0 else max(sq_sort) end)+1 from setsque 
-                WHERE sq_sid=? AND sq_part=?), ?, ? FROM setsque
+                WHERE sq_sid=? AND sq_part=?), ?, ? 
             WHERE NOT EXISTS( 
                 SELECT * FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=?
             ) limit 1";
-            DB::insert($sql, [
+            $data = [
                 $sid, $part, $q, 
                 $sid, $part, $this->login_user, time(),
-                $sid, $part, $q]);
+                $sid, $part, $q];
+            DB::insert($sql, $data);
             //看資料是否存在，不存在會原條件返回，有存在會返回該筆資料
             // $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at)
             //     SELECT ?, ?, ?, (SELECT IFNULL(1, max('sq_sort')) FROM setsque WHERE sq_sid=? AND sq_part=?), ?, ? FROM setsque

@@ -103,6 +103,7 @@ Route::group(['prefix'=>'ques'], function(){
 	Route::get('/create', "QueController@create");
 	Route::post('/', "QueController@store");
 	Route::get('{id}/edit', "QueController@edit");
+	Route::get('{id}',"QueController@show");
 	Route::put('{id}',"QueController@update");
 	Route::get('/imp', "QueController@join");
 });
