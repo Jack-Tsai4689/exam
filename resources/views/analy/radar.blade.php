@@ -118,14 +118,14 @@
 	<div class="content">
 		<div id="cen">
         @if (is_file('concept/'.$Graph_id.'.jpg'))
-            <img class="graph" src="{{ URL::asset('/concept/'.$Graph_id.'.jpg') }}">
+            <img class="graph" id="concept" src="{{ URL::asset('/concept/'.$Graph_id.'.jpg') }}">
         @else
     		@if(count($Data)>2)
-                <img class="graph" src="{{ URL::asset('jpgraph/pattern/radarmarkex1.php?f_sid='.$Graph_id.'&str_scrtype='.urlencode($Con_type).'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖')) }}">
+                <img class="graph" id="concept" src="{{ URL::asset('jpgraph/pattern/radarmarkex1.php?f_sid='.$Graph_id.'&str_scrtype='.urlencode($Con_type).'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖')) }}">
             @elseif(count($Data)===2)
-                <img class="graph" src="{{ URL::asset('jpgraph/pattern/pieex5_2.php?f_sid='.$Graph_id.'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖'))}}">
+                <img class="graph" id="concept" src="{{ URL::asset('jpgraph/pattern/pieex5_2.php?f_sid='.$Graph_id.'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖'))}}">
             @else
-                <img class="graph" src="{{ URL::asset('jpgraph/pattern/pieex5.php?f_sid='.$Graph_id.'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖')) }}">
+                <img class="graph" id="concept" src="{{ URL::asset('jpgraph/pattern/pieex5.php?f_sid='.$Graph_id.'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖')) }}">
             @endif
         @endif
 		<table cellpadding="0" cellspacing="0" width="100%" class="list">
@@ -197,5 +197,6 @@ $("#see_result").on('click', function(){
 $("#see_analy").on('click', function(){
     location.href = "{{ url('/analy/'.$Eid) }}";
 });
+document.getElementById('concept').src+='?'+Math.random();
 </script>
 @stop

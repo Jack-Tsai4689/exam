@@ -37,6 +37,7 @@ class Exams extends Model
                 $tmp = new \stdclass;
                 $tmp->qno = $q->ed_sort;
                 //題目
+                $qcont = array();
                 if (!empty($q->q_quetxt))$qcont[] = nl2br(trim($q->q_quetxt));
                 if (!empty($q->q_qm_src)){
                     if (is_file($q->q_qm_src))$qcont[] = '<img class="pic" src="'.URL::asset($q->q_qm_src).'">';
@@ -143,7 +144,7 @@ class Exams extends Model
     }
     //關聯大題設定
     public function sets_info(){
-        return $this->hasone(Sets::class, 's_id','s_id')->first();
+        return $this->hasone(Pubs::class, 'p_id','s_id')->first();
     }
     //關聯學生
     public function stu(){

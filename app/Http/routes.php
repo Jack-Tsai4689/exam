@@ -39,7 +39,7 @@ Route::group(['prefix'=>'score'], function(){
 	//成績列表
 	Route::get('/', "ScoreController@index");
 	//個人成績
-	Route::get('/one', "ScoreController@show");
+	Route::get('/{id}', "ScoreController@show");
 });
 //分析
 Route::group(['prefix'=>'analy'], function(){
@@ -103,9 +103,9 @@ Route::group(['prefix'=>'ques'], function(){
 	Route::get('/create', "QueController@create");
 	Route::post('/', "QueController@store");
 	Route::get('{id}/edit', "QueController@edit");
+	Route::get('/imp', "QueController@join");
 	Route::get('{id}',"QueController@show");
 	Route::put('{id}',"QueController@update");
-	Route::get('/imp', "QueController@join");
 });
 //知識點
 Route::group(['prefix'=>'know'], function(){

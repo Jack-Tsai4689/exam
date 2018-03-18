@@ -32,7 +32,7 @@ io.sockets.on('connection', function (socket) {
 		redis.get(cio).then(function(rs){
 			request.post(
 				{
-					url: "http://localhost:8081/gold/public/exam/quit",
+					url: "http://localhost/exam/quit",
 					form:{
 						token: rs,
 						time: d.getTime()

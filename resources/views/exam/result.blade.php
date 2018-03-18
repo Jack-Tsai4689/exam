@@ -87,13 +87,16 @@
             font-weight: bolder;
         }
         .right {
-            color: blue;
+            color: green;
         }
         .wrong {
             color: red;
         }
         .none {
             color: gray;
+        }
+        .hiden {
+            display: none;
         }
         .pic {
             width: 80%;
@@ -104,13 +107,14 @@
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<div class="title_intro result_times">
-		{{ $Setsname }}　費時 時分秒　
+		{{ $Setsname }}　測驗費時 {{ $Time->hour }}小時 {{ $Time->min }}分 {{ $Time->sec}}秒　
         答對<span class="right">{{ $exam->e_rnum }}</span>題　
         答錯<span class="wrong">{{ $exam->e_wnum }}</span>題　
         未答<span class="none">{{ $exam->e_nnum }}</span>題　
 		總分<span class="wrong">{{ (float)$exam->e_score }}</span>分
 	</div>
 	<div class="title_intro">
+        <input type="button" class="btn w150 f14 oans" value="顯示解答/詳解">
 		<input type="button" class="btn w100 f14 analy" value="考題概念表">
 		<input type="button" class="btn w150 f14 concept" value="觀念答對比率圖" onclick="">
 		<input type="button" class="btn w150 f14" value="列印診斷報告" onclick="">
@@ -121,9 +125,9 @@
         <INPUT type="hidden" name="f_subject" id="f_subject" value="">
         <INPUT type="hidden" name="fkey" id="fkey" value="">
 	</div>
-    @foreach($Data as $i => $p)
+    @foreach($Data as $p)
     <div class="title_intro">
-        <div class="part">第 {{ ($i+1) }} 大題 {{ (float)$p->e_score }}分({{ $p->sets_info()->s_percen }}%)　答對<span class="right">{{ $p->e_rnum }}</span>題　答錯<span class="wrong">{{ $p->e_wnum }}</span>題　未答<span class="none">{{ $p->e_nnum }}</span>題</div>
+        <div class="part">第 {{ $p->e_sort }} 大題 {{ (float)$p->e_score }}分({{ $p->sets_info()->p_percen }}%)　答對<span class="right">{{ $p->e_rnum }}</span>題　答錯<span class="wrong">{{ $p->e_wnum }}</span>題　未答<span class="none">{{ $p->e_nnum }}</span>題</div>
     </div>
 	<div class="content">
 		<div id="cen">
@@ -135,7 +139,7 @@
 					<td class="qno_ans">{{ $q->myans }}</td>
 					<td class="que" align="left">{!! $q->qcont !!}</td>
                 </tr>
-                <tr align="center">
+                <tr align="center" class="ans hiden">
                     <td class="qno">解答</td>
                     <td class="qno_c"></td>
                     <td class="qno_ans">{{ $q->q_ans }}</td>
@@ -150,6 +154,7 @@
 	</div>
     @endforeach
 	<div class="title_intro">
+        <input type="button" class="btn w150 f14 oans" value="顯示解答/詳解">
 		<input type="button" class="btn w100 f14 analy" value="考題概念表">
 		<input type="button" class="btn w150 f14 concept" value="觀念答對比率圖">
 		<input type="button" class="btn w150 f14" name="" id="" value="列印診斷報告">
@@ -160,12 +165,24 @@
 @stop
 @section('script')
 <script type="text/javascript">
+    let hiden_ans = true;
     window.moveTo(0,0);window.resizeTo(screen.width,screen.height);
     $(".analy").on('click', function(){
         location.href = "{{ url('/analy/'.$Eid) }}";
     });
     $(".concept").on('click', function(){
         location.href = "{{ url('/analy/'.$Eid.'/concept') }}";
+    });
+    $(".oans").on('click', function(){
+        if (hiden_ans){
+            $(".oans").val('隱藏解答/詳解');
+            $(".ans").removeClass("hiden");
+            hiden_ans = false;
+        }else{
+            $(".oans").val('顯示解答/詳解');
+            $(".ans").addClass("hiden");
+            hiden_ans = true;
+        }
     });
 </script>  
 @stop

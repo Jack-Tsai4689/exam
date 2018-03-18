@@ -53,28 +53,20 @@ class BasicController extends TopController
 
         if (empty($type))$error = true;
         if ($error)abort(400);
-        $data = new Gscs;
-        $data->g_owner = $this->login_user;
-        $data->created_at = time();
-        $data->updated_at = time();
+        $data = array(
+            'g_owner' => $this->login_user,
+            'created_at' => time(),
+            'updated_at' => time()
+        );
         switch ($type) {
             case 'gra': //新增類別
                 $gra_name = ($req->has('graname')) ? $req->input('graname'):'';
                 if (empty($gra_name))$error = true;
                 if ($error)abort(400);
-                $data = new Gscs;
-                $data->g_name = $gra_name;
-                $data->save();
+                $data['g_name'] = $gra_name;
+                Gscs::create($data);
                 $grade_data = $this->grade();
-                $rs_data = array();
-                foreach ($grade_data as $v) {
-                    $tmp = new \stdClass;
-                    $tmp->ID = $v->g_id;
-                    $tmp->NAME = $v->g_name;
-                    $tmp->OWNER = $v->g_owner;
-                    $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                    array_push($rs_data, $tmp);
-                }
+                $rs_data = $this->_gsclist_format($grade_data);
                 unset($grade_data);
                 break;
             case 'subj': //新增科目
@@ -82,19 +74,11 @@ class BasicController extends TopController
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if (empty($subj_name) || $g===0)$error = true;
                 if ($error)abort(400);
-                $data->g_name = $subj_name;
-                $data->g_graid = $g;
-                $data->save();
+                $data['g_name'] = $subj_name;
+                $data['g_graid'] = $g;
+                Gscs::create($data);
                 $subj_data = $this->subject($g);
-                $rs_data = array();
-                foreach ($subj_data as $v) {
-                    $tmp = new \stdClass;
-                    $tmp->ID = $v->g_id;
-                    $tmp->NAME = $v->g_name;
-                    $tmp->OWNER = $v->g_owner;
-                    $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                    array_push($rs_data, $tmp);
-                }
+                $rs_data = $this->_gsclist_format($subj_data);
                 unset($subj_data);
                 break;
             case 'chap': //新增章節
@@ -103,66 +87,62 @@ class BasicController extends TopController
                 $s = ($req->has('s')) ? (int)$req->input('s'):0;
                 if (empty($chap_name) || $g===0 || $s===0)$error = true;
                 if ($error)abort(400);
-                $data->g_name = $chap_name;
-                $data->g_graid = $g;
-                $data->g_subjid = $s;
-                $data->save();
+                $data['g_name'] = $chap_name;
+                $data['g_graid'] = $g;
+                $data['g_subjid'] = $s;
+                Gscs::create($data);
                 $chap_data = $this->chapter($g, $s);
-                $rs_data = array();
-                foreach ($chap_data as $v) {
-                    $tmp = new \stdClass;
-                    $tmp->ID = $v->g_id;
-                    $tmp->NAME = $v->g_name;
-                    $tmp->OWNER = $v->g_owner;
-                    $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                    array_push($rs_data, $tmp);
-                }
+                $rs_data = $this->_gsclist_format($chap_data);
                 unset($chap_data);
                 break;
             case 'ugra':
-                // $gra_id = ($req->has('ugraid') && (int)$req->input('ugraid')>0) ? (int)$req->input('ugraid'):0;
-                // $gra_name = ($req->has('ugraname') && (int)$req->input('ugraname')>0) ? (int)$req->input('ugraname'):0;
-                // if ($gra_id<=0 || empty($gra_name))abort(400);
-                // $gra = Gscs::find($gra_id);
-                // $gra->g_name = $gra_name;
-                // $gra->save();
-                // $grade_data = $this->grade();
-                // $rs_data = array();
-                // foreach ($grade_data as $v) {
-                //     $tmp = new \stdClass;
-                //     $tmp->ID = $v->g_id;
-                //     $tmp->NAME = $v->g_name;
-                //     $tmp->OWNER = $v->g_owner;
-                //     $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                //     array_push($rs_data, $tmp);
-                // }
-                // unset($grade_data);
+                $gra_id = ($req->has('ugraid') && !empty($req->input('ugraid'))) ? trim($req->input('ugraid')):0;
+                $gra_name = ($req->has('ugraname') && !empty($req->input('ugraname'))) ? trim($req->input('ugraname')):'';
+                if (!preg_match("/^[0-9]*$/", $gra_id) || empty($gra_name))abort(400);
+                Gscs::where('g_id', $gra_id)->update(['g_name'=>$gra_name]);
+                $grade_data = $this->grade();
+                $rs_data = $this->_gsclist_format($grade_data);
+                unset($grade_data);
                 break;
             case 'usubj':
-                // $subj_id = ($req->has('usubjid') && (int)$req->input('usubjid')>0) ? (int)$req->input('usubjid'):0;
-                // $subj_name = ($req->has('usubjname') && (int)$req->input('usubjname')>0) ? (int)$req->input('usubjname'):0;
-                // if ($subj_id<=0 || empty($subj_name))abort(400);
-                // $subj = Gscs::find($subj_id);
-                // $subj->g_name = $subj_name;
-                // $subj->save();
-                // $subj_data = $this->grade();
-                // $rs_data = array();
-                // foreach ($subj_data as $v) {
-                //     $tmp = new \stdClass;
-                //     $tmp->ID = $v->g_id;
-                //     $tmp->NAME = $v->g_name;
-                //     $tmp->OWNER = $v->g_owner;
-                //     $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                //     array_push($rs_data, $tmp);
-                // }
-                // unset($subj_data);
+                $subj_id = ($req->has('usubjid') && !empty($req->input('usubjid'))) ? trim($req->input('usubjid')):0;
+                $g_id = ($req->has('usg') && !empty($req->input('usg'))) ? trim($req->input('usg')):0;
+                $subj_name = ($req->has('usubjname') && !empty($req->input('usubjname'))) ? trim($req->input('usubjname')):'';
+                if (!preg_match("/^[0-9]*$/", $subj_id) || empty($subj_name))abort(400);
+                if (!preg_match("/^[0-9]*$/", $g_id))abort(400);
+                Gscs::where('g_id', $subj_id)->update(['g_name'=>$subj_name]);
+                $subj_data = $this->subject($g_id);
+                $rs_data = $this->_gsclist_format($subj_data);
+                unset($subj_data);
                 break;
             case 'uchap':
-                // uchapid
-                // uchapname
+                $chap_id = ($req->has('uchapid') && !empty($req->input('uchapid'))) ? trim($req->input('uchapid')):0;
+                $g_id = ($req->has('ucg') && !empty($req->input('ucg'))) ? trim($req->input('ucg')):0;
+                $s_id = ($req->has('ucs') && !empty($req->input('ucs'))) ? trim($req->input('ucs')):0;
+                $chap_name = ($req->has('uchapname') && !empty($req->input('uchapname'))) ? trim($req->input('uchapname')):'';
+                if (!preg_match("/^[0-9]*$/", $chap_id) || empty($chap_name))abort(400);
+                if (!preg_match("/^[0-9]*$/", $g_id))abort(400);
+                if (!preg_match("/^[0-9]*$/", $s_id))abort(400);
+                Gscs::where('g_id', $chap_id)->update(['g_name'=>$chap_name]);
+                $chap_data = $this->chapter($g_id, $s_id);
+                $rs_data = $this->_gsclist_format($chap_data);
+                unset($chap_data);
                 break;
         }
         return response()->json($rs_data);
+    }
+    //清單格式化
+    private function _gsclist_format($data){
+        $rs = array();
+        foreach ($data as $v) {
+            $tmp = new \stdClass;
+            $tmp->ID = $v->g_id;
+            $tmp->NAME = $v->g_name;
+            $tmp->OWNER = $v->g_owner;
+            $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
+            array_push($rs, $tmp);
+        }
+        return $rs;
     }
     public function ajshow(Request $req){
         if (!$this->login_status)abort(401);
@@ -174,15 +154,7 @@ class BasicController extends TopController
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if ($g===0)abort(400);
                 $subj_data = $this->subject($g);
-                $rs_data = array();
-                foreach ($subj_data as $v) {
-                    $tmp = new \stdClass;
-                    $tmp->ID = $v->g_id;
-                    $tmp->NAME = $v->g_name;
-                    $tmp->OWNER = $v->g_owner;
-                    $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                    array_push($rs_data, $tmp);
-                }
+                $rs_data = $this->_gsclist_format($subj_data);
                 if (empty($rs_data))abort(400);
                 unset($subj_data);
                 break;
@@ -191,15 +163,7 @@ class BasicController extends TopController
                 $s = ($req->has('s')) ? (int)$req->input('s'):0;
                 if ($g===0 || $s===0)abort(400);
                 $chap_data = $this->chapter($g, $s);
-                $rs_data = array();
-                foreach ($chap_data as $v) {
-                    $tmp = new \stdClass;
-                    $tmp->ID = $v->g_id;
-                    $tmp->NAME = $v->g_name;
-                    $tmp->OWNER = $v->g_owner;
-                    $tmp->UPDATETIME = date('Y/m/d H:i:s', $v->updated_at);
-                    array_push($rs_data, $tmp);
-                }
+                $rs_data = $this->_gsclist_format($chap_data);
                 if (empty($rs_data))abort(400);
                 unset($chap_data);
                 break;

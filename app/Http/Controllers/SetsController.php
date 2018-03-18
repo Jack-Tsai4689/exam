@@ -639,7 +639,7 @@ class SetsController extends TopController
         
         $data['s_owner'] = $this->login_user;
         $data['updated_at'] = time();
-        
+
         $have_sub = ($req->has('have_sub') && !empty($req->input('have_sub'))) ? trim($req->input('have_sub')):'';
         $data['s_sub'] = 0;
         if (!empty($have_sub)){

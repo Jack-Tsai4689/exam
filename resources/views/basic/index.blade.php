@@ -211,10 +211,11 @@
                     <form method="post" onsubmit="return gcheck(this)">
                     類別：<input type="text" name="ugraname" id="ugraname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="ugcancel"><font class="f15">取消</font></a></div>
                         <input type="hidden" name="ugraid" id="ugraid">
                         <input type="hidden" name="type" value="ugra">
+                        {{ csrf_field() }}
                     </div>
                     </form>
                 </div>
@@ -231,10 +232,12 @@
                     <form method="post" onsubmit="return scheck(this)">
                     科目：<input type="text" name="usubjname" id="usubjname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="uscancel"><font class="f15">取消</font></a></div>
                         <input type="hidden" name="usubjid" id="usubjid">
+                        <input type="hidden" name="usg" id="usg">
                         <input type="hidden" name="type" value="usubj">
+                        {{ csrf_field() }}
                     </div>
                     </form>
                 </div>
@@ -251,10 +254,13 @@
                     <form method="post" onsubmit="return ccheck(this)">
                     章節：<input type="text" name="uchapname" id="uchapname">	
                     <div>
-                        <div style="text-align:left; float:left;"><INPUT type="button" class="btn w150 f16" value="更新暫停"></div>
+                        <div style="text-align:left; float:left;"><INPUT type="submit" class="btn w150 f16" value="更新"></div>
                         <div style="text-align:right; height:30px; line-height:30px;"><a href="javascript:void(0)" id="uccancel"><font class="f15">取消</font></a></div>
                         <input type="hidden" name="uchapid" id="uchapid">
+                        <input type="hidden" name="ucg" id="ucg">
+                        <input type="hidden" name="ucs" id="ucs">
                         <input type="hidden" name="type" value="uchap">
+                        {{ csrf_field() }}
                     </div>
                     </form>
                 </div>
@@ -358,6 +364,8 @@ $("#gralist").on("click", ".gc", function(){
 	var tr = this.parentElement.parentElement;
 	$(tr).addClass('select');
 	g = $(this).data("id");
+	gb('usg').value = g;
+	gb('ucg').value = g;
 	act_start();
 	$.ajax({
 		type:"GET",
@@ -390,6 +398,7 @@ $("#subjlist").on("click", ".sc", function(){
 	var tr = this.parentElement.parentElement;
 	$(tr).addClass('select');
 	s = $(this).data("id");
+	gb('ucs').value = s;
 	act_start();
 	$.ajax({
 		type:"GET",

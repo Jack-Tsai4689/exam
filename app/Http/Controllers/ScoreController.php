@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Exams;
-use App\Sets;
+use App\Pubs;
 
 class ScoreController extends TopController
 {
@@ -31,10 +31,10 @@ class ScoreController extends TopController
                          ->orwhere('e_status','O')
                          ->get()->all();
             foreach ($data as $k => $v) {
-                $s = Sets::find($v->s_id);
-                $data[$k]->sets = $s->s_name;
-                $data[$k]->gra = $s->gra->name;
-                $data[$k]->subj = $s->subj->name;
+                $p = Pubs::find($v->s_id);
+                $data[$k]->sets = $p->p_name;
+                $data[$k]->gra = $p->gra->name;
+                $data[$k]->subj = $p->subj->name;
             }
             return view('exam.score_slist', [
                 'menu_user' => $this->menu_user,
@@ -90,21 +90,26 @@ class ScoreController extends TopController
         $eid = (int)$id;
         if ($eid<1)abort(400);
         $exam = Exams::find($eid);
-        $sets = Sets::find($exam->s_id);
+        $sets = Pubs::find($exam->s_id);
         
         $Sets_name = $sets->s_name;
         $que = array();
         if ($exam->e_sub){
-            $sub_exam = Exams::where('e_pid', $eid)->get()->all();
+            $sub_exam = Exams::where('e_pid', $eid)->orderby('e_sort')->get()->all();
         }
-
         $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
+        $times = new \stdclass;
+        $times->hour = floor($uses_time/3600);
+        $times->min = floor(($uses_time%3600)/60);
+        $times->sec = floor($uses_time%60);
+
         return view('exam.result', [
             'menu_user' => $this->menu_user,
-            'title' => $sets->s_name.' 測驗結果',
-            'Setsname' => $sets->s_name,
+            'title' => $sets->p_name.' 測驗結果',
+            'Setsname' => $sets->p_name,
             'Data' => $sub_exam,
             'exam' => $exam,
+            'Time' => $times,
             'Eid' => $eid
         ]);
     }

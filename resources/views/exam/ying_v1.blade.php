@@ -176,29 +176,41 @@
 	<input type="hidden" name="current_qno" id="current_qno" value="{{ $curr }}">
     <input type="hidden" name="stu_ans" id="stu_ans" value="">
     <input type="hidden" name="exam" id="exam" value="{{ $exam }}">
+    <input type="hidden" name="qtype" id="qtype" value="{{ $que->qtype }}">
+    <input type="hidden" name="qnum" id="qnum" value="{{ $que->qnum }}">
     <input type="hidden" name="epart" id="epart" value="{{ $first_part->eid }}">
     <input type="hidden" name="spart" id="spart" value="{{ $first_part->sid }}">
     <input type="hidden" name="utime" id="utime">
+    <div class="content" id="Q1">
+        <div class="cen">
+            <input type="hidden" id="Q1_no" value="{{ $que->qid }}">
+            <div class="que_main" id="Q1_main">
+                {!! $que->qcont !!}
+            </div>
+        </div>
+    </div>
+    <div class="title_intro result_times ans" id="A1">
+        <span id="A1_main">
+            {!! $que->ans !!}
+        </span>
+        <div id="chk_choice"><label><input type="checkbox" name="dou_check" id="dou_check1" value="1">再檢查</label></div>
+    </div>
     <input type="hidden" name="next_qtxt" id="next_qtxt" value="">
     <input type="hidden" name="next_qa" id="next_qa" value="">
     <input type="hidden" name="next_qno" id="next_qno" value="">    
-    @foreach($que as $i)
-	<div class="content" id="Q{{ $i->qsort }}" {!! $i->hiden !!}>
+    @php $i = 2 @endphp
+    @while($first_part->nums >= $i)
+	<div class="content" id="Q{{ $i }}" style="display:none;">
 		<div class="cen">
-            <input type="hidden" name="qtype{{ $i->qsort }}" id="qtype{{ $i->qsort }}" value="{{ $i->qtype }}">
-            <input type="hidden" name="qnum{{ $i->qsort }}" id="qnum{{ $i->qsort }}" value="{{ $i->qnum }}">
-			<div class="que_main" id="Q{{ $i->qsort }}_main">
-                {!! $i->qcont !!}         
-            </div>
+			<div class="que_main" id="Q{{ $i }}_main"></div>
 		</div>
 	</div>
-	<div class="title_intro result_times ans" id="A{{ $i->qsort }}" {!! $i->hiden !!}>
-        <span id="A{{ $i->qsort }}_main">
-            {!! $i->ans !!}
-        </span>
-		<div id="chk_choice"><label><input type="checkbox" name="dou_check" id="dou_check{{ $i->qsort }}" value="1">再檢查</label></div>
+	<div class="title_intro result_times ans" id="A{{ $i }}" style="display:none;">
+        <span id="A{{ $i }}_main"></span>
+		<div id="chk_choice"><label><input type="checkbox" name="dou_check" id="dou_check{{ $i }}" value="1">再檢查</label></div>
 	</div>
-    @endforeach
+        @php $i++ @endphp
+    @endwhile
 	<div class="title_intro qno_btn">
         {{ csrf_field() }}
 		<div id="btn_left"><input type="button" class="btn w150 f14" style="margin-left:5px; display:none;" id="perious" name="perious" value="上一題"><input type="button" class="btn w150 f14 btn_right" id="finish" name="finish" value="交卷"></div>
@@ -316,7 +328,7 @@ function but_change(){
 }
 function storeans(){
     var oans = Array();
-    var qtype = gb("qtype"+current).value;
+    var qtype = gb("qtype").value;
     switch(qtype){
         case 'S':
         case 'R':
@@ -325,7 +337,7 @@ function storeans(){
             }); 
             break;
         case 'M':
-            var qnum = gb("qnum"+current).value;
+            var qnum = gb('qnum').value;
             var i = 1;
             while(i<=qnum){
                 let ans = $('input[name="ans'+current+'_'+i+'"]:checked').val();
@@ -370,10 +382,10 @@ function storeans(){
 $('#next').click(function(){
     storeans();
     var nqno = current+1;
-    // var txt = ($('#Q'+nqno+'_main').html()=='')?'n':'y';
-    // gb('next_qtxt').value = txt;
+    var txt = ($('#Q'+nqno+'_main').html()=='')?'n':'y';
+    gb('next_qtxt').value = txt;
     gb('next_qa').value = 'n';
-    // if (txt=='n'){ clearTimeout(exam_times); }
+    if (txt=='n'){ clearTimeout(exam_times); }
     $.ajax({
         type:'POST',
         url:'{{ url('/exam') }}',
@@ -381,16 +393,16 @@ $('#next').click(function(){
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
             utime = 0;
-            // gb("qtype").value = data.qtype;
-            // gb("qnum").value = data.qnum;
-            // if (txt=='n'){
-            //     gb('Q'+nqno+'_main').innerHTML = data.qcont;
-            //     gb('A'+nqno+'_main').innerHTML = data.ans;
-            // }
+            gb("qtype").value = data.qtype;
+            gb("qnum").value = data.qnum;
+            if (txt=='n'){
+                gb('Q'+nqno+'_main').innerHTML = data.qcont;
+                gb('A'+nqno+'_main').innerHTML = data.ans;
+            }
         }
     });
 
-    // if (txt=='n'){ count(); }
+    if (txt=='n'){ count(); }
     $('#Q'+current).css('display','none');
     $('#A'+current).css('display','none');
     current+=1;
@@ -401,10 +413,10 @@ $('#next').click(function(){
 $('#perious').click(function(){
     storeans();
     var pqno = current-1;
-    // var txt = ($('#Q'+pqno+'_main').html()=='')?'n':'y';
-    // gb('next_qtxt').value = txt;
+    var txt = ($('#Q'+pqno+'_main').html()=='')?'n':'y';
+    gb('next_qtxt').value = txt;
     gb('next_qa').value = 'p';
-    // if (txt=='n'){ clearTimeout(exam_times); }
+    if (txt=='n'){ clearTimeout(exam_times); }
     $.ajax({
         type:'POST',
         url:'{{ url('/exam') }}',
@@ -412,15 +424,15 @@ $('#perious').click(function(){
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
             utime = 0;
-            // gb("qtype").value = data.qtype;
-            // gb("qnum").value = data.qnum;
-            // if (txt=='n'){
-            //     gb('Q'+current+'_main').innerHTML = data.qcont;
-            //     gb('A'+current+'_main').innerHTML = data.ans;
-            // }
+            gb("qtype").value = data.qtype;
+            gb("qnum").value = data.qnum;
+            if (txt=='n'){
+                gb('Q'+current+'_main').innerHTML = data.qcont;
+                gb('A'+current+'_main').innerHTML = data.ans;
+            }
         }
     });
-    // if (txt=='n'){ count(); }
+    if (txt=='n'){ count(); }
     $('#Q'+current).css('display','none');
     $('#A'+current).css('display','none');
     current-=1;
@@ -431,11 +443,11 @@ $('#perious').click(function(){
 function go(qno){
     $('#go'+current).removeClass('current');
     storeans();
-    // var txt = ($('#Q'+qno+'_main').html()=='')?'n':'y';
-    // gb('next_qtxt').value = txt;
+    var txt = ($('#Q'+qno+'_main').html()=='')?'n':'y';
+    gb('next_qtxt').value = txt;
     gb('next_qa').value = 'q';
     gb('next_qno').value = qno;
-    // if (txt=='n'){ clearTimeout(exam_times); }
+    if (txt=='n'){ clearTimeout(exam_times); }
     $.ajax({
         type:'POST',
         url:'{{ url('/exam') }}',
@@ -443,15 +455,15 @@ function go(qno){
         data: $('#exam_form').serialize(),
         success: function (data, textStatus, jqXHR){
             utime = 0;
-            // gb("qtype").value = data.qtype;
-            // gb("qnum").value = data.qnum;
-            // if (txt=='n'){
-            //     gb('Q'+qno+'_main').innerHTML = data.qcont;
-            //     gb('A'+qno+'_main').innerHTML = data.ans;
-            // }
+            gb("qtype").value = data.qtype;
+            gb("qnum").value = data.qnum;
+            if (txt=='n'){
+                gb('Q'+qno+'_main').innerHTML = data.qcont;
+                gb('A'+qno+'_main').innerHTML = data.ans;
+            }
         }
     });
-    // if (txt=='n'){ count(); }
+    if (txt=='n'){ count(); }
     $('#Q'+current).css('display','none');
     $('#A'+current).css('display','none');
     current = qno;

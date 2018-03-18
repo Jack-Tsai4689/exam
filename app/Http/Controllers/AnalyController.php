@@ -132,7 +132,7 @@ class AnalyController extends TopController
                 }
             }
             $q_right[] = count($right);
-            $q_all[] = count($all);
+            $q_all[] = $all;
             // $d->all = $all;
             $d->right = implode(" ", $right);
             $d->wrong = implode(" ", $wrong);
@@ -165,14 +165,15 @@ class AnalyController extends TopController
                     $ans_html[] = chr($o+64);
                 }
                 $data->q_ans = implode(", ", $ans_html);
-
-                $ans = array();
-                $ans = explode(",", $e_que->ed_ans);
-                $ans_html = array();
-                foreach ($ans as $o) {
-                    $ans_html[] = chr($o+64);
+                if (!empty($e_que->ed_ans)){
+                    $ans = array();
+                    $ans = explode(",", $e_que->ed_ans);
+                    $ans_html = array();
+                    foreach ($ans as $o) {
+                        $ans_html[] = chr($o+64);
+                    }
+                    $data->ed_ans = implode(", ", $ans_html);
                 }
-                $data->ed_ans = implode(", ", $ans_html);
                 break;
             case "R": 
                 $data->q_ans = ($que->q_ans==="1") ? "O":"X";

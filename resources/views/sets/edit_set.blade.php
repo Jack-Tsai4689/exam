@@ -282,6 +282,31 @@ function check_data(){
     var setsname = trim(gb('setsname').value);//名稱
     var error = false;
     var percen = 0;
+    if (setsname==''){
+        alert('考試名稱有誤'); return false;
+    }else if (!isNaN(setsname)){
+        alert('[考卷名稱]不能都是數字喔'); return false;
+    }
+    var date = $('input[name=chk_date]:checked').val();
+    if (date==0){
+        if (gb('begdate').value > gb('enddate').value){
+            alert('考試結束時間需大於等於考試起始時間!'); return false;
+        }
+    }
+    // var limTimeH = gb('limTimeH').value;
+    // var limTimeM = gb('limTimeM').value;
+    // var limTimeS = gb('limTimeS').value;
+    // if (limTimeH==0 && limTimeM==0 && limTimeS==0){
+    //     alert('考試限時不可以都是0!'); return false;
+    // }
+    var passscore = gb('passscore').value;
+    if (passscore<=0 || isNaN(passscore)){
+        alert('及格分數有誤'); return false;
+    }
+    var sum_score = gb('sum').value;
+    if (sum_score<=0 || isNaN(sum_score)){
+        alert('總分有誤'); return false;
+    }
     if ($("#have_sub").prop('checked')){
         $(".subsort").each(function(){
             if (isNaN(this.value)){
@@ -312,31 +337,11 @@ function check_data(){
         //     }
         // });
         if (error)return false;
-    }    
-    if (setsname==''){
-        alert('考試名稱有誤'); return false;
-    }else if (!isNaN(setsname)){
-        alert('[考卷名稱]不能都是數字喔'); return false;
-    }
-    var date = $('input[name=chk_date]:checked').val();
-    if (date==0){
-        if (gb('begdate').value > gb('enddate').value){
-            alert('考試結束時間需大於等於考試起始時間!'); return false;
-        }
-    }
-    var limTimeH = gb('limTimeH').value;
-    var limTimeM = gb('limTimeM').value;
-    var limTimeS = gb('limTimeS').value;
-    if (limTimeH==0 && limTimeM==0 && limTimeS==0){
-        alert('考試限時不可以都是0!'); return false;
-    }
-    var passscore = gb('passscore').value;
-    if (passscore<=0 || isNaN(passscore)){
-        alert('及格分數有誤'); return false;
-    }
-    var sum_score = gb('sum').value;
-    if (sum_score<=0 || isNaN(sum_score)){
-        alert('總分有誤'); return false;
+    }else{
+        $(".sub").find(".subno").each(function(){
+            if (this.value!=="")delid.push(this.value);    
+        });
+        gb('delsub').value = delid.join(',');
     }
 }
 function subj_c(v){

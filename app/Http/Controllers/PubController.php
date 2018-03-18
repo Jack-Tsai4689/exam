@@ -299,7 +299,7 @@ class PubController extends TopController
         }else{
             //題目
             $que = Setsque::select('sq_qid','q_ans','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap')
-                              ->where('sq_sid', $s->s_id)
+                              ->where('sq_sid', $sid)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
             foreach ($que as $i => $q) {
@@ -358,9 +358,8 @@ class PubController extends TopController
     public function show($pid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($pid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $pid))abort(400);
         $pid = (int)$pid;
-        if ($pid<=0)abort(400);
         if ($this->login_type==="S"){
             echo('很抱歉，權限不足以瀏覽');
             return;
@@ -377,12 +376,12 @@ class PubController extends TopController
             $other_sub = $sub;
             $fsub = array_shift($other_sub);
             $first_sub->p_part = '(第1大題)';
-            $first_sub->subque = $fsub->subque;
+            $first_sub->subque = $fsub->subque()->get()->all();
             $first_sub->p_id = $fsub->p_id;
         }else{
             $first_sub->p_id = $pid;
             $first_sub->p_part = '';
-            $first_sub->subque = $data->subque;
+            $first_sub->subque = $data->subque()->get()->all();
             $sub = array();
             // $fsub = $data->sub()->first();
             // $first_sub->s_id = $fsub->s_id;
@@ -450,16 +449,13 @@ class PubController extends TopController
     //ajax查詢大題題目
     public function ajshow_que($pid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($pid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $pid))abort(400);
         $pid = (int)$pid;
-        if ($pid<=0)abort(400);
         $part_id = request()->input('part');
-        if (!is_numeric($part_id))abort(400);
+        if (!preg_match("/^[0-9]*$/", $part_id))abort(400);
         $part_id = (int)$part_id;
-        if ($part_id<=0)abort(400);
-
-        $sets = Pubs::find($pid);
-        $que = Pubsque::where('p_id', $part_id)
+        $que = Pubsque::where('pq_pid', $pid)
+                        ->where('pq_part', $part_id)
                         ->orderby('pq_sort')->get()->all();
         $html = '';
         foreach ($que as $k => $v) {

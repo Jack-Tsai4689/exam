@@ -6808,7 +6808,7 @@ module.exports = yeast;
 'use strict';
 
 var io = require('socket.io-client');
-var notification = io.connect('http://localhost:3000');
+var notification = io.connect('http://192.168.56.102:3000');
 notification.on('connect', function() {
   notification.emit('exam', token);
 });
