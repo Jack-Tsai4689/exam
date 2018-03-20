@@ -48,7 +48,7 @@ class Pubs extends Model
     //sets show
     public function subque(){
         return $this->hasMany(Pubsque::class, 'pq_part', 'p_id')
-                    ->select('pq_sort','pq_qid','pq_ans','pq_quetype','pq_quetxt','pq_qm_src','pq_num','pq_qs_src')
+                    ->select('pq_sort','pq_qid','pq_ans','pq_quetype','pq_quetxt','pq_qm_src','pq_qs_name','pq_num','pq_qs_src')
                     ->orderby('pq_sort');
     }
 }

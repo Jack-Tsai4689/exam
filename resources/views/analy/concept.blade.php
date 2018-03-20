@@ -115,7 +115,7 @@
 	<div class="title_intro">
 		<input type="button" class="btn w100" id="see_result" value="成績結果">
 		<input type="button" class="btn w150" id="see_concept" value="觀念答對比率圖">
-		<input type="button" class="btn w150" name="" id="" value="列印" onclick="print();">
+		{{-- <input type="button" class="btn w150" name="" id="" value="列印" onclick="print();"> --}}
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?')) window.close();">關閉</a></label> --}}
 	</div>
 	@foreach($Part as $pi => $p)

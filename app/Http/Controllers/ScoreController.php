@@ -34,7 +34,7 @@ class ScoreController extends TopController
                 $p = Pubs::find($v->s_id);
                 $data[$k]->sets = $p->p_name;
                 $data[$k]->gra = $p->gra->name;
-                $data[$k]->subj = $p->subj->name;
+                $data[$k]->subj = $p->subj->name;                
             }
             return view('exam.score_slist', [
                 'menu_user' => $this->menu_user,
@@ -47,6 +47,21 @@ class ScoreController extends TopController
         if (session('ident')==="T"){
             $data = Exams::where('e_pid', 0)
                          ->get()->all();
+            foreach ($data as $k => $v) {
+                $data[$k]->can_see = '';
+                switch($v->e_status){
+                    case 'Y':
+                        $data[$k]->e_end = date('Y/m/d H:i:s', $v->e_endtime_at);
+                        $data[$k]->can_see = 'class="see_rs" id="'.$v->e_id.'"';
+                        break;
+                    case 'N':
+                        $data[$k]->e_end = '進行中';
+                        break;
+                    case 'O':
+                        $data[$k]->e_end = '中離';
+                        break;
+                }
+            }
             return view('exam.score_tlist', [
                 'menu_user' => $this->menu_user,
                 'title' => '成績-班級查詢',
@@ -86,6 +101,7 @@ class ScoreController extends TopController
     //看成績結果
     public function show($id)
     {
+        if (!preg_match("/^[0-9]*$/", $id))abort(400);
         //學生卷主id
         $eid = (int)$id;
         if ($eid<1)abort(400);
@@ -96,6 +112,8 @@ class ScoreController extends TopController
         $que = array();
         if ($exam->e_sub){
             $sub_exam = Exams::where('e_pid', $eid)->orderby('e_sort')->get()->all();
+        }else{
+            
         }
         $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
         $times = new \stdclass;

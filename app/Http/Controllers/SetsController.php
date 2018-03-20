@@ -8,7 +8,6 @@ use App\Http\Requests;
 use App\Sets;
 use App\Setsque;
 use DB;
-use Input;
 use URL;
 
 class SetsController extends TopController
@@ -27,7 +26,7 @@ class SetsController extends TopController
         $p_gra = 0;
         $p_subj = 0;
 
-        $_get = Input::all();
+        $_get = request()->all();
         if (!empty($_get)){
             $p_gra = (int)request()->input('gra');
             $p_subj = (int)request()->input('subj');
@@ -221,9 +220,7 @@ class SetsController extends TopController
             $data['s_sub'] = 0; 
         }
         //主體
-        $ins = new Sets;
-        $ins->fill($data);
-        $ins->save();
+        $ins = Sets::create($data);
         if ($have_sub){
             //大題
             $sort  = ($req->has('sub_sort') && !empty($req->input('sub_sort'))) ? $req->input('sub_sort'):array();
@@ -239,9 +236,7 @@ class SetsController extends TopController
                 $data['s_sum'] = $s_sum * $score[$k];
                 $data['s_pass_score'] = $s_pass_score * $score[$k];
                 $data['s_pid'] = $ins->s_id;
-                $sub_ins = new Sets;
-                $sub_ins->fill($data);
-                $sub_ins->save();
+                Sets::create($data);
             }
         }
         return redirect('/sets');
@@ -281,9 +276,7 @@ class SetsController extends TopController
             $data['s_sub'] = 0; 
         }
         //主體
-        $ins = new Sets;
-        $ins->fill($data);
-        $ins->save();
+        $ins = Sets::create($data);
         if ($have_sub){
             //大題
             $sort  = ($req->has('sub_sort') && !empty($req->input('sub_sort'))) ? $req->input('sub_sort'):array();
@@ -299,9 +292,7 @@ class SetsController extends TopController
                 $data['s_sum'] = $s_sum * $score[$k];
                 $data['s_pass_score'] = $s_pass_score * $score[$k];
                 $data['s_pid'] = $ins->s_id;
-                $sub_ins = new Sets;
-                $sub_ins->fill($data);
-                $sub_ins->save();
+                Sets::create($data);
             }
         }
         return redirect('/sets');
@@ -315,14 +306,21 @@ class SetsController extends TopController
     public function show($sid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
-        if ($this->login_type==="S"){
+        if ($this->login_type!=="T"){
             echo('很抱歉，權限不足以瀏覽');
             return;
         }
+        if ($sid<1){
+            return redirect('/sets');
+            exit;
+        }
         $data = Sets::find($sid);
+        if ($data===null){
+            return redirect('/sets');
+            exit;
+        }
         //限時
         $lime = explode(":", $data->s_limtime);
         $first_sub = new \stdClass;
@@ -437,10 +435,20 @@ class SetsController extends TopController
     public function edit($sid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid)){
+            return redirect('/sets');
+            exit;
+        }
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+        if ($sid<1){
+            return redirect('/sets');
+            exit;
+        }
         $data = Sets::find($sid);
+        if ($data===null){
+            return redirect('/sets');
+            exit;
+        }
         //考試時間
         $Time = new \stdClass;
         $Time->begTimeH = '';
@@ -537,11 +545,20 @@ class SetsController extends TopController
     public function edit_set($sid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid)){
+            return redirect('/sets');
+            exit;
+        }
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+        if ($sid<1){
+            return redirect('/sets');
+            exit;
+        }
         $data = Sets::find($sid);
-
+        if ($data===null){
+            return redirect('/sets');
+            exit;
+        }
         $gra_html = '';
         $subj_html = '';
         $grade_data = $this->grade();
@@ -590,11 +607,21 @@ class SetsController extends TopController
         $s_name = ($req->has('setsname')) ? $req->input('setsname'):'';
         $s_gra = ($req->has('grade')) ? $req->input('grade'):0;
         $s_subj = ($req->has('subject')) ? $req->input('subject'):0;
-        if ($sid===0 ||
-            $s_gra===0 || 
-            $s_subj===0 || 
-            empty($s_name))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $s_gra))abort(400);
+        if (!preg_match("/^[0-9]*$/", $s_subj))abort(400);
+        if ($sid===0 || $s_gra===0 || $s_subj===0 || empty($s_name))abort(400);
         $sets = Sets::find($sid);
+        if ($sets===null){
+            $act = ($req->has('_act') && !empty($req->input('_act'))) ? trim($req->input('_act')):'';
+            if ($act==="aj"){
+                abort(403);
+            }else{
+                echo '<script>alert("此考卷已被刪除");location.href="'.url('/sets').'";</script>';
+                exit;
+            } 
+        }
+        $past_sub = $sets->s_sub;
         $sets->s_finish = 2;
         $sets->save();
         $s_intro = ($req->has('intro')) ? $req->input('intro'):'';
@@ -648,8 +675,31 @@ class SetsController extends TopController
             $score = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
             $control = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
             $intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
+            //之前沒大題
+            $past_sub_get = false;
+            if (!$past_sub){
+                //取第一大題的排序
+                $past_sub_get = true;
+                $first_sort = min($sort);
+            }
+            
             foreach ($no as $k => $v) {
                 if (empty($v)){
+                    if ($past_sub_get){
+                        if ($sort[$k]==$first_sort){
+                            // 從沒大題到有大題，原先題目會自動關聯至第一大題
+                            $sub = Sets::create([
+                                's_part'=> $sort[$k],
+                                's_page'=> $control[$k],
+                                's_percen'=> $score[$k],
+                                's_intro'=> $intro[$k],
+                                's_pid'=> $sid
+                            ]);
+                            Setsque::where('sq_sid', $sid)->where('sq_part', $sid)->update(['sq_part'=>$sub->s_id]);
+                            $past_sub_get = false;
+                            continue;
+                        }                        
+                    }
                     Sets::create([
                         's_part'=> $sort[$k],
                         's_page'=> $control[$k],
@@ -657,13 +707,6 @@ class SetsController extends TopController
                         's_intro'=> $intro[$k],
                         's_pid'=> $sid
                     ]);
-                    // $sub_ins = new Sets;
-                    // $sub_ins->s_part = $sort[$k];
-                    // $sub_ins->s_page = $control[$k];
-                    // $sub_ins->s_percen =  $score[$k];
-                    // $sub_ins->s_intro = $intro[$k];
-                    // $sub_ins->s_pid = $sid;
-                    // $sub_ins->save();
                 }else{
                     Sets::where('s_id', $v)
                         ->update([
@@ -675,7 +718,9 @@ class SetsController extends TopController
                 }
                 $data['s_sub'] = 1;
             }
+            
         }
+        // 刪大題 連同題目一併刪除
         $del = ($req->has('delsub') && !empty($req->input('delsub'))) ? trim($req->input('delsub')):'';
         if (!empty($del)){
             $id = explode(",", $del);
@@ -683,7 +728,6 @@ class SetsController extends TopController
                 $part_sid = (int)$v;
                 if ($part_sid>0){
                     Sets::destroy($part_sid);
-                    //刪題目
                     Setsque::where('sq_part', $part_sid)->delete();
                 }
             }
@@ -718,117 +762,114 @@ class SetsController extends TopController
         return redirect('/sets');
     }
     //ajax更新大題
-    public function ajstore_part(Request $req, $sid){
-        if (!$this->login_status)abort(401);
-        $sub = ($req->has('sub') && !empty($req->input('sub'))) ? $req->input('sub'):array();
-        $sub_score = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
-        $sub_control = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
-        $sub_intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
+    // public function ajstore_part(Request $req, $sid){
+    //     if (!$this->login_status)abort(401);
+    //     $sub = ($req->has('sub') && !empty($req->input('sub'))) ? $req->input('sub'):array();
+    //     $sub_score = ($req->has('sub_score') && !empty($req->input('sub_score'))) ? $req->input('sub_score'):array();
+    //     $sub_control = ($req->has('sub_control') && !empty($req->input('sub_control'))) ? $req->input('sub_control'):array();
+    //     $sub_intro = ($req->has('sub_intro') && !empty($req->input('sub_intro'))) ? $req->input('sub_intro'):array();
 
-        $sets = Sets::find($sid);
-        $sets->s_finish = 2;
-        $sets->save();
+    //     Sets::where('s_id', $sid)->update(['s_finish'=>2]);
         
-        //先查全部大題的id，照順序
-        $all_sub_id = array();
-        $sub_all = Sets::select('s_id','s_part')
-                       ->where('s_pid', $sid)
-                       ->orderby('s_part')->get()->all();
-        foreach ($sub_all as $v) {
-            $all_sub_id[] = $v->s_id;
-        }
+    //     //先查全部大題的id，照順序
+    //     $all_sub_id = array();
+    //     $sub_all = Sets::select('s_id','s_part')
+    //                    ->where('s_pid', $sid)
+    //                    ->orderby('s_part')->get()->all();
+    //     foreach ($sub_all as $v) {
+    //         $all_sub_id[] = $v->s_id;
+    //     }
 
-        if (!empty($sub)){
+    //     if (!empty($sub)){
             
-            $del_id = array();
-            $del_id = array_diff($all_sub_id, $sub);
-            foreach ($del_id as $v) {
-                //如果說有大題就不能刪
-                if (Setsque::where('sq_sid', $sid)->where('sq_part',$v)->exists()){
-                    about(400);
-                }
-            }            
-            $have_sub = false;
-            foreach ($sub as $k => $v) {
-                //新增
-                if (empty($v)&& !empty($sub_score[$k])){
-                    $have_sub = true;
-                    $data = [
-                        's_intro' => $sub_intro[$k],
-                        's_percen' => $sub_score[$k],
-                        's_pid' => $sid,
-                        's_part' => ($k+1),
-                        'created_at' => time(),
-                        'updated_at' => time(),
-                        's_page' => $sub_control[$k]
-                    ];
-                    if ($k===0){
-                        $ins = new Sets;
-                        $ins->fill($data);
-                        $ins->save();
-                        $first_id = $ins->s_id;
-                    }else{
-                        Sets::create($data);
-                    }
-                }else{
-                    //更新
-                    Sets::where('s_id', $v)
-                        ->update([
-                            's_intro' => $sub_intro[$k],
-                            's_page' => $sub_control[$k],
-                            's_percen' => $sub_score[$k],
-                            's_part' => ($k+1),
-                            'updated_at' => time(),
-                        ]);
-                }
-                if ($k===0){
-                    if (empty($all_sub_id)){
-                        //之前沒有大題 $all_sub_id = 空陣列
-                        Setsque::where('sq_sid', $sid)->where('sq_part', $sid)->update(['sq_part'=> $first_id]);
-                    // }else{
-                    //     //所有原來的第一大題題目，重新對應至新的第一大題id
-                    //     Setsque::where('sq_sid', $sid)->where('sq_part', $all_sub_id[0])->update(['sq_part'=> $v]);
-                    }
-                }
-                //unset($all_sub_id[array_search($v, $all_sub_id)]);
-            }
-            //剩下的刪掉
-            foreach ($del_id as $v) {
-                Sets::destroy($v);
-            }
-            if ($have_sub){
-                Sets::where('s_id', $sid)
-                    ->update(['s_sub' => 1]);
-            }
-        }else{
-            //全刪
-            if (!empty($all_sub_id)){
-                foreach ($all_sub_id as $k => $v) {
-                    if ($k===0)continue;
-                    //除了第一大題，其他大題有題目就不能刪
-                    if (Setsque::where('sq_sid', $sid)->where('sq_part', $v)->exists()){
-                        about(400);
-                    }
-                }
-                //第一大題題目，挪至試卷下
-                Setsque::where('sq_sid', $sid)->where('sq_part', $all_sub_id[0])->update(['sq_part'=> $sid]);
-                //全部大題全刪除，變更至無大題狀態
-                Sets::where('s_pid', $sid)->delete();
-                Sets::where('s_id', $sid)->update(['s_sub' => 0]);
-            }
-        }
-        Sets::where('s_id', $sid)->update(['s_finish' => 0]);
-        $json['Success'] = true;
-        echo json_encode($json);
-    }
+    //         $del_id = array();
+    //         $del_id = array_diff($all_sub_id, $sub);
+    //         foreach ($del_id as $v) {
+    //             //如果說有大題就不能刪
+    //             if (Setsque::where('sq_sid', $sid)->where('sq_part',$v)->exists()){
+    //                 about(400);
+    //             }
+    //         }            
+    //         $have_sub = false;
+    //         foreach ($sub as $k => $v) {
+    //             //新增
+    //             if (empty($v)&& !empty($sub_score[$k])){
+    //                 $have_sub = true;
+    //                 $data = [
+    //                     's_intro' => $sub_intro[$k],
+    //                     's_percen' => $sub_score[$k],
+    //                     's_pid' => $sid,
+    //                     's_part' => ($k+1),
+    //                     'created_at' => time(),
+    //                     'updated_at' => time(),
+    //                     's_page' => $sub_control[$k]
+    //                 ];
+    //                 if ($k===0){
+    //                     $ins = Sets::create($data);
+    //                     $first_id = $ins->s_id;
+    //                 }else{
+    //                     Sets::create($data);
+    //                 }
+    //             }else{
+    //                 //更新
+    //                 Sets::where('s_id', $v)
+    //                     ->update([
+    //                         's_intro' => $sub_intro[$k],
+    //                         's_page' => $sub_control[$k],
+    //                         's_percen' => $sub_score[$k],
+    //                         's_part' => ($k+1),
+    //                         'updated_at' => time(),
+    //                     ]);
+    //             }
+    //             if ($k===0){
+    //                 if (empty($all_sub_id)){
+    //                     //之前沒有大題 $all_sub_id = 空陣列
+    //                     Setsque::where('sq_sid', $sid)->where('sq_part', $sid)->update(['sq_part'=> $first_id]);
+    //                 // }else{
+    //                 //     //所有原來的第一大題題目，重新對應至新的第一大題id
+    //                 //     Setsque::where('sq_sid', $sid)->where('sq_part', $all_sub_id[0])->update(['sq_part'=> $v]);
+    //                 }
+    //             }
+    //             //unset($all_sub_id[array_search($v, $all_sub_id)]);
+    //         }
+    //         //剩下的刪掉
+    //         foreach ($del_id as $v) {
+    //             Sets::destroy($v);
+    //         }
+    //         if ($have_sub){
+    //             Sets::where('s_id', $sid)
+    //                 ->update(['s_sub' => 1]);
+    //         }
+    //     }else{
+    //         //全刪
+    //         if (!empty($all_sub_id)){
+    //             foreach ($all_sub_id as $k => $v) {
+    //                 if ($k===0)continue;
+    //                 //除了第一大題，其他大題有題目就不能刪
+    //                 if (Setsque::where('sq_sid', $sid)->where('sq_part', $v)->exists()){
+    //                     about(400);
+    //                 }
+    //             }
+    //             //第一大題題目，挪至試卷下
+    //             Setsque::where('sq_sid', $sid)->where('sq_part', $all_sub_id[0])->update(['sq_part'=> $sid]);
+    //             //全部大題全刪除，變更至無大題狀態
+    //             Sets::where('s_pid', $sid)->delete();
+    //             Sets::where('s_id', $sid)->update(['s_sub' => 0]);
+    //         }
+    //     }
+    //     Sets::where('s_id', $sid)->update(['s_finish' => 0]);
+    //     $json['Success'] = true;
+    //     echo json_encode($json);
+    // }
     //ajax查詢大題
     public function ajedit_part($sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+        if ($sid<1)abort(400);
         //大題
         $have = Sets::find($sid);
+        if ($have===null)abort(403);
         $data = array();
         if ($have->s_sub){
             $sub = Sets::select('s_id','s_intro','s_percen','s_page')
@@ -849,31 +890,50 @@ class SetsController extends TopController
     //ajax大題加入題目
     public function partjoinque(Request $req, $sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
         if ($sid<1)abort(400);
         $sets = Sets::find($sid);
-        if ($sets===null)abort(400);
+        if ($sets===null)abort(403);
         $sets->s_finish = 2;
         $sets->save();
         $ques = ($req->has('ques') && !empty($req->input('ques'))) ? $req->input('ques'):'';
         $part = ($req->has('npart') && (int)$req->input('npart')>0) ? (int)$req->input('npart'):0;
         if (empty($ques) || $part===0)abort(400);
         $addque = explode(',',$ques);
-
+        $y = 0;
+        $n = 0;
         foreach ($addque as $q) {
+            $check = DB::select("SELECT EXISTS( SELECT * FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=? limit 1 ) as ed", [
+                $sid, $part, $q
+            ]);
+            if ($check[0]->ed===0){
+                $y++;
+                $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at) 
+                SELECT ?, ?, ?, (SELECT (Case When Max(sq_sort) is null then 0 else max(sq_sort) end)+1 from setsque 
+                    WHERE sq_sid=? AND sq_part=?), ?, ?";
+                DB::insert($sql, [
+                    $sid, $part, $q, 
+                    $sid, $part, $this->login_user, time()
+                ]);
+            }else{
+                $n++;
+            }            
+
             //如果大題的題目沒重覆才新增，並自動遞增序號
-            $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at) 
-            SELECT ?, ?, ?, (SELECT (Case When Max(sq_sort) is null then 0 else max(sq_sort) end)+1 from setsque 
-                WHERE sq_sid=? AND sq_part=?), ?, ? 
-            WHERE NOT EXISTS( 
-                SELECT * FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=?
-            ) limit 1";
-            $data = [
-                $sid, $part, $q, 
-                $sid, $part, $this->login_user, time(),
-                $sid, $part, $q];
-            DB::insert($sql, $data);
+            // $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at) 
+            // SELECT ?, ?, ?, (SELECT (Case When Max(sq_sort) is null then 0 else max(sq_sort) end)+1 from setsque 
+            //     WHERE sq_sid=? AND sq_part=?), ?, ? 
+            // WHERE NOT EXISTS( 
+            //     SELECT * FROM setsque WHERE sq_sid=? AND sq_part=? AND sq_qid=?
+            // ) limit 1";
+            // $data = [
+            //     $sid, $part, $q, 
+            //     $sid, $part, $this->login_user, time(),
+            //     $sid, $part, $q];
+            // DB::insert($sql, $data);
+
+
             //看資料是否存在，不存在會原條件返回，有存在會返回該筆資料
             // $sql = "INSERT INTO setsque(sq_sid, sq_part, sq_qid, sq_sort, sq_owner, updated_at)
             //     SELECT ?, ?, ?, (SELECT IFNULL(1, max('sq_sort')) FROM setsque WHERE sq_sid=? AND sq_part=?), ?, ? FROM setsque
@@ -889,23 +949,26 @@ class SetsController extends TopController
             // }
         }
         Sets::where('s_id', $sid)->update(['s_finish'=>0]);
-        echo true;
+        $rs = new \stdClass;
+        $rs->y = $y;
+        $rs->n = $n;
+        echo json_encode($rs);
         // $json['Success'] = true;
         // echo json_encode($json);
     }
     //ajax查詢大題題目
     public function ajshow_que($sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
         if ($sid<1)abort(400);
         $part_id = request()->input('part');
-        if (!is_numeric($part_id))abort(400);
+        if (!preg_match("/^[0-9]*$/", $part_id))abort(400);
         $part_id = (int)$part_id;
         if ($part_id<1)abort(400);
 
         $sets = Sets::find($sid);
-        if ($sets===null)abort(400);
+        if ($sets===null)abort(403);
         $que = Setsque::select('sq_qid','sq_sort')
                         ->where('sq_sid', $sid)
                         ->where('sq_part', $part_id)
@@ -932,16 +995,18 @@ class SetsController extends TopController
     //ajax更新大題題目順序
     public function ajupdate_sortq(Request $req, $sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
         if ($sid<1)abort(400);
         $sets = Sets::find($sid);
-        if ($sets===null)abort(400);
+        if ($sets===null)abort(403);
         $sets->s_finish = 2;
         $sets->save();
         $node = ($req->has('node') && !empty($req->input('node'))) ? json_decode(trim($req->input('node'))):array();
-        $part = ($req->has('s') && (int)$req->input('s')>0) ? (int)$req->input('s'):0;
-        if ($part===0)abort(400);
+        $part = ($req->has('s') && !empty($req->input('s'))) ? trim($req->input('s')):0;
+        if (!preg_match("/^[0-9]*$/", $part))abort(400);
+        $part = (int)$part;
+        if ($part<1)abort(400);
         foreach ($node as $position => $item){
             Setsque::where('sq_sid', $sid)
                    ->where('sq_part', $part)
@@ -956,11 +1021,11 @@ class SetsController extends TopController
     //ajax更新大題順序
     public function ajupdate_psort(Request $req, $sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
         if ($sid<1)abort(400);
         $sets = Sets::find($sid);
-        if ($sets===null)abort(400);
+        if ($sets===null)abort(403);
         $sets->s_finish = 2;
         $sets->save();
         $node = ($req->has('node') && !empty($req->input('node'))) ? json_decode(trim($req->input('node'))):array();
@@ -973,14 +1038,16 @@ class SetsController extends TopController
     //ajax刪除題目
     public function ajdelete_que(Request $req, $sid){
         if (!$this->login_status)abort(401);
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+        if ($sid<1)abort(400);
         $part = ($req->has('part') && (int)$req->input('part')>0) ? (int)$req->input('part'):0;
         $que = ($req->has('que') && (int)$req->input('que')>0) ? (int)$req->input('que'):0;
-        if ($part===0 || $que===0)abort(400);
+        if (!preg_match("/^[0-9]*$/", $part))abort(400);
+        if (!preg_match("/^[0-9]*$/", $que))abort(400);
+        if ($part<1 || $que<1)abort(400);
         $sets = Sets::find($sid);
-        if ($sets===null)abort(400);
+        if ($sets===null)abort(403);
         $sets->s_finish = 2;
         $sets->save();
         Setsque::where('sq_sid', $sid)
@@ -991,63 +1058,63 @@ class SetsController extends TopController
         echo '1';
     }
     //切換試卷狀態
-    public function status_change(Request $req, $sid){
-        if (!$this->login_status)abort(400);
-        if (!is_numeric($sid))abort(400);
-        $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+    // public function status_change(Request $req, $sid){
+    //     if (!$this->login_status)abort(400);
+    //     if (!preg_match("/^[0-9]*$/", $sid))abort(400);
+    //     $sid = (int)$sid;
+    //     if ($sid<1)abort(400);
         
-        $status = ($req->has('status') && !empty($req->input('status'))) ? trim($req->input('status')):'';
-        if ($status==="open"){
-            //檢查配分
-            $have_sub = Sets::find($sid);
-            if ($have_sub->s_sub){
-                //有大題
-                $sub = Sets::select('s_id','s_percen')->where('s_pid', $sid)->orderby('s_part')->get()->all();
-                $percen = 0;
-                foreach ($sub as $k => $v) {
-                    $percen+=$v->s_percen;
-                }
-                if ($percen!== 100){
-                    echo '試卷 - 「'.$have_sub->s_name.'」 配分錯誤，請返回確認';
-                    return;
-                }
-                //重新順號
-                foreach ($sub as $v) {
-                    $sub_q = Setsque::select('sq_qid','sq_sort')
-                                ->where('sq_sid', $sid)
-                                ->where('sq_part', $v->s_id)
-                                ->orderby('sq_sort')->get()->all();
-                    foreach ($sub_q as $sk => $sv) {
-                        Setsque::where('sq_sid', $sid)
-                               ->where('sq_part', $v->s_id)
-                               ->update(['sq_sort'=> ($sk+1)]);
-                    }
-                }
-            }else{
-                //沒有大題
-                $sub_q = Setsque::select('sq_qid','sq_sort')
-                                ->where('sq_sid', $sid)
-                                ->where('sq_part', $sid)
-                                ->orderby('sq_sort')->get()->all();
-                foreach ($sub_q as $sk => $sv) {
-                    Setsque::where('sq_sid', $sid)
-                           ->where('sq_part', $sid)
-                           ->update(['sq_sort'=> ($sk+1)]);
-                }
-            }
-            Sets::where('s_id', $sid)->update(['s_finish'=>1]);
-            return redirect('/sets');
-        }
-    }
+    //     $status = ($req->has('status') && !empty($req->input('status'))) ? trim($req->input('status')):'';
+    //     if ($status==="open"){
+    //         //檢查配分
+    //         $have_sub = Sets::find($sid);
+    //         if ($have_sub->s_sub){
+    //             //有大題
+    //             $sub = Sets::select('s_id','s_percen')->where('s_pid', $sid)->orderby('s_part')->get()->all();
+    //             $percen = 0;
+    //             foreach ($sub as $k => $v) {
+    //                 $percen+=$v->s_percen;
+    //             }
+    //             if ($percen!== 100){
+    //                 echo '試卷 - 「'.$have_sub->s_name.'」 配分錯誤，請返回確認';
+    //                 return;
+    //             }
+    //             //重新順號
+    //             foreach ($sub as $v) {
+    //                 $sub_q = Setsque::select('sq_qid','sq_sort')
+    //                             ->where('sq_sid', $sid)
+    //                             ->where('sq_part', $v->s_id)
+    //                             ->orderby('sq_sort')->get()->all();
+    //                 foreach ($sub_q as $sk => $sv) {
+    //                     Setsque::where('sq_sid', $sid)
+    //                            ->where('sq_part', $v->s_id)
+    //                            ->update(['sq_sort'=> ($sk+1)]);
+    //                 }
+    //             }
+    //         }else{
+    //             //沒有大題
+    //             $sub_q = Setsque::select('sq_qid','sq_sort')
+    //                             ->where('sq_sid', $sid)
+    //                             ->where('sq_part', $sid)
+    //                             ->orderby('sq_sort')->get()->all();
+    //             foreach ($sub_q as $sk => $sv) {
+    //                 Setsque::where('sq_sid', $sid)
+    //                        ->where('sq_part', $sid)
+    //                        ->update(['sq_sort'=> ($sk+1)]);
+    //             }
+    //         }
+    //         Sets::where('s_id', $sid)->update(['s_finish'=>1]);
+    //         return redirect('/sets');
+    //     }
+    // }
     //ajax編輯試卷 (iframe open show)
     public function ajstru($sid){
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($sid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
         $sid = (int)$sid;
-        if ($sid<=0)abort(400);
+        if ($sid<1)abort(400);
         $data = Sets::find($sid);
-        if ($data===null)abort(400);
+        if ($data===null)abort(403);
         $gra_html = '';
         $subj_html = '';
         $grade_data = $this->grade();
@@ -1082,15 +1149,17 @@ class SetsController extends TopController
             'Page' => $data->s_page
         ]);
     }
+    //派卷時搜尋
     public function ajpublish(){
-        $_get = Input::all();
+        $_get = request()->all();
         if (!empty($_get)){
             $gra = request()->input('g');
             $subj = request()->input('s');
-            if (!is_numeric($gra) || !is_numeric($subj))abort(400);
+            if (!preg_match("/^[0-9]*$/", $gra))abort(400);
+            if (!preg_match("/^[0-9]*$/", $subj))abort(400);
             $g = (int)$gra;
             $s = (int)$subj;
-            if ($g<=0 || $s<=0)return;
+            if ($g<1 || $s<1)return;
             if (!$this->login_status)abort(400);
             $data = Sets::select('s_id','s_name')
                         ->where('s_gra', $g)

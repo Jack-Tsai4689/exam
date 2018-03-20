@@ -112,13 +112,13 @@
 	<div class="title_intro">
 		<input type="button" class="btn w100" id="see_result" value="成績結果">
 		<input type="button" class="btn w100" id="see_analy" value="考題概念表" >
-		<input type="button" class="btn w150" value="列印" onclick="print();">
+		{{-- <input type="button" class="btn w150" value="列印" onclick="print();"> --}}
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?'))window.close();">關閉</a></label> --}}
 	</div>
 	<div class="content">
 		<div id="cen">
         @if (is_file('concept/'.$Graph_id.'.jpg'))
-            <img class="graph" id="concept" src="{{ URL::asset('/concept/'.$Graph_id.'.jpg') }}">
+            <img class="graph" id="concept" src="{{ URL::asset('/concept/'.$Graph_id.'.jpg').'?'.rand() }}">
         @else
     		@if(count($Data)>2)
                 <img class="graph" id="concept" src="{{ URL::asset('jpgraph/pattern/radarmarkex1.php?f_sid='.$Graph_id.'&str_scrtype='.urlencode($Con_type).'&str_rightcnt='.urlencode($Con_right).'&str_allcnt='.urlencode($Con_all).'&title='.urlencode('觀念答對比率圖')) }}">
@@ -197,6 +197,5 @@ $("#see_result").on('click', function(){
 $("#see_analy").on('click', function(){
     location.href = "{{ url('/analy/'.$Eid) }}";
 });
-document.getElementById('concept').src+='?'+Math.random();
 </script>
 @stop

@@ -80,7 +80,7 @@ Route::group(['prefix'=>'sets'], function(){
 	//預覽
 	Route::get('/{id}', "SetsController@show");
 	//ajax更新大題
-	Route::post('/{id}/subu', "SetsController@ajstore_part");
+	//Route::post('/{id}/subu', "SetsController@ajstore_part");
 	//ajax編題大題
 	Route::get('{id}/subshow', "SetsController@ajedit_part");
 	//ajax更新大題順序

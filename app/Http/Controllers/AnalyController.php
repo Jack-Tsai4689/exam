@@ -146,7 +146,7 @@ class AnalyController extends TopController
             'Con_type' => implode(",", $chap_name),
             'Con_right' => implode(",", $q_right),
             'Con_all' => implode(",", $q_all),
-            'Graph_id' => $this->login_user.'_'.$eid
+            'Graph_id' => $exam->e_stu.'_'.$eid
         ]);
     }
     private function _que_ans_format($que, $e_que){

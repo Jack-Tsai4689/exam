@@ -593,6 +593,7 @@ class QueController extends TopController
     public function show($qid)
     {
         if (!preg_match("/^[0-9]*$/", $qid))abort(400);
+        if ($qid<1)abort(400);
         $qdata = Ques::find($qid);
         //題型、答案
         switch ($qdata->q_quetype) {
@@ -612,12 +613,12 @@ class QueController extends TopController
                 break;
             case "R": 
                 $Quetype = "是非題";
-                $Ans = ($v->q_ans==="1") ? "O":"X";
+                $Ans = ($qdata->q_ans==="1") ? "O":"X";
                 break;
             case "M": 
                 $Quetype = "選填題";
                 $ans = array();
-                $ans = explode(",", $v->q_ans);
+                $ans = explode(",", $qdata->q_ans);
                 $ans_html = array();
                 foreach ($ans as $o) {
                     if (!preg_match("/^[0-9]*$/", $o)){
@@ -724,6 +725,7 @@ class QueController extends TopController
         if (!$this->login_status)return redirect('/login');
         if (!preg_match("/^[0-9]*$/", $qid))abort(400);
         $qid = (int)$qid;
+        if ($qid<1)abort(400);
         if (session('ident')!=="T"){
             echo '很抱歉，權限不足';
             return;

@@ -84,6 +84,7 @@ class ExamController extends TopController
              ->where('e_status', 'N')
              ->update(['e_status' => 'O', 'e_endtime_at' => time() ]);
         Exams::where('e_id', $exam->e_pid)
+             ->where('e_status', 'N')
              ->update(['e_status' => 'O', 'e_endtime_at' => time() ]);
         //Event::fire(new PushNotification($this->login_user, '123'));
     }
@@ -120,6 +121,7 @@ class ExamController extends TopController
                 ON exams.e_id=a.e_pid
                 SET e_score = a.s, e_rnum=a.r, e_wnum=a.w, e_nnum=a.n, e_status='Y'";
                 DB::update($sql, [$eid]);
+                Exams::where('e_id', $eid)->update(['e_status'=>'Y']);
                 die('考試結束');
             }
             $lime = $hour.":".$min.":".$sec;
@@ -331,6 +333,8 @@ class ExamController extends TopController
                 $_exam->ssid = $spart;
                 $data = $this->_next_part($_exam, $pubs_data, $lime);
                 Exams::where('e_id', $epart)->update(['e_begtime_at'=> time()]);
+                //改回考試中
+                Exams::where('e_id', $exam)->update(['e_status'=>'N']);
                 return view('exam.ying', $data);
                 return;
             }
@@ -584,6 +588,7 @@ class ExamController extends TopController
                 $_exam->ssid = $spart;
                 $data = $this->_next_part($_exam, $pubs_data, $lime);
                 Exams::where('e_id', $epart)->update(['e_begtime_at'=> time()]);
+                Exams::where('e_id', $exam)->update(['e_status'=>'N']);
                 return view('exam.ying', $data);
                 return;
             }
@@ -888,7 +893,7 @@ class ExamController extends TopController
         $this->_aes_init();
         $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
         $data = [
-                'sets_name' => $sets_data->s_name,
+                'sets_name' => $sets_data->p_name,
                 'type' => 'sets',
                 'sets' => $exam->sid,
                 'exam' => $exam->eid,
@@ -907,14 +912,14 @@ class ExamController extends TopController
         return $data;
     }
     //下個大題
-    private function _next_part($exam, $sets_data, $limetime){
+    private function _next_part($exam, $pubs_data, $limetime){
         $start_q = 0;
         $qno = array();
         $part_show = new \stdclass;
         $first_que = new \stdclass;
         $part_show->eid = $exam->esid;
         $exam_que = array();
-        if ($sets_data->p_sub){
+        if ($pubs_data->p_sub){
             //找大題 -> 找題目，放進exams 依大題順序
             $part_que = Pubs::find($exam->ssid);
             /*
@@ -944,7 +949,7 @@ class ExamController extends TopController
                 $exam_que[] = $this->_Ques_Info($pqv, $pqv->pq_sort, 1);
             }
         }else{
-            $part_show->control = $sets_data->p_page;
+            $part_show->control = $pubs_data->p_page;
             $part_show->sub = false;
             
             $first_quedata = Pubsque::where('pq_pid', $exam->sid)
@@ -969,7 +974,7 @@ class ExamController extends TopController
         $this->_aes_init();
         $token = $this->_encrypt($this->login_user.'|'.$part_show->eid);
         $data = [
-                'sets_name' => $sets_data->s_name,
+                'sets_name' => $pubs_data->p_name,
                 'type' => 'sets',
                 'sets' => $exam->sid,
                 'exam' => $exam->eid,

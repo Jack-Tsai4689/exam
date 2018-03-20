@@ -468,7 +468,7 @@ function gcheck(v){
 			var g_sel = null;
 			for (var i in rs){
 				g_sel = (rs[i].ID===g) ? 'class="select"':'';
-				html+= '<tr '+g_sel+'><td class="name"><a href="javascript:void(0)" class="gc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="gedit" data-id="'+rs[i].ID+'" value="更名"></td></tr>';
+				html+= '<tr '+g_sel+'><td class="name"><a href="javascript:void(0)" class="gc" data-id="'+rs[i].ID+'">'+rs[i].NAME+'</a></td><td>'+rs[i].OWNER+'</td><td>'+rs[i].UPDATETIME+'</td><td><input type="button" class="gedit" data-id="'+rs[i].ID+'" value="更名"></td><td><form onsubmit="return nsubj(this)"><input type="text" name="subjname"><input type="hidden" name="type" value="subj"><input type="hidden" name="g" value="'+rs[i].ID+'"><input type="submit" class="btn w70" value="確定"></form></td></tr>';
 			}
 			gb('gralist').innerHTML = html;
 			gb('graname').value = '';

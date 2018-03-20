@@ -87,47 +87,40 @@ class PubController extends TopController
             $Lim->limTimeS.= '<option value="'.$i.'"'.$limm.'>'.$m.'</option>';
         }
         $_get = request()->all();
-        $sel = new \stdclass;
-        $sel->sid = 0;
-        $sel->gra = 0;
-        $sel->subj = 0;
+        $Sel = new \stdclass;
+        $Sel->sid = 0;
+        $Sel->gra = 0;
+        $Sel->subj = 0;
         if (!empty($_get)){
             $sid = request()->input('sid');
             if (!is_numeric($sid))return redirect('/pub/create');
             $sid = (int)$sid;
             if ($sid<1)return redirect('/pub/create');
-            $sel->sid = $sid;
+            $Sel->sid = $sid;
             $s = Sets::find($sid);
-            $sel->gra = $s->s_gra;
-            $sel->subj = $s->s_subj;
+            $Sel->gra = $s->s_gra;
+            $Sel->subj = $s->s_subj;
         }
-        $grade_data = $this->grade();
-        $subject_data = array();
-        $sets_data = array();
-        if (!empty($grade_data)){
-            if ($sel->gra===0)$sel->gra = $grade_data[0]->g_id;
-            $subject_data = $this->subject($sel->gra);
+        $Grade = $this->grade();
+        $Subject = array();
+        $Sets = array();
+        if (!empty($Grade)){
+            if ($Sel->gra===0)$Sel->gra = $Grade[0]->g_id;
+            $Subject = $this->subject($Sel->gra);
         }
-        if (!empty($subject_data)){
-            if ($sel->subj===0)$sel->subj = $subject_data[0]->g_id;
-            $sets_data = Sets::select('s_name','s_id')
+        if (!empty($Subject)){
+            if ($Sel->subj===0)$Sel->subj = $Subject[0]->g_id;
+            $Sets = Sets::select('s_name','s_id')
                              ->where('s_pid', 0)
-                             ->where('s_gra', $sel->gra)
-                             ->where('s_subj', $sel->subj)
+                             ->where('s_gra', $Sel->gra)
+                             ->where('s_subj', $Sel->subj)
                              ->get()->all();
         }
-        return view('pub.create', [
-            'menu_user' => $this->menu_user,
-            'title' => '發佈測驗',
-            'Time' => $Time,
-            'Lim' => $Lim,
-            'Grade' => $grade_data,
-            'Subject' => $subject_data,
-            'Sets' => $sets_data,
-            'Sum' => 100,
-            'Pass' => 60,
-            'Sel' => $sel
-        ]);
+        $Sum = 100;
+        $Pass = 60;
+        $menu_user = $this->menu_user;
+        $title = '發佈測驗';
+        return view('pub.create', compact("menu_user","title","Time","Lim","Grade","Subject","Sets","Sum","Pass","Sel"));
     }
 
     /**
@@ -136,15 +129,18 @@ class PubController extends TopController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    // 派卷
     public function store(Request $req)
     {
-        $sid = ($req->has('sets') && !empty($req->input('sets'))) ? (int)$req->input('sets'):0;
-        if ($sid===0)abort(400);
+        $sid = ($req->has('sets') && !empty($req->input('sets'))) ? trim($req->input('sets')):0;
+        if (!preg_match("/^[0-9]*$/", $sid))abort(400);
+        if ($sid<1)abort(400);
         $sets = Sets::find($sid);
+        if ($sets===null)die('此考卷已刪除');
         //如果更新中不能動
         if ($sets->s_finish===2)abort(406);
         $chk_date = ($req->has('chk_date')) ? (int)$req->input('chk_date'):0;
-        if ($chk_date===0)abort(400);
+        if ($chk_date!==1 && $chk_date!==2)abort(400);
         $data = array();
         $p_begtime = '';
         $p_endtime = '';
@@ -360,11 +356,19 @@ class PubController extends TopController
         if (!$this->login_status)return redirect('/login');
         if (!preg_match("/^[0-9]*$/", $pid))abort(400);
         $pid = (int)$pid;
-        if ($this->login_type==="S"){
+        if ($pid<1){
+            return rediret('/pub');
+            exit;
+        }
+        if ($this->login_type!=="T"){
             echo('很抱歉，權限不足以瀏覽');
             return;
         }
         $data = Pubs::find($pid);
+        if ($data===null){
+            return rediret('/pub');
+            exit;
+        }
         //限時
         $lime = explode(":", $data->p_limtime);
         $first_sub = new \stdClass;
@@ -383,19 +387,10 @@ class PubController extends TopController
             $first_sub->p_part = '';
             $first_sub->subque = $data->subque()->get()->all();
             $sub = array();
-            // $fsub = $data->sub()->first();
-            // $first_sub->s_id = $fsub->s_id;
-            // $first_sub->subque = $fsub->subque;
-            // $first_sub->s_part = '';
         }
-        //$first_sub->que = $this->pubs_review_format($first_sub->subque);
         foreach ($first_sub->subque as $k => $v) {
             $first_sub->que[] = $this->pubs_review_format($v);
         }
-        // foreach ($other_sub as $k => $v) {
-        //     $other_sub[$k]->que = $this->pubs_review_format($v->subque);
-        // }
-
         return view('pub.review', [
             'menu_user' => $this->menu_user,
             'title' => $data->p_name.'測驗卷 - 題目預覽',
@@ -451,9 +446,11 @@ class PubController extends TopController
         if (!$this->login_status)abort(401);
         if (!preg_match("/^[0-9]*$/", $pid))abort(400);
         $pid = (int)$pid;
+        if ($pid<1)abort(400);
         $part_id = request()->input('part');
         if (!preg_match("/^[0-9]*$/", $part_id))abort(400);
         $part_id = (int)$part_id;
+        if ($part_id<1)abort(400);
         $que = Pubsque::where('pq_pid', $pid)
                         ->where('pq_part', $part_id)
                         ->orderby('pq_sort')->get()->all();
@@ -513,10 +510,11 @@ class PubController extends TopController
             }
             //題目聲音檔
             if (!empty($data->pq_qs_src)){
+                $qname = "題目音訊：".$data->pq_qs_name;
                 if(is_file($data->pq_qs_src)){
-                    $qcont[] = '<font color="green">題目音訊 O</font>';
+                    $qcont[] = $qname;
                 }else{
-                    $qcont[] = '<font color="red">題目音訊遺失 X</font>';
+                    $qcont[] = $qname.'　<font color="red">遺失</font>';
                 }
             }
             $data->pq_qcont = implode("<br>", $qcont);

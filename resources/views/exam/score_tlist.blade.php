@@ -141,27 +141,21 @@
                             <th width="120">學號</th>
                             <th width="120">姓名</th>                            
                             <th width="100">得分</th>
-                            <th width="160">測驗開始</th>
-                            <th width="160">測驗結束</th>
+                            <th width="160">交卷時間</th>
                             <th width="180" class="last">診斷報告</th>
                         </tr>
                     </thead>
                     <tbody>
-                    @foreach ($Data as $i => $v)
-                        <tr align="center" class="{{ ($i%2==0) ? 'deep':'shallow' }}">
-                            <td class="see_rs" id="{{ $v->e_id }}">{{ $v->e_stu }}</td>
+                    @foreach ($Data as $i => $v)    <tr align="center" class="{{ ($i%2==0) ? 'deep':'shallow' }}">
+                            <td {!! $v->can_see !!}>{{ $v->e_stu }}</td>
                             <td>{{ $v->stu()->name }}</td>
                             <td>{{ (float)$v->e_score }}</td>
-                            <td>{{ date('Y/m/d H:i:s', $v->e_begtime_at) }}</td>
-                            <td>{{ ($v->e_status==="Y") ? date('Y/m/d H:i:s', $v->e_endtime_at):'' }}</td>
-                            <td class="last">
-                                @if ($v->e_status==="Y")
+                            <td>{{ $v->e_end }}</td>
+                            <td class="last">@if ($v->e_status==="Y")
                                 <span style="float:left; margin-right: 1em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span>
-                                @endif
-                            </td>
+                                @endif</td>
                         </tr>
-                    @endforeach
-                    </tbody>
+                    @endforeach</tbody>
 				</table>
 			</div>
 		</div>

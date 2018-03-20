@@ -235,7 +235,7 @@
     <div class="title_intro">
         <label>總分</label>{{ $Sum }}
         <label>及格分數</label>{{ $Pass }}
-        {{-- <label>限時</label>{{ $Limtime }} --}}　<input type="button" id="sets_edit" value="編輯">　
+        {{-- <label>限時</label>{{ $Limtime }} --}}　<input type="button" id="sets_edit" value="編輯">　<input type="button" id="publish" value="發佈測驗">
 	</div>
     @if($Have_sub)
     <div class="title"><label class="f17" style="float:left;" onclick="zoom()">大題</label><img style="float:left;margin-top:5px;" id="part_img" src="{{ URL::asset('img/open.png') }}" width="20" height="20"></div>
@@ -839,9 +839,10 @@ function importque(){
         url: "{{ url('/sets/'.$Sid.'/joinq') }}",
         data: $("#joinq").serialize(),
         dataType: "JSON",
-        success: function(){
+        success: function(rs){
             showque(gb('npart').value);
-            alert('加入成功');
+            n = (rs.n>0) ? rs.n+'題已加入':'';
+            alert('成功加入'+rs.y+'題　'+n);
         }
     });
 }
@@ -896,5 +897,8 @@ function delq(obj){
         });
     }
 }
+$("#publish").on('click', function(){
+    location.href = "{{ url('/pub/create?sid='.$Sid) }}";
+});
 </script>
 @stop

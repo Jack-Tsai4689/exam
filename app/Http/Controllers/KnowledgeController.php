@@ -234,9 +234,7 @@ class KnowledgeController extends TopController
             'created_at' => time(),
             'updated_at' => time()
         ];
-        $save = new Knows;
-        $save->fill($data);
-        $save->save();
+        Knows::create($data);
         return redirect('know');
     }
 
@@ -260,9 +258,9 @@ class KnowledgeController extends TopController
     public function edit($kid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($kid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $kid))abort(400);
         $kid = (int)$kid;
-        if ($kid<=0)abort(400);
+        if ($kid<1)abort(400);
 
         if ($this->login_type!=="T"){
             die('很抱歉，權限不足');
@@ -370,9 +368,9 @@ class KnowledgeController extends TopController
     public function update(Request $req, $kid)
     {
         if (!$this->login_status)return redirect('/login');
-        if (!is_numeric($kid))abort(400);
+        if (!preg_match("/^[0-9]*$/", $kid))abort(400);
         $kid = (int)$kid;
-        if ($kid<=0)abort(400);
+        if ($kid<1)abort(400);
 
         if ($this->login_type!=="T"){
             die('很抱歉，權限不足');
