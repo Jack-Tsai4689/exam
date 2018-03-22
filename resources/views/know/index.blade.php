@@ -212,15 +212,15 @@
 	</div>
 	<div class="title_intro condition">
 		<div>
-			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">篩選條件</div>
+			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">範圍條件</div>
 				類別：
 				<select name="gra" onchange="getsubj(this.value)">
 					<option value="0">全部</option>{!! $Grade !!}
-				</select>
+				</select>　
 				科目：
 				<select name="subj" id="subj" onchange="getchap(this.value)">
 					<option value="0">全部</option>{!! $Subject !!}
-				</select>
+				</select>　
 				章節：
 				<select name="chap" id="chap">
 					<option value="0">全部</option>{!! $Chapter !!}
@@ -239,21 +239,14 @@
 					<tr>
 						<th style="width:99px;">發表者</th>
 						<th style="min-width:550px; width:60%;">知識點</th>
-						<th style="width:99px;">類別</th>
-						<th style="width:99px;">科目</th>
-						<th style="width:99px;">章節</th>
 						<th class="last" style="width:82px;">編輯</th>
 					</tr>
 				</thead>
 				<tbody>
 				@foreach ($Data as $i => $v)
-					@php $class = ($i%2==0) ? 'deep' : 'shallow'; @endphp
-					<tr class="{{ $class }}">
+					<tr class="{{ ($i%2==0) ? 'deep' : 'shallow' }}">
 						<td>{{ $v->k_owner }}</td>
-						<td class="kcont">{!! $v->k_content !!}</td>
-						<td>{{ $v->gra->name }}</td>
-						<td>{{ $v->subj->name }}</td>
-						<td>{{ $v->chap->name }}</td>
+						<td class="kcont"><div>範圍 【{{ $v->gra->name }}】【{{ $v->subj->name }}】【{{ $v->chap->name }}】</div>{!! $v->k_content !!}</td>
 						<td class="last"><input type="button" class="btn w50" name="" id="" value="編輯" onclick="location.href='{{ url('/know/'.$v->k_id.'/edit') }}'"></td>
 					</tr>
 				@endforeach

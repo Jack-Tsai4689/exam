@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 
 use App\Exams;
 use App\ExamDetail;
-use App\Sets;
+use App\Pubs;
 use App\Ques;
 use App\Gscs;
 use DB;
@@ -26,10 +26,10 @@ class AnalyController extends TopController
         if (!$this->login_status)return redirect('/login');
         $eid = (int)$eid;
         $exam = Exams::find($eid);
-        $sets_set = Sets::find($exam->s_id);
+        $sets_set = Pubs::find($exam->s_id);
         if ($exam->e_sub){
             $sub_exam = Exams::where('e_pid', $eid)->get()->all();
-            $sub_sets = Sets::where('s_pid', $exam->s_id)->get()->all();
+            $sub_sets = Pubs::where('p_pid', $exam->s_id)->get()->all();
             $part = array();
             foreach ($sub_exam as $si => $se) {
                 $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
@@ -40,7 +40,7 @@ class AnalyController extends TopController
                 $info->rnum = $se->e_rnum;
                 $info->wnum = $se->e_wnum;
                 $info->nnum = $se->e_nnum;
-                $info->percen = $sub_sets[$si]->s_percen;
+                $info->percen = $sub_sets[$si]->p_percen;
                 $qdata = array();
                 foreach ($ques as $v) {
                     $oq = $v->ques_source();
@@ -68,12 +68,48 @@ class AnalyController extends TopController
                 $info->qdata = $qdata;
                 array_push($part, $info);
             }
+        }else{
+            $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
+                                 ->where('ed_eid', $eid)
+                                 ->orderby('ed_sort')->get()->all();
+            $part = new \stdclass;
+            $part->score = $exam->e_score;
+            $part->rnum = $exam->e_rnum;
+            $part->wnum = $exam->e_wnum;
+            $part->nnum = $exam->e_nnum;
+            $part->percen = $sets_set->p_sum;
+            $qdata = array();
+            foreach ($ques as $v) {
+                $oq = $v->ques_source();
+                $chap = Ques::find($oq->q_id)->chap()->first();
+                $data = $this->_que_ans_format($oq, $v);
+
+                $tmp = new \stdclass;
+                $tmp->sort = $v->ed_sort;
+                $tmp->chap = $chap->name;
+                $tmp->ed_ans = $data->ed_ans;
+                $tmp->q_ans = $data->q_ans;
+                $tmp->right = ($data->ed_right) ? true:false;
+
+                switch ($oq->q_degree) {
+                    case "M": $tmp->degree = "中等"; break;
+                    case "H": $tmp->degree = "困難"; break;
+                    case "E": $tmp->degree = "容易"; break;
+                    default: $tmp->degree = "容易"; break;
+                }
+                $sql = "SELECT COUNT(*) AS row, SUM(ed_right) as correct FROM exam_details WHERE ed_qid=?";
+                $c = DB::select($sql, [$v->ed_qid])[0];
+                $tmp->percen = round($c->correct / $c->row, 2)*100;
+                array_push($qdata, $tmp);
+            }
+            $part->qdata = $qdata;
         }
         return view('analy.concept', [
             'menu_user' => $this->menu_user,
-            'title' => $sets_set->s_name.'- 考題概念表',
+            'title' => $sets_set->p_name.'- 考題概念表',
             'Part' => $part,
-            'Eid' => $eid
+            'Eid' => $eid,
+            'Have_sub' => $exam->e_sub
         ]);
     }
     /*
@@ -82,14 +118,13 @@ class AnalyController extends TopController
     public function radar($eid){
         if (!$this->login_status)return redirect('/login');
         $eid = (int)$eid;
-        $eid = (int)$eid;
         $exam = Exams::find($eid);
-        $sets_set = Sets::find($exam->s_id);
+        $sets_set = Pubs::find($exam->s_id);
         $q = array();
         $chap_id = array();
+        $no = 0;
         if ($exam->e_sub){
             $sub_exam = Exams::where('e_pid', $eid)->get()->all();
-            $no = 0;
             foreach ($sub_exam as $si => $se) {
                 $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
                                  ->where('ed_eid', $se->e_id)
@@ -104,6 +139,20 @@ class AnalyController extends TopController
                     $tmp->id = $oq->q_chap;
                     array_push($q, $tmp);
                 }
+            }
+        }else{
+            $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
+                              ->where('ed_eid', $eid)
+                              ->orderby('ed_sort')->get()->all();
+            foreach ($ques as $v) {
+                $no++;
+                $tmp = new \stdclass;
+                $tmp->qno = $no;//$v->ed_sort;
+                $tmp->right = $v->ed_right;
+                $oq = $v->ques_source();
+                $chap_id[] = $oq->q_chap;
+                $tmp->id = $oq->q_chap;
+                array_push($q, $tmp);
             }
         }
         //唯一
@@ -140,7 +189,7 @@ class AnalyController extends TopController
         }
         return view('analy.radar', [
             'menu_user' => $this->menu_user,
-            'title' => $sets_set->s_name.'- 觀念答對比率圖',
+            'title' => $sets_set->p_name.'- 觀念答對比率圖',
             'Data' => $data,
             'Eid' => $eid,
             'Con_type' => implode(",", $chap_name),

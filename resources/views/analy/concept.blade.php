@@ -87,6 +87,7 @@
 		.part {
 			padding-left: 1em;
 			font-size: 18px;
+			text-align: center;
 		}
 		.part > span {
 			margin: 0px 5px;
@@ -118,6 +119,7 @@
 		{{-- <input type="button" class="btn w150" name="" id="" value="列印" onclick="print();"> --}}
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?')) window.close();">關閉</a></label> --}}
 	</div>
+	@if($Have_sub)
 	@foreach($Part as $pi => $p)
 	<div class="title_intro">
 		<div class="part">第{{ ($pi+1) }}大題 {{ (float)$p->score }}分 ({{ $p->percen }}%)　答對<span class="right">{{ $p->rnum }}</span>題　答錯<span class="wrong">{{ $p->wnum }}</span>題　未答<span class="none">{{ $p->nnum }}</span>題</div>
@@ -151,6 +153,39 @@
 		</div>
 	</div>
 	@endforeach
+	@else
+	<div class="title_intro">
+		<div class="part">得分 {{ (float)$Part->score }} / {{ $Part->percen }}　答對<span class="right">{{ $Part->rnum }}</span>題　答錯<span class="wrong">{{ $Part->wnum }}</span>題　未答<span class="none">{{ $Part->nnum }}</span>題</div>
+	</div>
+	<div class="content">
+		<div id="cen">
+			<table width="100%" class="list">
+				<thead>
+					<tr class="shallow">
+						<th style="min-width:70px;">題號</th>
+						<th style="width:100%;">章節概念</th>
+						<th style="min-width:70px;">對錯</th>
+						<th style="min-width:70px;">答對率</th>
+						<th style="min-width:70px;">難易度</th>
+						<th style="min-width:80px;">作答</th>
+						<th class="last" style="min-width:80px;">答案</th>
+					</tr>
+				</thead>
+				@foreach($Part->qdata as $qi => $q)
+				<tr class="{{ ($qi%2===0) ? 'deep':'shallow' }}">
+					<td>{{ $q->sort }}</td>
+					<td align="left">{{ $q->chap }}</td>
+					<td><img src="{{ ($q->right) ? URL::asset('img/icon_op_t.png'):URL::asset('img/icon_op_f.png') }}" height="20"></td>
+					<td>{{ $q->percen }}%</td>
+					<td>{{ $q->degree }}</td>
+					<td>{{ $q->ed_ans }}</td>
+					<td class="last">{{ $q->q_ans }}</td>
+				</tr>
+				@endforeach
+			</table>
+		</div>
+	</div>
+	@endif
 </div>
 @stop
 @section('script')

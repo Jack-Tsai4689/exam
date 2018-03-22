@@ -8,8 +8,11 @@
 		.hiden {
 			display: none;
 		}
-		.list > tbody > tr > td.qcont {
+		.list > tbody > tr > td.cont {
 			text-align: left;
+		}
+		.cont > div {
+			margin-bottom: 5px;
 		}
 		.pic {
 			width: 500px;
@@ -27,19 +30,19 @@
 	</div>
 	<div class="title_intro condition">
 		<div>
-			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">條件</div>
+			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">範圍條件</div>
 			類別：
 			<select name="gra" onchange="getsubj(this.value)">
 				<option value="0">全部</option>{!! $Grade !!}
-			</select>
+			</select>　
 			科目：
 			<select name="subj" id="subj" onchange="getchap(this.value)">
 				<option value="0">全部</option>{!! $Subject !!}
-			</select>
+			</select>　
 			章節：
 			<select name="chap" id="chap">
 				<option value="0">全部</option>{!! $Chapter !!}
-			</select>
+			</select>　
 			難度：
 			<select name="degree">
 				<option value=""  {{ $Degree->A}} >全部</option>
@@ -58,31 +61,22 @@
 				<thead>
 					<tr>
 						<th name="qno" style="width:4%; min-width:39px;">序號</th>
-						<th name="que">題目</th>
+						<th name="que">題目/詳解</th>
 						<th style="width:80px;">題型</th>
 						<th name="ans" style="width:5%; min-width:49px;">答案</th>
-						<th name="gra" style="width:6%; min-width:59px;">類別</th>
-						<th name="sub" style="width:5%; min-width:49px;">科目</th>
-						<th name="chp" style="width:9.5%; min-width:99px;">章節</th>
-						<th name="deg" style="width:4%; min-width:39px;">難度</th>
-						<th style="width:100px;">Qrcode</th>
+						<th style="width:100px;">知識點</th>
 						<th name="pub" style="width:10%; min-width:109px;">發表時間</th>
 						<th class="last" style="width:82px;">編輯</th>
 					</tr>
 				</thead>
 				<tbody>
 				@foreach ($Data as $k => $v)
-					@php $class = (($k+1)%2==0) ? 'shallow':'deep' @endphp
-					<tr class="{{ $class }}">
+					<tr class="{{ ($k%2==0) ? 'deep':'shallow' }}">
 						<td name="qno">{{ $v->q_id }}</td>
-						<td class="qcont" name="que">{!! $v->q_qcont.'<br>'.$v->q_acont !!}<br>{{ $v->q_know }}</td>
+						<td class="cont" name="que"><div>範圍 【{{ $v->q_gra }}】【{{ $v->q_subj }}】【{{ $v->q_chap }}】【{{ $v->q_degree }}】</div>{!! $v->cont !!}</td>
 						<td>{{ $v->q_quetype }}</td>
 						<td name="ans">{{ $v->q_ans }}</td>
-						<td name="gra">{{ $v->q_gra }}</td>
-						<td name="sub">{{ $v->q_subj }}</td>
-						<td name="chp">{{ $v->q_chap }}</td>
-						<td name="deg">{{ $v->q_degree }}</td>
-						<td></td>
+						<td>{{ $v->q_know }}</td>
 						<td>{{ $v->q_update }}</td>
 						<td class="last"><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="明細"><br><input type="button" class="btn w80" onclick='window.open("{{ url('ques/'.$v->q_id.'/edit') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' value="編輯"></td>
 					</tr>

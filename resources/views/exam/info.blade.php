@@ -70,6 +70,12 @@
 						<td align="center">限時</td>
 						<td>{{ $Limetime }}</td>
 					</tr>
+					@if (!$Have_sub)
+					<tr>
+						<td></td>
+						<td>{{ $Back }}回上題俢改</td>
+					</tr>
+					@endif
 					<tr>
 						<td align="center">成績公佈</td>
 						<td>{{ $score_open }}</td>

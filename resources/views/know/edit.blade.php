@@ -109,7 +109,7 @@
                     </td>
                 </tr>
                 <tr class="shallow">
-                    <td align="right">年級</td>
+                    <td align="right">類別</td>
                     <td>
                     	<select name="f_grade" id="f_grade" onchange="subj_c(this.value)">{!! $Grade !!}</select>
                     </td>

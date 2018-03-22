@@ -225,21 +225,27 @@
                 <tr class="deep">
                     <td align="right">年級<font color="red">＊</font></td>
                     <td width="80%">
-                        <select name="f_grade" id="f_grade" onchange="subj_c(this.value,'qm')"></select>
+                        <div class="ui-widget">
+                            <select class="f_grade" name="f_chapterui">
+                                <option value=""></option>{!! $Q_Grade !!}
+                            </select>
+                            <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
+                        </div>
+                        {{-- <select name="f_grade" id="f_grade" onchange="subj_c(this.value,'qm')">{!! $Q_Grade !!}</select> --}}
                     </td>
                 </tr>
                 <tr class="shallow">
                     <td align="right">科目<font color="red">＊</font></td>
                     <td id="subj">
-                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value,'qm')"></select>
+                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value,'qm')">{!! $Q_Subject !!}</select>
                     </td>
                 </tr>
                 <tr class="deep">
                     <td align="right">章節<font color="red">＊</font></td>
                     <td>
                         <div class="ui-widget">
-                            <select id="f_chapterui" name="f_chapterui">
-                                <option value=""></option>
+                            <select class="f_chapterui" name="f_chapterui">
+                                <option value=""></option>{!! $Q_Chapter !!}
                             </select>
                             <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
                         </div>
@@ -252,7 +258,7 @@
                         <label><input type="radio" name="f_degree1[]" value="M">中等</label>
                         <label><input type="radio" name="f_degree1[]" value="H">困難</label>
                     </TD>
-                </TR>                
+                </TR>
             </table>
         </div>
     </div>
@@ -264,7 +270,44 @@
                         <label><input type="radio" name="f_qus_type" id="typeD" value="D" onchange="change_type(this.value)">複選題</label>
                         <label><input type="radio" name="f_qus_type" id="typeR" value="R" onchange="change_type(this.value)">是非題</label>
                     </td>
-                </tr><tr class="shallow"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow" class="ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum(this)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans0[]" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans0[]" value="2"><font id="ans_2">B</font></label></div><label id="ans_group_error" class="error_msg"></label></td></tr><tr><td><label class="f17 oans_control" id="oans_control0" onclick="show_oans(\'oans0\')">詳解<img class="oans_pic" id="pic_oans0" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans0"><tr class="deep"><td align="right">文字說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea></td></tr><tr class="shallow"><td align="right">圖片檔</td><td><input type="hidden" id="f_imgsol0" name="f_imgsol[]" value="">格式：JPG/PNG</td></tr><tr class="deep"><TD align="right">聲音檔</TD><td><input type="hidden" id="f_imgsols0" name="f_imgsols[]" value="">格式：MP3</TD></TR><tr class="shallow"><td align="right">影片檔</td><td><input type="hidden" id="f_imgsolv0" name="f_imgsolv[]" value="">格式：MP4</td></tr></table></div></div></div>
+                </tr><tr class="shallow"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow" class="ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum(this)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans0[]" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans0[]" value="2"><font id="ans_2">B</font></label></div><label id="ans_group_error" class="error_msg"></label></td></tr>
+                <tr>
+                    <td align="left" colspan="2"><label class="f17">範圍</label><font color="green">*確實設定範圍，在學生的診斷報告中，較可以準確分析學生「較強」或「較弱」是哪些</font></td>
+                </tr>
+                <tr class="deep">
+                    <td align="right">年級<font color="red">＊</font></td>
+                    <td width="80%">
+                        <select name="f_grade" id="f_grade" onchange="subj_c(this.value,'qm')">{!! $Q_Grade !!}</select>
+                    </td>
+                </tr>
+                <tr class="shallow">
+                    <td align="right">科目<font color="red">＊</font></td>
+                    <td id="subj">
+                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value,'qm')">{!! $Q_Subject !!}</select>
+                    </td>
+                </tr>
+                <tr class="deep">
+                    <td align="right">章節<font color="red">＊</font></td>
+                    <td>
+                        <div class="ui-widget">
+                            <select class="f_chapterui" name="f_chapterui">
+                                <option value=""></option>{!! $Q_Chapter !!}
+                            </select>
+                            <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
+                        </div>
+                    </td>
+                </TR>
+                <tr class="shallow">
+                    <TD align="right">難易度</TD>
+                    <td>
+                        <label><input type="radio" name="f_degree1[]" value="E">容易</label>
+                        <label><input type="radio" name="f_degree1[]" value="M">中等</label>
+                        <label><input type="radio" name="f_degree1[]" value="H">困難</label>
+                    </TD>
+                </TR>
+                <tr><td><label class="f17 oans_control" id="oans_control0" onclick="show_oans(\'oans0\')">詳解<img class="oans_pic" id="pic_oans0" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans0"><tr class="deep"><td align="right">文字說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea></td></tr><tr class="shallow"><td align="right">圖片檔</td><td><input type="hidden" id="f_imgsol0" name="f_imgsol[]" value="">格式：JPG/PNG</td></tr><tr class="deep"><TD align="right">聲音檔</TD><td><input type="hidden" id="f_imgsols0" name="f_imgsols[]" value="">格式：MP3</TD></TR><tr class="shallow"><td align="right">影片檔</td><td><input type="hidden" id="f_imgsolv0" name="f_imgsolv[]" value="">格式：MP4</td></tr></table></div>
+            </div>
+        </div>
     </div>
     <div class="title" id="more_btn" onclick="more_one()"><font class="f17">增加小題</font></div>
     <div class="content" style="margin-bottom:50px;">
@@ -408,7 +451,8 @@ window.focus();
 })( jQuery );
     
 $(function() {
-    $( "#f_chapterui" ).combobox();
+    $( ".f_chapterui" ).combobox();
+    $( ".f_grade" ).combobox();    
 });
 // function delete_que(){//刪除
 //     if (confirm('刪除後以上您輸入的資料都會消失，您確定要刪除嗎?')){

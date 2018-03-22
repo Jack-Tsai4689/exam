@@ -38,6 +38,8 @@ Route::group(['prefix'=>'exam'], function(){
 Route::group(['prefix'=>'score'], function(){
 	//成績列表
 	Route::get('/', "ScoreController@index");
+	//個人成績查詢頁
+	Route::get('/search', "ScoreController@find_stu");
 	//個人成績
 	Route::get('/{id}', "ScoreController@show");
 });

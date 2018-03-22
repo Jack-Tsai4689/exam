@@ -258,7 +258,7 @@ class PubController extends TopController
                     'p_updated_at' => time(),
                 ]);
                 //題目
-                $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap')
+                $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know')
                               ->where('sq_part', $s->s_id)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
@@ -288,13 +288,14 @@ class PubController extends TopController
                         'pq_subj' => $q->q_subj,
                         'pq_chap' => $q->q_chap,
                         'pq_created_at' => time(),
-                        'pq_updated_at' => time()
+                        'pq_updated_at' => time(),
+                        'pq_know' => $q->q_know
                     ]);
                 }
             }
         }else{
             //題目
-            $que = Setsque::select('sq_qid','q_ans','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap')
+            $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know')
                               ->where('sq_sid', $sid)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
@@ -305,6 +306,7 @@ class PubController extends TopController
                     'pq_sort' => ($i+1),
                     'pq_qid' => $q->sq_qid,
                     'pq_ans' => $q->q_ans,
+                    'pq_num' => $q->q_num,
                     'pq_quetype' => $q->q_quetype,
                     'pq_quetxt' => $q->q_quetxt,
                     'pq_qm_src' => $q->q_qm_src,
@@ -323,7 +325,8 @@ class PubController extends TopController
                     'pq_subj' => $q->q_subj,
                     'pq_chap' => $q->q_chap,
                     'pq_created_at' => time(),
-                    'pq_updated_at' => time()
+                    'pq_updated_at' => time(),
+                    'pq_know' => $q->q_know
                 ]);
             }
         }

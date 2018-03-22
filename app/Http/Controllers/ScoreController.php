@@ -36,7 +36,7 @@ class ScoreController extends TopController
                 $data[$k]->gra = $p->gra->name;
                 $data[$k]->subj = $p->subj->name;                
             }
-            return view('exam.score_slist', [
+            return view('score.score_slist', [
                 'menu_user' => $this->menu_user,
                 'title' => '成績',
                 'Data' => $data
@@ -62,7 +62,7 @@ class ScoreController extends TopController
                         break;
                 }
             }
-            return view('exam.score_tlist', [
+            return view('score.score_tlist', [
                 'menu_user' => $this->menu_user,
                 'title' => '成績-班級查詢',
                 'Data' => $data
@@ -108,19 +108,17 @@ class ScoreController extends TopController
         $exam = Exams::find($eid);
         $sets = Pubs::find($exam->s_id);
         
-        $Sets_name = $sets->s_name;
-        $que = array();
-        if ($exam->e_sub){
-            $sub_exam = Exams::where('e_pid', $eid)->orderby('e_sort')->get()->all();
-        }else{
-            
-        }
         $uses_time = $exam->e_endtime_at - $exam->e_begtime_at;
         $times = new \stdclass;
         $times->hour = floor($uses_time/3600);
         $times->min = floor(($uses_time%3600)/60);
         $times->sec = floor($uses_time%60);
 
+        if ($exam->e_sub){
+            $sub_exam = Exams::where('e_pid', $eid)->orderby('e_sort')->get()->all();
+        }else{
+            $sub_exam = $exam->sub_ques_ans();
+        }
         return view('exam.result', [
             'menu_user' => $this->menu_user,
             'title' => $sets->p_name.' 測驗結果',
@@ -128,41 +126,65 @@ class ScoreController extends TopController
             'Data' => $sub_exam,
             'exam' => $exam,
             'Time' => $times,
-            'Eid' => $eid
+            'Eid' => $eid,
+            'Have_sub' => $sets->p_sub,
+            'Sum' => $sets->p_sum
         ]);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+    // 成績搜尋頁
+    public function find_stu(){
+        $_get = request()->all();
+        $Stuno = '';
+        $Stuname = '';
+        $open_search = false;
+        if (!empty($_get)){
+            $no = request()->input('stuno');
+            $name = request()->input('stuname');
+            if (preg_match("/^[0-9]*$/", $no)){
+                $open_search = true;
+                $Stuno = (string)$no;
+            }
+            if (!empty($name)){
+                $open_search = true;
+                $Stuname = trim($name);
+            }
+        }
+        $data = array();
+        if ($open_search){
+            $data = Exams::select('*');
+            if (!empty($Stuno))$data = $data->where('e_stu', $Stuno);
+            if (!empty($Stuname)){
+                $data = $data->join('stus','stus.st_no','=','exams.e_stu')
+                             ->where('st_name','like','%'.$Stuname.'%');
+            }
+            $data = $data->where('e_pid', 0)
+                         // ->where('e_status', 'Y')
+                         // ->orwhere('e_status','O')
+                         ->get()->all();
+            foreach ($data as $k => $v) {
+                $data[$k]->can_see = '';
+                switch($v->e_status){
+                    case 'Y':
+                        $data[$k]->e_end = date('Y/m/d H:i:s', $v->e_endtime_at);
+                        $data[$k]->can_see = 'class="see_rs" id="'.$v->e_id.'"';
+                        break;
+                    case 'N':
+                        $data[$k]->e_end = '進行中';
+                        break;
+                    case 'O':
+                        $data[$k]->e_end = '中離';
+                        break;
+                }
+            }
+        }
+        $menu_user = $this->menu_user;
+        $title = '成績-個人查詢';
+        return view('score.tlist_search', [
+            'menu_user' => $this->menu_user,
+            'title' => '成績-個人查詢',
+            'Data' => $data,
+            'Stuno' => $Stuno,
+            'Stuname' => $Stuname
+        ]);
     }
 }

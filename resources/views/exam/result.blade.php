@@ -111,7 +111,7 @@
         答對<span class="right">{{ $exam->e_rnum }}</span>題　
         答錯<span class="wrong">{{ $exam->e_wnum }}</span>題　
         未答<span class="none">{{ $exam->e_nnum }}</span>題　
-		總分<span class="wrong">{{ (float)$exam->e_score }}</span>分
+		得分<span class="wrong">{{ (float)$exam->e_score }}</span> / {{ $Sum }}
 	</div>
 	<div class="title_intro">
         <input type="button" class="btn w150 f14 oans" value="顯示解答/詳解">
@@ -119,12 +119,13 @@
 		<input type="button" class="btn w150 f14 concept" value="觀念答對比率圖" onclick="">
 		<input type="button" class="btn w150 f14" value="列印診斷報告" onclick="">
 		<label>診斷報告封面標題</label>
-		<input type="text" class="input_field w250" name="f_reporttitle" id="f_reporttitle">
+		<input type="text" class="input_field w250" name="f_reporttitle" id="f_reporttitle">　{{ date('Y/m/d H:i:s', $exam->e_endtime_at) }} 交卷
 		<INPUT type="hidden" name="f_sid" id="f_sid"  value="">
         <INPUT type="hidden" name="p_sids" id="p_sids"  value="">
         <INPUT type="hidden" name="f_subject" id="f_subject" value="">
         <INPUT type="hidden" name="fkey" id="fkey" value="">
 	</div>
+    @if ($Have_sub)
     @foreach($Data as $p)
     <div class="title_intro">
         <div class="part">第 {{ $p->e_sort }} 大題 {{ (float)$p->e_score }}分({{ $p->sets_info()->p_percen }}%)　答對<span class="right">{{ $p->e_rnum }}</span>題　答錯<span class="wrong">{{ $p->e_wnum }}</span>題　未答<span class="none">{{ $p->e_nnum }}</span>題</div>
@@ -132,7 +133,7 @@
 	<div class="content">
 		<div id="cen">
 			<table class="list" cellpadding="0" cellspacing="0" width="100%">
-                @foreach($p->ques_ans() as $q)
+                @foreach($p->sub_ques_ans() as $q)
 				<tr align="center">
 					<td class="qno">{{ $q->qno }}</td>
 					<td class="qno_c"><img src="{{ URL::asset($q->right_pic) }}"></td>
@@ -153,6 +154,31 @@
 		</div>
 	</div>
     @endforeach
+    @else
+    <div class="content">
+        <div id="cen">
+            <table class="list" cellpadding="0" cellspacing="0" width="100%">
+                @foreach($Data as $q)
+                <tr align="center">
+                    <td class="qno">{{ $q->qno }}</td>
+                    <td class="qno_c"><img src="{{ URL::asset($q->right_pic) }}"></td>
+                    <td class="qno_ans">{{ $q->myans }}</td>
+                    <td class="que" align="left">{!! $q->qcont !!}</td>
+                </tr>
+                <tr align="center" class="ans hiden">
+                    <td class="qno">解答</td>
+                    <td class="qno_c"></td>
+                    <td class="qno_ans">{{ $q->q_ans }}</td>
+                    <td class="que" align="left">{!! $q->acont !!}</td>
+                </tr>
+                <tr>
+                    <td colspan="5"><hr></td>
+                </tr>
+                @endforeach
+            </table>
+        </div>
+    </div>
+    @endif
 	<div class="title_intro">
         <input type="button" class="btn w150 f14 oans" value="顯示解答/詳解">
 		<input type="button" class="btn w100 f14 analy" value="考題概念表">

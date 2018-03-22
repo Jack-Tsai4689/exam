@@ -121,7 +121,7 @@
                 </tr>
                 <tr class="deep">
                     <td align="right">範圍</td>
-                    <td width="80%">{{ $Grade }} / {{ $Subject }} / {{ $Chapter }}　難易度：{{ $Degree }}</td>
+                    <td width="80%">【{{ $Grade }}】【{{ $Subject }}】【{{ $Chapter }}】【{{ $Degree }}】</td>
                 </tr>
                 <tr>
                     <td><label class="f17 oans_control" onclick="show_oans('oans')"><img id="oans_pic" src="{{ URL::asset('img/close.png')}}" height="20">詳解</label></td>

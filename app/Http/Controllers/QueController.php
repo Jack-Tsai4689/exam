@@ -29,6 +29,52 @@ class QueController extends TopController
         $data = $this->ques_list();
         return view('que.index', $data);
     }
+    private function _ques_ans_format($v){
+        $data = new \stdClass;
+        //題型、答案
+        switch ($v->q_quetype) {
+            case "S": 
+                $data->q_quetype = "單選"; 
+                $data->q_ans = chr($v->q_ans+64);
+                break;
+            case "D": 
+                $data->q_quetype = "複選"; 
+                $ans = array();
+                $ans = explode(",", $v->q_ans);
+                $ans_html = array();
+                foreach ($ans as $o) {
+                    $ans_html[] = chr($o+64);
+                }
+                $data->q_ans = implode(", ", $ans_html);
+                break;
+            case "R": 
+                $data->q_quetype = "是非"; 
+                $data->q_ans = ($v->q_ans==="1") ? "O":"X";
+                break;
+            case "M": 
+                $data->q_quetype = '選填'; 
+                $ans = array();
+                $ans = explode(",", $v->q_ans);
+                $ans_html = array();
+                foreach ($ans as $o) {
+                    if (!preg_match("/^[0-9]*$/", $o)){
+                        $ans_html[] = ($o==="a") ? '-':'±';
+                    }else{
+                        $ans_html[] = $o;
+                    }
+                }
+                $data->q_ans = implode(", ", $ans_html);
+                break;
+        }
+        //難度
+        switch ($v->q_degree) {
+            case "M": $data->q_degree = "中等"; break;
+            case "H": $data->q_degree = "困難"; break;
+            case "E": $data->q_degree = "容易"; break;
+            default: $data->q_degree = "容易"; break;
+        }
+        return $data;
+    }
     private function ques_list(){
         $p_gra = 0;
         $p_subj = 0;
@@ -103,93 +149,58 @@ class QueController extends TopController
             $que_data = Ques::paginate(10);
         }
         foreach ($que_data as $k => $v) {
-            //題型、答案
-            switch ($v->q_quetype) {
-                case "S": 
-                    $que_data[$k]->q_quetype = "單選"; 
-                    $que_data[$k]->q_ans = chr($v->q_ans+64);
-                    break;
-                case "D": 
-                    $que_data[$k]->q_quetype = "複選"; 
-                    $ans = array();
-                    $ans = explode(",", $v->q_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        $ans_html[] = chr($o+64);
-                    }
-                    $que_data[$k]->q_ans = implode(", ", $ans_html);
-                    break;
-                case "R": 
-                    $que_data[$k]->q_quetype = "是非"; 
-                    $que_data[$k]->q_ans = ($v->q_ans==="1") ? "O":"X";
-                    break;
-                case "M": 
-                    $que_data[$k]->q_quetype = '選填'; 
-                    $ans = array();
-                    $ans = explode(",", $v->q_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        if (!preg_match("/^[0-9]*$/", $o)){
-                            $ans_html[] = ($o==="a") ? '-':'±';
-                        }else{
-                            $ans_html[] = $o;
-                        }
-                    }
-                    $que_data[$k]->q_ans = implode(", ", $ans_html);
-                    break;
-            }
-            $qcont =  array();
+            
+            $format = $this->_ques_ans_format($v);
+            $que_data[$k]->q_quetype = $format->q_quetype;
+            $que_data[$k]->q_ans = $format->q_ans;
+
+            $cont =  array();
             //題目文字
-            if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($v->q_quetxt));
+            if (!empty($v->q_quetxt)) $cont[] = '<div>'.nl2br(trim($v->q_quetxt)).'</div>';
             //題目圖檔
             if (!empty($v->q_qm_src)){
-                if(is_file($v->q_qm_src))$qcont[] = '<IMG class="pic" src="'.URL::asset($v->q_qm_src).'">';
+                if(is_file($v->q_qm_src))$cont[] = '<div>題目圖片：'.$v->q_qm_name.'</div><IMG class="pic" src="'.URL::asset($v->q_qm_src).'">';
             }
             //題目聲音檔
             if (!empty($v->q_qs_src)){
                 if(is_file($v->q_qs_src)){
-                    $qcont[] = '<font color="green">題目音訊 O</font>';
+                    $cont[] = '<div>題目音訊：'.$v->q_qs_name.'</div>';
                 }else{
-                    $qcont[] = '<font color="red">題目音訊遺失 X</font>';
+                    $cont[] = '<div>題目音訊：'.$v->q_qs_name.'　(<font color="red">遺失</font>)</div>';
                 }
             }
-            $que_data[$k]->q_qcont = implode("<br>", $qcont);
-
             $acont = array();
             //詳解文字
-            if (!empty($v->q_anstxt)) $acont[] = nl2br(trim($v->q_anstxt));
+            if (!empty($v->q_anstxt)) $acont[] = '<div>'.nl2br(trim($v->q_anstxt)).'</div>';
             //詳解圖檔
             if(!empty($v->q_am_src)){
-                if (is_file($v->q_am_src))$acont[] = '<IMG class="pic"  src="'.URL::asset($v->q_am_src).'">';
+                if (is_file($v->q_am_src))$acont[] = '<div>詳解圖片：'.$v->q_am_name.'</div><IMG class="pic"  src="'.URL::asset($v->q_am_src).'">';
             }
-            $amedia = array();
             //詳解聲音檔
             if(!empty($v->q_as_src)){
                 if(is_file($v->q_as_src)){
-                    $amedia[] = '<font color="green">詳解音訊 O</font>';
+                    $acont[] = '<div>詳解音訊：'.$v->q_as_name.'</div>';
                 }else{
-                    $amedia[] = '<font color="red">詳解音訊遺失 X</font>';
+                    $acont[] = '<div>詳解音訊：'.$v->q_as_name.'(<font color="red">遺失</font>)<div>';
                 }
             }
             //詳解影片檔
             if(!empty($v->q_av_src)){
                 if(is_file($v->q_av_src)){
-                    $amedia[] = '<font color="green">詳解視訊 O</font>';
+                    $acont[] = '<div>詳解視訊：'.$v->av_name.'</div>';
                 }else{
-                    $amedia[] = '<font color="red">詳解視訊遺失 X</font>';
+                    $acont[] = '<div>詳解視訊：'.$v->av_name.'(<font color="red">遺失</font>)</div>';
                 }
             }
-            $acont[] = implode(' | ', $amedia);
-            $que_data[$k]->q_acont = '詳解<br>'.implode("<br>", $acont);
-            //難度
-            switch ($v->q_degree) {
-                case "M": $que_data[$k]->q_degree = "中等"; break;
-                case "H": $que_data[$k]->q_degree = "困難"; break;
-                case "E": $que_data[$k]->q_degree = "容易"; break;
-                default: $que_data[$k]->q_degree = "容易"; break;
+            if (!empty($acont)){
+                $cont[] = "<br><div><strong>詳解</strong></div>";
+                $cont = array_merge($cont, $acont);
             }
+            $que_data[$k]->cont = implode("", $cont);
+            //難度
+            $que_data[$k]->q_degree = $format->q_degree;
             $que_data[$k]->q_update = date('Y/m/d H:i:s', $v->q_updated_at);
-            $que_data[$k]->q_know = ($v->q_know!==0) ? '知識點：'.$v->knows->name:'';
+            $que_data[$k]->q_know = ($v->q_know!==0) ? $v->knows->name:'';
 
             $que_data[$k]->q_gra = $v->gra->name;
             $que_data[$k]->q_subj = $v->subj->name;
@@ -480,7 +491,7 @@ class QueController extends TopController
         $degree->H = '';
         $data['Degree'] = $degree;
         $data['que_type'] = '';
-        $data['title'] = '建立題目';
+        $data['title'] = '建立題組';
         return view('que.createg', $data);
     }
     /**
@@ -724,50 +735,25 @@ class QueController extends TopController
         if ($qid<1)abort(400);
         $qdata = Ques::find($qid);
         //題型、答案
-        switch ($qdata->q_quetype) {
-            case "S": 
-                $Quetype = "單選題"; 
-                $Ans = chr($qdata->q_ans+64);
-                break;
-            case "D": 
-                $Quetype = "複選題";
-                $ans = array();
-                $ans = explode(",", $qdata->q_ans);
-                $ans_html = array();
-                foreach ($ans as $o) {
-                    $ans_html[] = chr($o+64);
-                }
-                $Ans = implode(", ", $ans_html);
-                break;
-            case "R": 
-                $Quetype = "是非題";
-                $Ans = ($qdata->q_ans==="1") ? "O":"X";
-                break;
-            case "M": 
-                $Quetype = "選填題";
-                $ans = array();
-                $ans = explode(",", $qdata->q_ans);
-                $ans_html = array();
-                foreach ($ans as $o) {
-                    if (!preg_match("/^[0-9]*$/", $o)){
-                        $ans_html[] = ($o==="a") ? '-':'±';
-                    }else{
-                        $ans_html[] = $o;
-                    }
-                }
-                $Ans = implode(", ", $ans_html);
-                break;
-        }
+        $format = $this->_ques_ans_format($qdata);
+        $Quetype = $format->q_quetype.'題';
+        $Ans = $format->q_ans;
+        $Degree = $format->q_degree;
+        $Grade = $qdata->gra->name;
+        $Subject = $qdata->subj->name;
+        $Chapter = $qdata->chap->name;
+        $Owner = $qdata->q_owner;
+
         $qcont =  array();
         //題目文字
         if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($qdata->q_quetxt));
         //題目圖檔
         if (!empty($qdata->q_qm_src)){
-            if(is_file($qdata->q_qm_src))$qcont[] = '<IMG class="pic" src="'.URL::asset($qdata->q_qm_src).'">';
+            if(is_file($qdata->q_qm_src))$qcont[] = '圖：'.$qdata->q_qm_name.'<br><IMG class="pic" src="'.URL::asset($qdata->q_qm_src).'">';
         }
         //題目聲音檔
         if (!empty($qdata->q_qs_src)){
-            $qs_name = '音訊檔名：'.$qdata->q_qs_name;
+            $qs_name = '音訊：'.$qdata->q_qs_name;
             if(is_file($qdata->q_qs_src)){
                 $qcont[] = $qs_name.'<br><audio controls preload oncontextmenu="return false;">
                         <source src="'.URL::asset($qdata->q_qs_src).'" type="audio/mpeg">
@@ -784,48 +770,36 @@ class QueController extends TopController
         if (!empty($qdata->q_anstxt)) $acont[] = nl2br(trim($qdata->q_anstxt));
         //詳解圖檔
         if(!empty($qdata->q_am_src)){
-            if (is_file($qdata->q_am_src))$acont[] = '<IMG class="pic" src="'.URL::asset($qdata->q_am_src).'">';
+            if (is_file($qdata->q_am_src))$acont[] = '圖：'.$qdata->q_am_name.'<br><IMG class="pic" src="'.URL::asset($qdata->q_am_src).'">';
         }
         $amedia = array();
         //詳解聲音檔
         if(!empty($qdata->q_as_src)){
-            $as_name = '音訊檔名：'.$qdata->q_as_name;
+            $as_name = '音訊：'.$qdata->q_as_name;
             if(is_file($qdata->q_as_src)){
                 $amedia[] = $as_name.'<br><audio controls preload oncontextmenu="return false;">
                         <source src="'.URL::asset($qdata->q_as_src).'" type="audio/mpeg">
                         <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
                       </audio>';
             }else{
-                $amedia[] = $as_name.'<font color="red">(遺失)</font>';
+                $amedia[] = $as_name.'(<font color="red">遺失</font>)';
             }
         }
         //詳解影片檔
         if(!empty($qdata->q_av_src)){
-            $av_name = '音訊檔名：'.$qdata->q_av_name;
+            $av_name = '視訊：'.$qdata->q_av_name;
             if(is_file($qdata->q_av_src)){
-                $amedia[] = $av_name.'<br><audio controls preload oncontextmenu="return false;">
-                        <source src="'.URL::asset($qdata->q_av_src).'" type="audio/mpeg">
+                $amedia[] = $av_name.'<br><video controls preload oncontextmenu="return false;">
+                        <source src="'.URL::asset($qdata->q_av_src).'" type="video/mpeg">
                         <em>提醒您，您的瀏覽器無法支援此服務的媒體，請更新</em>
-                      </audio>';
+                      </video>';
             }else{
-                $amedia[] = '<font color="red">(遺失)</font>';
+                $amedia[] = $av_name.'(<font color="red">遺失</font>)';
             }
         }
         $acont[] = implode(' | ', $amedia);
-        $Ans_content = '詳解<br>'.implode("<br>", $acont);
-        //難度
-        switch ($qdata->q_degree) {
-            case "M": $Degree = "中等"; break;
-            case "H": $Degree = "困難"; break;
-            case "E": $Degree = "容易"; break;
-            default: $Degree = "容易"; break;
-        }
-        $Know_content = ($qdata->q_know!==0) ? '知識點：'.$qdata->knows->name:'';
-
-        $Grade = $qdata->gra->name;
-        $Subject = $qdata->subj->name;
-        $Chapter = $qdata->chap->name;
-        $Owner = $qdata->q_owner;
+        $Ans_content = implode("<br>", $acont);
+        $Know_content = ($qdata->q_know!==0) ? $qdata->knows->name:'';
 
         $keyword = explode("|", $qdata->q_keyword);
         $key = array();
@@ -835,7 +809,7 @@ class QueController extends TopController
             $key[] = $v;
         }
         $Keyword = implode(", ", $key);
-        $title = '預覽題目';
+        $title = '題目資訊-第'.$qid.'題';
         return view("que.info", 
             compact("qid", "title", "Owner", "Quetype", "Que_content", 
                     "Know_content", "Grade", "Subject", "Chapter", "Degree", 

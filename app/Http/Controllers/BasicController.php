@@ -99,7 +99,7 @@ class BasicController extends TopController
                 $gra_name = ($req->has('ugraname') && !empty($req->input('ugraname'))) ? trim($req->input('ugraname')):'';
                 if (!preg_match("/^[0-9]*$/", $gra_id))abort(400);
                 if ($gra_id<1 || empty($gra_name))abort(400);
-                Gscs::where('g_id', $gra_id)->update(['g_name'=>$gra_name]);
+                Gscs::where('g_id', $gra_id)->update(['g_name'=>$gra_name, 'g_owner' => $this->login_user]);
                 $grade_data = $this->grade();
                 $rs_data = $this->_gsclist_format($grade_data);
                 unset($grade_data);
@@ -111,7 +111,7 @@ class BasicController extends TopController
                 if (!preg_match("/^[0-9]*$/", $subj_id))abort(400);
                 if (!preg_match("/^[0-9]*$/", $g_id))abort(400);
                 if ($subj_id<1 || empty($subj_name))abort(400);
-                Gscs::where('g_id', $subj_id)->update(['g_name'=>$subj_name]);
+                Gscs::where('g_id', $subj_id)->update(['g_name'=>$subj_name, 'g_owner' => $this->login_user]);
                 $subj_data = $this->subject($g_id);
                 $rs_data = $this->_gsclist_format($subj_data);
                 unset($subj_data);
@@ -125,7 +125,7 @@ class BasicController extends TopController
                 if (!preg_match("/^[0-9]*$/", $g_id))abort(400);
                 if (!preg_match("/^[0-9]*$/", $s_id))abort(400);
                 if ($chap_id<1 || $g_id<1 || $s_id<1 || empty($chap_name))abort(400);
-                Gscs::where('g_id', $chap_id)->update(['g_name'=>$chap_name]);
+                Gscs::where('g_id', $chap_id)->update(['g_name'=>$chap_name, 'g_owner' => $this->login_user]);
                 $chap_data = $this->chapter($g_id, $s_id);
                 $rs_data = $this->_gsclist_format($chap_data);
                 unset($chap_data);

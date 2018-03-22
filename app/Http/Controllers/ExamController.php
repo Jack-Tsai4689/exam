@@ -24,6 +24,7 @@ class ExamController extends TopController
      *
      * @return \Illuminate\Http\Response
      */
+    // 加密參數
     private $encrypt_hash = "JerryTsai";
     private $hash = null;
     private $aes_key = null;
@@ -271,14 +272,28 @@ class ExamController extends TopController
                                        ->orderby('pq_sort')
                                        ->get()->all();
                         $ans = array();
-                        foreach ($subq as $sk => $sv) {
+                        foreach ($subq as $sv) {
                             $ans[] = $sv->pq_ans;
                         }
-                        Redis::set('s'.$p_id.'|p'.$v->p_id.'|a', implode("|", $ans));
+                        Redis::set($key, implode("|", $ans));
                     }
                 }
             }else{
                 $sub = array();
+                $back = ($pubs->p_page==='N') ? '不':'';
+                $key = 's'.$p_id.'|p'.$p_id.'|a';
+                if (!Redis::exists($key)){
+                    $q = Pubsque::where('pq_pid', $p_id)
+                                   ->where('pq_part', $p_id)
+                                   ->select('pq_ans')
+                                   ->orderby('pq_sort')
+                                   ->get()->all();
+                    $ans = array();
+                    foreach ($q as $v) {
+                        $ans[] = $v->pq_ans;
+                    }
+                    Redis::set($key, implode("|", $ans));
+                }
             }
             $time = ($pubs->p_again) ? '可重複考':'僅限一次';
             $lime = explode(":", $pubs->p_limtime);
@@ -297,12 +312,14 @@ class ExamController extends TopController
                 'degree' => '',
                 'sets' => $p_id,
                 'lime' => $pubs->p_limtime,
+                'Have_sub' => $pubs->p_sub,
                 'score_open' => '',
                 'Sum' => $pubs->p_sum,
                 'Limetime' => $limetime,
                 'Sub_info' => $sub,
                 'Pass_core' => $pubs->p_pass_score,
-                'Times' => $time
+                'Times' => $time,
+                'Back' => $back
             ]);
         }
     }
@@ -600,7 +617,6 @@ class ExamController extends TopController
             $time = time();
             $lime = explode(":", $pubs_data->p_limtime);
             $already_ans = 0;
-            $part_que_info = new \stdclass;
             $exam_que = array();
             switch ($_exam->status) {
                 case 'ed'://考完了，可重覆考
@@ -649,7 +665,7 @@ class ExamController extends TopController
                             }
                             
                             // 把題目寫一份到學生卷 exam_details
-                            foreach ($que as $pqk => $pqv) {
+                            foreach ($que as $pqv) {
                                 ExamDetail::create([
                                     's_id' => $pv->p_id,
                                     'ed_eid' => $e_part->e_id,
@@ -677,15 +693,35 @@ class ExamController extends TopController
                         $part_show->no = 1;
                         $part_show->sub = true;
                         $part_show->score = $part[0]->p_percen;
-                        $part_que_info->p = $pid;
-                        $part_que_info->part = $part_show->sid;
                         //$part_show->nums = Pubsque::where('pq_pid', $pid)->where('pq_part', $part[0]->p_id)->count();
                     }else{
-                        $part_show->control = $pubs_data->s_page;
+                        $pkey = 's'.$pid.'p';
+                        if (Redis::exists($pkey)){
+                            $data = Redis::get($pkey);
+                            $que = json_decode($data);
+                        }else{
+                            $que = Pubsque::where('pq_pid', $pid)
+                                      ->where('pq_part', $pid)
+                                      ->orderby('pq_sort')->get()->all();
+                            Redis::set($pkey, json_encode($que));
+                        }
+                        
+                        // 把題目寫一份到學生卷 exam_details
+                        foreach ($que as $pqv) {
+                            ExamDetail::create([
+                                's_id' => $pid,
+                                'ed_eid' => $eid,
+                                'ed_sort' => $pqv->pq_sort,
+                                'ed_qid' => $pqv->pq_qid
+                            ]);
+                            $exam_que[] = $this->_Ques_Info($pqv, $pqv->pq_sort, 1);
+                        }
+                        // insert select 會遞增空洞 auto gaps
+                        $part_show->eid = $eid;
+                        $part_show->sid = $pid;
+                        $part_show->nums = count($que);
+                        $part_show->control = $pubs_data->p_page;
                         $part_show->sub = false;
-                        $part_que_info->p = $pid;
-                        $part_que_info->part = $pid;
-                        $part_show->nums = Pubsque::where('pq_pid', $pid)->where('pq_part', $pid)->count();
                     }
                     
                     //$part_show->nums = count($first_quedata);
@@ -754,6 +790,16 @@ class ExamController extends TopController
                         $exam_data = ExamDetail::select('ed_ans')->where('ed_eid', $_exam->eid)
                                                      ->where('s_id', $pid)
                                                      ->orderby('ed_sort')->get()->all();
+                        $pkey = 's'.$pid.'p';
+                        if (Redis::exists($pkey)){
+                            $data = Redis::get($pkey);
+                            $que = json_decode($data);
+                        }else{
+                            $que = Pubsque::where('pq_pid', $pid)
+                                      ->where('pq_part', $pid)
+                                      ->orderby('pq_sort')->get()->all();
+                            Redis::set($pkey, json_encode($que));
+                        }
                     }
                     $part_show->nums = count($exam_data);
                     foreach ($exam_data as $i => $v) {

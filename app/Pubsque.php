@@ -34,6 +34,7 @@ class Pubsque extends Model
 		'pq_subj',
 		'pq_chap',
 		'pq_created_at',
-		'pq_updated_at'
+		'pq_updated_at',
+		'pq_know'
     ];
 }

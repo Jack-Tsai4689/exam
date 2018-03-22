@@ -30,16 +30,7 @@
 					{{-- 選班級、考卷(下拉式)，列出每個人成績 --}}
 					<li><div class="ex"><a href="{{ url('/score') }}">班級查詢</a></div></li>
 					{{-- 以學號查詢 --}}
-					<li><div class="ex"><a href="">個人查詢</a></div></li>
-				</ul>
-			</li>
-			<li>
-				<a href="javascript:void(0)">診斷系統</a>
-				<ul>
-					{{-- 選班級、考卷(下拉式)，列出每個人。或看整體分析 --}}
-					<li><div class="ex"><a href="">班級查詢</a></div></li>
-					{{-- 以學號查詢 --}}
-					<li><div class="ex"><a href="">個人查詢</a></div></li>
+					<li><div class="ex"><a href="{{ url('/score/search') }}">個人查詢</a></div></li>
 				</ul>
 			</li>
 			@endif
@@ -57,7 +48,7 @@
 				</ul>
 			</li> --}}
 		</ul>
-		<div class="top_per" id="top_id"><a href="">{{ $menu_user }}</a></div><div class="top_per"><a href="{{ url('/logout') }}">登出系統</a></div>
+		<div class="top_per" id="top_id">{{ $menu_user }}</div><div class="top_per"><a href="{{ url('/logout') }}">登出系統</a></div>
 	</div>
 </div>
 @yield('content')
