@@ -101,6 +101,8 @@ Route::group(['prefix'=>'sets'], function(){
 Route::group(['prefix'=>'ques'], function(){
 	Route::get('/', "QueController@index");
 	Route::get('/create', "QueController@create");
+	//新增題組題型
+	Route::get('/createg', "QueController@create_group");
 	Route::post('/', "QueController@store");
 	Route::get('{id}/edit', "QueController@edit");
 	Route::get('/imp', "QueController@join");

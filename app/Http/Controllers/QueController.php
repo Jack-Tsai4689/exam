@@ -354,7 +354,135 @@ class QueController extends TopController
         $data['title'] = '建立題目';
         return view('que.create', $data);
     }
+    public function create_group()
+    {
+        if (!$this->login_status)return redirect('/login');
+        $sets_message = '';//'<div id="sets_title"><label class="17">'.$msg.'</label></div>';
+        //年級、科目 篩選條件
+        $Q_Grade = '';
+        $Q_Subject = '';
+        $Q_Chapter = '';
+        $Sets = '';
+        $grade_data = $this->grade();
+        $subject_data = array();
+        $chap_data = array();
+        if (!empty($grade_data)){
+            foreach ($grade_data as $v) {
+                $Q_Grade.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+            $subject_data = $this->subject($grade_data[0]->g_id);
+        }
+        if (!empty($subject_data)){
+            foreach ($subject_data as $v) {
+                $Q_Subject.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+            $chap_data = $this->chapter($grade_data[0]->g_id, $subject_data[0]->g_id);
+        }
+        if (!empty($chap_data)){
+            foreach ($chap_data as $v) {
+                $Q_Chapter.= '<option value="'.$v->g_id.'">'.$v->g_name.'</option>';
+            }
+        }
+        $data = array();
+        /*
+        如果有舊檔，以不刪檔的為主
+        上傳裁剪後刪檔 nq
+            1.上傳至temp dir
+            2.轉圖並裁切
+                沒裁切的話，上傳頁進行偵測，有圖跳裁切頁
+            3.裁完，多一個btn刪檔
 
+        上傳裁剪後不刪檔 dnq
+            1.上傳至temp dir
+            2.轉圖並裁切
+                沒裁切的話，上傳頁進行偵測，有圖跳裁切頁
+            3.裁完，btn重新裁圖，add 刪檔btn
+        */
+        //題目圖片
+        //不刪檔
+        $qimg_html = '';
+        $data['Qimg'] = '';
+        $loading_dnq = false;
+        //刪檔
+        $loading_nq = false;
+        $epno = $this->login_user;
+        // if (is_file('questions/tmp/dnqrc_'.$epno.'.jpg')){
+        //     $loading_dnq = true;
+        //     //不刪檔，裁過的，直接載入
+        //     $data['Qimg'] = base_url('questions/tmp/dnqrc_'.$epno.'.jpg');
+        //     $qimg_html.= '<input type="button" value="重新裁切" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
+        // }else if (is_file('questions/tmp/dnqr_'.$epno.'.jpg')){
+        //     $loading_dnq = true;
+        //     //不刪檔，沒裁過，跳至裁切
+        //     $qimg_html.= '<input type="button" value="載入舊圖檔" id="dnque" class="btn w100 h25" onClick="uque(this.id);" >';
+        // }
+        // if (!$loading_dnq){
+        //     if (is_file('questions/tmp/nqrc_'.$epno.'.jpg')){
+        //         //刪檔，裁過的，直接載入
+        //         $loading_nq = true;
+        //         $data['Qimg'] = base_url('questions/tmp/nqrc_'.$epno.'.jpg');
+                //$qimg_html.= '<input type="button" value="載入舊圖檔" id="nlque" class="btn w100 h25" onClick="uque(this.id);" >';
+            //}else if (is_file('questions/tmp/nqr_'.$epno.'.jpg')){
+                //刪檔，沒裁過，跳至裁切
+                //$loading_nq = true;
+                //$qimg_html.= '<input type="button" value="載入舊圖檔" id="nclque" class="btn w100 h25" onClick="uque(this.id);" >';
+            // }
+        //     $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        //     $qimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnque" class="btn w160 h25" onClick="uque(this.id)" >   ';
+        // }
+        // if ($loading_dnq || $loading_nq){
+        //     $qimg_html.= '<input type="button" value="刪除圖檔" id="dque" class="btn w100 h25" onClick="uque(this.id)" >   ';
+        // }
+        $data['Qimg_html'] = $qimg_html;
+        $data['Sets_msg'] = $sets_message;
+        $data['Q_Grade'] = $Q_Grade;
+        $data['Q_Subject'] = $Q_Subject;
+        $data['Q_Chapter'] = $Q_Chapter;
+
+        //詳解圖片
+        $aimg_html = '';
+        $data['Aimg'] = '';
+        $loading_dna = false;
+        //刪檔
+        $loading_na = false;
+        // if (is_file('questions/tmp/dnarc_'.$epno.'.jpg')){
+        //     $loading_dna = true;
+        //     //不刪檔，裁過的，直接載入
+        //     $data['Aimg'] = base_url('questions/tmp/dnarc_'.$epno.'.jpg');
+        //     $aimg_html.= '<input type="button" value="重新裁切" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
+        // }else if (is_file('questions/tmp/dnar_'.$epno.'.jpg')){
+        //     $loading_dna = true;
+        //     //不刪檔，沒裁過，跳至裁切
+        //     $aimg_html.= '<input type="button" value="載入舊圖檔" id="dnans" class="btn w100 h25" onClick="uans(this.id);" >';
+        // }
+        // if (!$loading_dna){
+        //     if (is_file('questions/tmp/narc_'.$epno.'.jpg')){
+        //         //刪檔，裁過的，直接載入
+        //         $loading_na = true;
+        //         $data['Aimg'] = base_url('questions/tmp/narc_'.$epno.'.jpg');
+        //         //$aimg_html.= '<input type="button" value="載入舊圖檔" id="nlque" class="btn w100 h25" onClick="uans(this.id);" >';
+        //     }else if (is_file('questions/tmp/nar_'.$epno.'.jpg')){
+        //         //刪檔，沒裁過，跳至裁切
+        //         $loading_na = true;
+        //         $aimg_html.= '<input type="button" value="載入舊圖檔" id="nclans" class="btn w100 h25" onClick="uans(this.id);" >';
+        //     }
+        //     $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後刪檔)" id="nans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        //     $aimg_html.= '<input type="button" value="上傳圖檔(裁剪後不刪檔)" id="dnans" class="btn w160 h25" onClick="uans(this.id)" >   ';
+        // }
+        // if ($loading_dna || $loading_na){
+        //     $aimg_html.= '<input type="button" value="刪除圖檔" id="dans" class="btn w100 h25" onClick="uans(this.id)" >   ';
+        // }
+        $data['Aimg_html'] = $aimg_html;
+        //難度
+        $degree = new \stdClass;
+        $degree->E = 'checked';
+        $degree->M = '';
+        $degree->H = '';
+        $data['Degree'] = $degree;
+        $data['que_type'] = '';
+        $data['title'] = '建立題目';
+        return view('que.createg', $data);
+    }
     /**
      * Store a newly created resource in storage.
      *
