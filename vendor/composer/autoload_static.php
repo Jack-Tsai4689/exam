@@ -277,6 +277,7 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
         'AlterQuesImg' => __DIR__ . '/../..' . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
         'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
+        'AlterQuesTypec' => __DIR__ . '/../..' . '/database/migrations/2018_03_26_021315_alter_ques_typec.php',
         'AlterStus' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_174855_alter_stus.php',
         'BasicTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172034_basic_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',

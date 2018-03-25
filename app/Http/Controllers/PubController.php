@@ -24,27 +24,34 @@ class PubController extends TopController
     public function index()
     {
         if (!$this->login_status)return redirect('/login');
-        $data = Pubs::where('p_pid',0)->get()->all();
+        $data = Pubs::where('p_pid',0)->paginate(10);
         foreach ($data as $k => $v) {
             $data[$k]->exam_day = (empty($v->p_begtime)) ? '不限':$data[$k]->exam_day = $v->p_begtime.'~<br>'.$v->p_endtime;
         }
         $sel = new \stdclass;
         $sel->gra = 0;
         $sel->subj = 0;
-        $page = new \stdclass;
-        $page->prev = '';
-        $page->next = '';
-        $page->pg = '';
         $grade_data = $this->grade();
         $subject_data = array();
+
+        $page_info = $this->page_info(
+            $data->currentPage(),
+            $data->lastPage(),
+            $data->total()
+        );
+        $pfunc = new \stdClass;
+        $pfunc->prev = $this->prev_page;
+        $pfunc->next = $this->next_page;
+        $pfunc->pg = $this->group_page;
+
         return view('pub.index', [
             'menu_user' => $this->menu_user,
             'title' => '發佈記錄',
             'Data' => $data,
             'Grade' => $grade_data,
             'Subject' => $subject_data,
-            'Num' => 0,
-            'Page' => $page
+            'Num' => $data->total(),
+            'Page' => $pfunc
         ]);
     }
 

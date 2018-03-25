@@ -554,10 +554,8 @@ class QueController extends TopController
                     $ans[] = implode(",", $tmp);
                 }
                 $all_ans = implode("|", $ans);
-                echo implode(",", $opt);
-                echo implode(",", $group);
-                echo $all_ans;
-                exit;
+                $canc = implode(",", $opt);
+                $cgroup = implode(",", $group);
                 break;
             default:
                 abort(400);
@@ -696,6 +694,8 @@ class QueController extends TopController
             'q_updated_at' => time(),
             'q_keyword' => '|'.implode('|', $key).'|'
         ];
+//         canc
+// cgroup
         $que_data = new Ques;
         $que_data->fill($save);
         $que_data->save();

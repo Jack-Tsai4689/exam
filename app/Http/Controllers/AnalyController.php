@@ -66,9 +66,6 @@ class AnalyController extends TopController
                 array_push($part, $info);
             }
         }else{
-            // $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid')
-            //                      ->where('ed_eid', $eid)
-            //                      ->orderby('ed_sort')->get()->all();
             $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
                                   ->join('pubsque', function($join){
                                         $join->on('exam_details.s_id','=','pubsque.pq_part')
@@ -123,9 +120,6 @@ class AnalyController extends TopController
         if ($exam->e_sub){
             $sub_exam = Exams::where('e_pid', $eid)->get()->all();
             foreach ($sub_exam as $si => $se) {
-                // $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid')
-                //                  ->where('ed_eid', $se->e_id)
-                //                  ->orderby('ed_sort')->get()->all();
                 $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
                                   ->join('pubsque', function($join){
                                         $join->on('exam_details.s_id','=','pubsque.pq_part')
@@ -145,9 +139,6 @@ class AnalyController extends TopController
                 }
             }
         }else{
-            // $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid')
-            //                   ->where('ed_eid', $eid)
-            //                   ->orderby('ed_sort')->get()->all();
             $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
                                   ->join('pubsque', function($join){
                                         $join->on('exam_details.s_id','=','pubsque.pq_part')
@@ -228,9 +219,6 @@ class AnalyController extends TopController
             $sub_sets = Pubs::where('p_pid', $exam->s_id)->get()->all();
             $part = array();
             foreach ($sub_exam as $si => $se) {
-                // $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
-                //                  ->where('ed_eid', $se->e_id)
-                //                  ->orderby('ed_sort')->get()->all();
                 $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
                                   ->join('pubsque', function($join){
                                         $join->on('exam_details.s_id','=','pubsque.pq_part')
@@ -274,9 +262,6 @@ class AnalyController extends TopController
             }
         }else{
             $sub_exam = $exam->sub_ques_ans();
-            // $ques = ExamDetail::select('ed_ans','ed_sort','ed_right','ed_qid')
-            //                      ->where('ed_eid', $eid)
-            //                      ->orderby('ed_sort')->get()->all();
             $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
                                   ->join('pubsque', function($join){
                                         $join->on('exam_details.s_id','=','pubsque.pq_part')

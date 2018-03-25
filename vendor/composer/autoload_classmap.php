@@ -15,6 +15,7 @@ return array(
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
     'AlterQuesImg' => $baseDir . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
+    'AlterQuesTypec' => $baseDir . '/database/migrations/2018_03_26_021315_alter_ques_typec.php',
     'AlterStus' => $baseDir . '/database/migrations/2018_02_06_174855_alter_stus.php',
     'BasicTable' => $baseDir . '/database/migrations/2018_01_28_172034_basic_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',

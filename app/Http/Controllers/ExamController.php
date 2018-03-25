@@ -251,6 +251,7 @@ class ExamController extends TopController
     public function goexam(){
         //試卷方式
         $can_exam = true;
+        $back = '';
         if (session('type')==="sets"){
             $exam_type = 'sets';
             $p_id = session('sets');
@@ -663,7 +664,6 @@ class ExamController extends TopController
                                           ->orderby('pq_sort')->get()->all();
                                 Redis::set($partkey, json_encode($que));
                             }
-                            
                             // 把題目寫一份到學生卷 exam_details
                             foreach ($que as $pqv) {
                                 ExamDetail::create([

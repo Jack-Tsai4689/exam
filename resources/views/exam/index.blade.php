@@ -123,7 +123,7 @@
                     <thead>
                         <tr>
                             <th>考卷名稱</th>
-                            <th width="120">年級</th>
+                            <th width="120">類別</th>
                             <th width="120">科目</th>
                             <th width="150">期間</th>
                             <th width="120">限時</th>

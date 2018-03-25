@@ -504,4 +504,4 @@ function getmusic(e){
     console.log(e.srcElement.currentTime);
 }
 </script>
-<script src="{{ URL::asset('js/app.js')}}"></script>
+<script src="{{ URL::asset('js/app.js?v='.rand())}}"></script>
