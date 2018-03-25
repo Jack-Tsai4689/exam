@@ -376,36 +376,8 @@ class SetsController extends TopController
         $que->sq_sort = $data->sq_sort;
         //foreach ($data as $k => $v) {
             //題型
-            switch ($data->q_quetype) {
-                case "S": 
-                    $que->q_ans = chr($data->q_ans+64);
-                    break;
-                case "D": 
-                    $ans = array();
-                    $ans = explode(",", $data->q_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        $ans_html[] = chr($o+64);
-                    }
-                    $que->q_ans = implode(", ", $ans_html);
-                    break;
-                case "R": 
-                    $que->q_ans = ($data->q_ans==="1") ? "O":"X";
-                    break;
-                case "M": 
-                    $ans = array();
-                    $ans = explode(",", $data->q_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        if (!preg_match("/^[0-9]*$/", $o)){
-                            $ans_html[] = ($o==="a") ? '-':'±';
-                        }else{
-                            $ans_html[] = $o;
-                        }
-                    }
-                    $que->q_ans = implode(", ", $ans_html);
-                    break;
-            }
+            $top_qformat = $this->Ques_format($data);
+            $que->q_ans = $top_qformat->q_ans;
             $qcont =  array();
             //題目文字
             if (!empty($data->q_quetxt)) $qcont[] = nl2br(trim($data->q_quetxt));
@@ -416,9 +388,9 @@ class SetsController extends TopController
             //題目聲音檔
             if (!empty($data->q_qs_src)){
                 if(is_file($data->q_qs_src)){
-                    $qcont[] = '<font color="green">題目音訊 O</font>';
+                    $qcont[] = '題目音訊：'.$data->q_qs_name.'<font color="green">題目音訊 O</font>';
                 }else{
-                    $qcont[] = '<font color="red">題目音訊遺失 X</font>';
+                    $qcont[] = '題目音訊：'.$data->q_qs_name.'(<font color="red">遺失</font>)';
                 }
             }
             $que->q_qcont = implode("<br>", $qcont);

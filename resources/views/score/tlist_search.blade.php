@@ -144,7 +144,7 @@
                         <td>{{ (float)$v->e_score }}</td>
                         <td>{{ $v->e_end }}</td>
                         <td class="last">@if ($v->e_status==="Y")
-                            <span style="float:left; margin-right: 1em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span>
+                            <span style="float:left; margin-right: 1em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/report') }}" target="_blank">完整報告</a></span>
                             @endif</td>
                     </tr>
                 @endforeach</tbody>

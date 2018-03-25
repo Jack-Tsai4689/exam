@@ -45,10 +45,12 @@ Route::group(['prefix'=>'score'], function(){
 });
 //分析
 Route::group(['prefix'=>'analy'], function(){
-	//考題概念表
+	// 考題概念表
 	Route::get('{id}', "AnalyController@source");
-	//觀念比例圖
+	// 觀念比例圖
 	Route::get('{id}/concept', "AnalyController@radar");
+	// 診斷報告
+	Route::get('{id}/report', "AnalyController@detail");
 });
 //發佈
 Route::group(['prefix'=>'pub'], function(){

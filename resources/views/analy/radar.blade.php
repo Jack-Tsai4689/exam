@@ -111,7 +111,8 @@
 	<div id="title"><label class="f17">{{ $title }}</label></div>
 	<div class="title_intro">
 		<input type="button" class="btn w100" id="see_result" value="成績結果">
-		<input type="button" class="btn w100" id="see_analy" value="考題概念表" >
+		<input type="button" class="btn w100" id="see_analy" value="考題概念表">
+        <input type="button" class="btn w100" id="see_report" value="診斷報告">
 		{{-- <input type="button" class="btn w150" value="列印" onclick="print();"> --}}
 		{{-- <label class="f15" id="end"><a href="javascript:void(0)" onclick="if(confirm('您確定要關閉?'))window.close();">關閉</a></label> --}}
 	</div>
@@ -161,41 +162,44 @@
 @stop
 @section('script')
 <script type="text/javascript">
-var pnum = '';
-function aga(num){
-    if (pnum!=''){
-        $('#ag_'+pnum).css('display','none');
-    }
-    if (pnum==num){
-        $('#ag_'+num).css('display','none');
-        pnum ='';    
-    }else{
-        $('#ag_'+num).css('display','block');
-        pnum = num;
-    }
-}
-function go_ex(n,s,g,v){
-    var getdata = {'n':n,'g':g,'s':s,'c':v};
-    $.ajax({
-        type:'get',
-        url:'validate_exam.php',
-        dataType: 'json',
-        data: getdata,
-        success: function (data, textStatus, jqXHR){
-            if (data.no){
-                if (data.msg!='')alert(data.msg);
-                window.open('startexam.php?n='+n+'&s='+s+'&g='+g+'&c='+v+'&key=7','result',"width=800,height=600,resizable=yes,scrollbars=yes,location=no");
-            }else{
-                alert(data.msg);
-            }
-        }
-    });
-}
-$("#see_result").on('click', function(){
+// var pnum = '';
+// function aga(num){
+//     if (pnum!=''){
+//         $('#ag_'+pnum).css('display','none');
+//     }
+//     if (pnum==num){
+//         $('#ag_'+num).css('display','none');
+//         pnum ='';    
+//     }else{
+//         $('#ag_'+num).css('display','block');
+//         pnum = num;
+//     }
+// }
+// function go_ex(n,s,g,v){
+//     var getdata = {'n':n,'g':g,'s':s,'c':v};
+//     $.ajax({
+//         type:'get',
+//         url:'validate_exam.php',
+//         dataType: 'json',
+//         data: getdata,
+//         success: function (data, textStatus, jqXHR){
+//             if (data.no){
+//                 if (data.msg!='')alert(data.msg);
+//                 window.open('startexam.php?n='+n+'&s='+s+'&g='+g+'&c='+v+'&key=7','result',"width=800,height=600,resizable=yes,scrollbars=yes,location=no");
+//             }else{
+//                 alert(data.msg);
+//             }
+//         }
+//     });
+// }
+document.getElementById('see_result').onclick = function(){
     location.href = "{{ url('/score/'.$Eid) }}";
-});
-$("#see_analy").on('click', function(){
+};
+document.getElementById('see_analy').onclick = function(){
     location.href = "{{ url('/analy/'.$Eid) }}";
-});
+};
+document.getElementById('see_report').onclick = function(){
+    location.href = "{{ url('/analy/'.$Eid.'/report') }}";
+};
 </script>
 @stop

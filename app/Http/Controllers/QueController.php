@@ -29,52 +29,6 @@ class QueController extends TopController
         $data = $this->ques_list();
         return view('que.index', $data);
     }
-    private function _ques_ans_format($v){
-        $data = new \stdClass;
-        //題型、答案
-        switch ($v->q_quetype) {
-            case "S": 
-                $data->q_quetype = "單選"; 
-                $data->q_ans = chr($v->q_ans+64);
-                break;
-            case "D": 
-                $data->q_quetype = "複選"; 
-                $ans = array();
-                $ans = explode(",", $v->q_ans);
-                $ans_html = array();
-                foreach ($ans as $o) {
-                    $ans_html[] = chr($o+64);
-                }
-                $data->q_ans = implode(", ", $ans_html);
-                break;
-            case "R": 
-                $data->q_quetype = "是非"; 
-                $data->q_ans = ($v->q_ans==="1") ? "O":"X";
-                break;
-            case "M": 
-                $data->q_quetype = '選填'; 
-                $ans = array();
-                $ans = explode(",", $v->q_ans);
-                $ans_html = array();
-                foreach ($ans as $o) {
-                    if (!preg_match("/^[0-9]*$/", $o)){
-                        $ans_html[] = ($o==="a") ? '-':'±';
-                    }else{
-                        $ans_html[] = $o;
-                    }
-                }
-                $data->q_ans = implode(", ", $ans_html);
-                break;
-        }
-        //難度
-        switch ($v->q_degree) {
-            case "M": $data->q_degree = "中等"; break;
-            case "H": $data->q_degree = "困難"; break;
-            case "E": $data->q_degree = "容易"; break;
-            default: $data->q_degree = "容易"; break;
-        }
-        return $data;
-    }
     private function ques_list(){
         $p_gra = 0;
         $p_subj = 0;
@@ -150,7 +104,7 @@ class QueController extends TopController
         }
         foreach ($que_data as $k => $v) {
             
-            $format = $this->_ques_ans_format($v);
+            $format = $this->Ques_format($v);
             $que_data[$k]->q_quetype = $format->q_quetype;
             $que_data[$k]->q_ans = $format->q_ans;
 
@@ -580,6 +534,31 @@ class QueController extends TopController
                 }
                 $all_ans = implode(",", $ans);
                 break;
+            case 'C'://配合
+                $ans = array();
+                // 配合模式 gmatch
+                $match_mode = ($req->input('gmatch') && !empty($req->input('gmatch'))) ? trim($req->input('gmatch')):0;
+                if (!preg_match("/^[0-9]*$/", $match_mode))abort(400);
+                $match_mode = (int)$match_mode;
+                if ($match_mode!==1 && $match_mode!==2)abort(400);
+                // 選項群 opttxt
+                $opt = ($req->has('opttxt') && !empty($req->input('opttxt'))) ? $req->input('opttxt'):array();
+                // 對應群名稱 cg
+                $group = ($req->has('cg') && !empty($req->input('cg'))) ? $req->input('cg'):array();
+                // 正解 cg_ans[]
+                foreach ($group as $k => $v) {
+                    $tmp = $req->input('cg_ans'.($k+1));
+                    foreach ($tmp as $k => $v) {
+                        $tmp[$k] = ($v+1);
+                    }
+                    $ans[] = implode(",", $tmp);
+                }
+                $all_ans = implode("|", $ans);
+                echo implode(",", $opt);
+                echo implode(",", $group);
+                echo $all_ans;
+                exit;
+                break;
             default:
                 abort(400);
                 return;
@@ -735,7 +714,7 @@ class QueController extends TopController
         if ($qid<1)abort(400);
         $qdata = Ques::find($qid);
         //題型、答案
-        $format = $this->_ques_ans_format($qdata);
+        $format = $this->Ques_format($qdata);
         $Quetype = $format->q_quetype.'題';
         $Ans = $format->q_ans;
         $Degree = $format->q_degree;

@@ -103,4 +103,50 @@ class TopController extends Controller
       //$this->url_curl();
       //return;
     }
+    // 題型、正確答案、難度
+    protected function Ques_format($v){
+      $data = new \stdClass;
+      switch ($v->q_quetype) {
+        case "S": 
+          $data->q_quetype = "單選"; 
+          $data->q_ans = chr($v->q_ans+64);
+          break;
+        case "D": 
+          $data->q_quetype = "複選"; 
+          $ans = array();
+          $ans = explode(",", $v->q_ans);
+          $ans_html = array();
+          foreach ($ans as $o) {
+          $ans_html[] = chr($o+64);
+          }
+          $data->q_ans = implode(", ", $ans_html);
+          break;
+        case "R": 
+          $data->q_quetype = "是非"; 
+          $data->q_ans = ($v->q_ans==="1") ? "O":"X";
+          break;
+        case "M": 
+          $data->q_quetype = '選填'; 
+          $ans = array();
+          $ans = explode(",", $v->q_ans);
+          $ans_html = array();
+          foreach ($ans as $o) {
+            if (!preg_match("/^[0-9]*$/", $o)){
+              $ans_html[] = ($o==="a") ? '-':'±';
+            }else{
+              $ans_html[] = $o;
+            }
+          }
+          $data->q_ans = implode(", ", $ans_html);
+        break;
+      }
+      //難度
+      switch ($v->q_degree) {
+        case "M": $data->q_degree = "中等"; break;
+        case "H": $data->q_degree = "困難"; break;
+        case "E": $data->q_degree = "容易"; break;
+        default: $data->q_degree = "容易"; break;
+      }
+      return $data;
+    }
 }

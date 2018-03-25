@@ -138,11 +138,11 @@
                 <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
                     <thead>
                         <tr>
-                            <th width="120">學號</th>
-                            <th width="120">姓名</th>                            
-                            <th width="100">得分</th>
+                            <th>學號</th>
+                            <th>姓名</th>                            
+                            <th>得分</th>
                             <th width="160">交卷時間</th>
-                            <th width="180" class="last">診斷報告</th>
+                            <th width="280" class="last">診斷報告</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,7 +152,7 @@
                             <td>{{ (float)$v->e_score }}</td>
                             <td>{{ $v->e_end }}</td>
                             <td class="last">@if ($v->e_status==="Y")
-                                <span style="float:left; margin-right: 1em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span>
+                                <span style="float:left; margin: 0 0.5em;"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a></span><span style="float:left; margin: 0 0.5em;"><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></span><span style="float:left; margin: 0 0.5em;"><a href="{{ url('/analy/'.$v->e_id.'/report') }}" target="_blank">完整報告</a></span>
                                 @endif</td>
                         </tr>
                     @endforeach</tbody>

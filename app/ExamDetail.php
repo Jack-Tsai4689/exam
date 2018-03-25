@@ -21,10 +21,13 @@ class ExamDetail extends Model
 	
 	//大題題目
     public function que(){
-        return $this->hasOne(Ques::class, 'q_id','ed_qid')->select('*');
+        return $this->hasOne(Pubsque::class, 'pq_qid','ed_qid')->select('*');
     }
     //考題來源表
     public function ques_source(){
-    	return $this->hasOne(Ques::class, 'q_id','ed_qid')->select('q_chap','q_quetype','q_degree','q_ans','q_chap','q_id')->first();
+    	return $this->hasOne(Pubsque::class, 'pq_qid','ed_qid')->select('q_chap','q_quetype','q_degree','q_ans','q_chap','q_id')->first();
     }
+	public function chap(){
+		return $this->belongsto(Gscs::class, 'pq_chap')->select('g_name as name')->first();
+	}
 }

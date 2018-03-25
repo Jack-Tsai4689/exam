@@ -472,56 +472,33 @@ class PubController extends TopController
     }
     //試卷題目預覽 格式化
     protected function pubs_review_format($data){
-        //foreach ($data as $k => $v) {
-            //題型
-            switch ($data->pq_quetype) {
-                case "S": 
-                    $data->pq_ans = chr($data->pq_ans+64);
-                    break;
-                case "D": 
-                    $ans = array();
-                    $ans = explode(",", $data->pq_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        $ans_html[] = chr($o+64);
-                    }
-                    $data->pq_ans = implode(", ", $ans_html);
-                    break;
-                case "R": 
-                    $data->pq_ans = ($data->pq_ans==="1") ? "O":"X";
-                    break;
-                case "M": 
-                    $ans = array();
-                    $ans = explode(",", $data->pq_ans);
-                    $ans_html = array();
-                    foreach ($ans as $o) {
-                        if (!preg_match("/^[0-9]*$/", $o)){
-                            $ans_html[] = ($o==="a") ? '-':'±';
-                        }else{
-                            $ans_html[] = $o;
-                        }
-                    }
-                    $data->pq_ans = implode(", ", $ans_html);
-                    break;
+        // 初始並格式化
+        $tmp = new \stdclass;
+        $tmp->q_quetype = $data->pq_quetype;
+        $tmp->q_ans = $data->pq_ans;
+        $tmp->q_degree = $data->pq_degree;
+        $que = $this->Ques_format($tmp);
+        $data->pq_quetype = $que->q_quetype;
+        $data->pq_ans = $que->q_ans;
+        $data->pq_degree = $que->q_degree;
+
+        $qcont =  array();
+        //題目文字
+        if (!empty($data->pq_quetxt)) $qcont[] = nl2br(trim($data->pq_quetxt));
+        //題目圖檔
+        if (!empty($data->pq_qm_src)){
+            if(is_file($data->pq_qm_src))$qcont[] = '題目圖檔：'.$data->pq_qm_name.'<br><IMG src="'.URL::asset($data->pq_qm_src).'" width="98%">';
+        }
+        //題目聲音檔
+        if (!empty($data->pq_qs_src)){
+            $qname = "題目音訊：".$data->pq_qs_name;
+            if(is_file($data->pq_qs_src)){
+                $qcont[] = $qname;
+            }else{
+                $qcont[] = $qname.'　<font color="red">遺失</font>';
             }
-            $qcont =  array();
-            //題目文字
-            if (!empty($data->pq_quetxt)) $qcont[] = nl2br(trim($data->pq_quetxt));
-            //題目圖檔
-            if (!empty($data->pq_qm_src)){
-                if(is_file($data->pq_qm_src))$qcont[] = '<IMG src="'.URL::asset($data->pq_qm_src).'" width="98%">';
-            }
-            //題目聲音檔
-            if (!empty($data->pq_qs_src)){
-                $qname = "題目音訊：".$data->pq_qs_name;
-                if(is_file($data->pq_qs_src)){
-                    $qcont[] = $qname;
-                }else{
-                    $qcont[] = $qname.'　<font color="red">遺失</font>';
-                }
-            }
-            $data->pq_qcont = implode("<br>", $qcont);
-        //}
+        }
+        $data->pq_qcont = implode("<br>", $qcont);
         return $data;
     }
 }

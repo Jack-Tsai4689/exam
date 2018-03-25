@@ -345,7 +345,7 @@
                 </tr>
                 <tr class="deep match">
                     <td align="right">配合方式</td>
-                    <td width="80%"><label><input type="radio" name="gmatch" class="gtype" checked value="1">1 v.s. 1 (1組 對應 1個選項)</label>　
+                    <td width="80%"><label><input type="radio" name="gmatch" checked class="gtype" value="1">1 v.s. 1 (1組 對應 1個選項)</label>　
                         <label><input type="radio" name="gmatch" class="gtype" value="2">1 v.s. 多 (1組 對應 多個選項)</label>
                     </td>
                 </tr>
@@ -709,56 +709,13 @@ function done(){
     action = true;
 }
 function form_check(obj){
-    if (gb('f_grade').value=="" || gb('f_subject').value=="" || gb('f_chapterui').value==""){
-        alert("注意題目範圍");
-        return false;
-    }
-    // if (data_check()){
-    //     alert('請確認無誤');
+    // if (gb('f_grade').value=="" || gb('f_subject').value=="" || gb('f_chapterui').value==""){
+    //     alert("注意題目範圍");
     //     return false;
     // }
-}
-function data_check(){
-    let no = '';
     let error = false;
-    let i = 0;
-    $('#form1 input[name="f_imgsrc[]"]').each(function(){
-        no = this.id;
-        no = no.substring(8);
-        let quetxt = $('#f_quetxt'+no).val();
-        let img = $(this).val();
-        i++;
-        if (quetxt=='' && img==''){
-            error = true;
-        }
-    });
-    let correct_ans = $('input[name="ans[]"]:checked').val();
-    if (correct_ans==null){
-        document.getElementById('ans_group_error').innerHTML = '(X) 設定答案';
-    }else{
-        document.getElementById('ans_group_error').innerHTML = '';
-    }
-    let chapter = document.getElementById('f_chapter').value;
-    if (trim(chapter)==''){
-        error = true;
-        document.getElementById('chapter_error').innerHTML = '(X) 章節勿空白';
-    }else{
-        document.getElementById('chapter_error').innerHTML = '';
-    }
-    if ($('input[name=f_qus_type]:checked').val()==4){
-        if (i<2){
-            error = true;
-            alert('請增加小題');
-        }
-    }
-    return error;
-}
-let originurl = opener.location.href;
-function check(act){
-    let q=0;
-    let error = false;//data_check();
-    if (!error){
-        let gcrows = Number($(".gtype").val());
+    if (gb("typeC").checked){
+        let gcrows = Number($(".gtype:checked").val());
         $(".cg_ans").each(function(){
             let grows = this.options.length;
             if (grows===0){
@@ -778,29 +735,82 @@ function check(act){
         $(".cg_ans").find("option").each(function(){
             this.selected = true;
         });
-        //背景post
-        $('#posting').show();
-        let type = 'a';
-        if (type=='feedback'){ $('#handle_type').val(act); }
-        $.ajax({
-            type:"POST",
-            url:"{{ url('/ques') }}",
-            data:new FormData(gb('form1')),
-            contentType: false,
-            processData: false,
-            cache: false,
-            dataType:"JSON",
-            success: function(rs){
-                opener.location.href = '{{ url('/ques') }}';
-                if (act==="c"){
-                    window.close();
-                }else{
-                    window.location.reload();
-                }
-            }
-        });
     }
+    // if (data_check()){
+    //     alert('請確認無誤');
+    //     return false;
+    // }
 }
+function data_check(){
+    let no = '';
+    let error = false;
+    let i = 0;
+    let correct_ans = $('input[name="ans[]"]:checked').val();
+    if (correct_ans==null){
+        document.getElementById('ans_group_error').innerHTML = '(X) 設定答案';
+    }else{
+        document.getElementById('ans_group_error').innerHTML = '';
+    }
+    let chapter = document.getElementById('f_chapter').value;
+    if (trim(chapter)==''){
+        error = true;
+        document.getElementById('chapter_error').innerHTML = '(X) 章節勿空白';
+    }else{
+        document.getElementById('chapter_error').innerHTML = '';
+    }
+    return error;
+}
+let originurl = opener.location.href;
+// function check(act){
+//     let q=0;
+//     let error = false;//data_check();
+//     if (!error){
+//         console.log(gb("typeC").checked);
+//         return;
+//         //if (gb("typeC").checked)
+//         let gcrows = Number($(".gtype").val());
+//         $(".cg_ans").each(function(){
+//             let grows = this.options.length;
+//             if (grows===0){
+//                 error = true;
+//                 alert("設定錯誤");
+//                 return false;
+//             }
+//             if (gcrows===1){
+//                 if (grows!=1){
+//                     error = true;
+//                     alert("設定錯誤");
+//                     return false;
+//                 }
+//             }
+//         });
+//         if (error)return false;
+//         $(".cg_ans").find("option").each(function(){
+//             this.selected = true;
+//         });
+//         //背景post
+//         $('#posting').show();
+//         let type = 'a';
+//         if (type=='feedback'){ $('#handle_type').val(act); }
+//         $.ajax({
+//             type:"POST",
+//             url:"{{ url('/ques') }}",
+//             data:new FormData(gb('form1')),
+//             contentType: false,
+//             processData: false,
+//             cache: false,
+//             dataType:"JSON",
+//             success: function(rs){
+//                 opener.location.href = '{{ url('/ques') }}';
+//                 if (act==="c"){
+//                     window.close();
+//                 }else{
+//                     window.location.reload();
+//                 }
+//             }
+//         });
+//     }
+// }
 function no_display(num){//編號切換
     let j ='';
     for (let i=0; i <num; i++) {
@@ -985,7 +995,6 @@ $("#cgroup_range").on('click', ".btn_removeo", function(){
     // $('#cg_ans'+id).find(":selected").remove();
 });
 $("#opt_range").on('blur', ".opt_txt", function(){
-    console.log(this);
     let obj = this;
     let gans = [];
     let id = $(".opt_txt").index(obj);

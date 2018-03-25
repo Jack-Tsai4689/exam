@@ -37,4 +37,7 @@ class Pubsque extends Model
 		'pq_updated_at',
 		'pq_know'
     ];
+ 	public function knows(){
+		return $this->belongsto(Knows::class, 'pq_know')->select('k_name as name');
+	}
 }

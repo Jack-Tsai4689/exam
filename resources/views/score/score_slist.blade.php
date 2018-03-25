@@ -142,7 +142,7 @@
                             <td>{{ (float)$v->e_score }}</td>
                             <td>{{ date('Y/m/d H:i:s', $v->e_begtime_at) }}</td>
                             <td>{{ date('Y/m/d H:i:s', $v->e_endtime_at) }}</td>
-                            <td class="last"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a><br><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a></td>
+                            <td class="last"><a href="{{ url('/analy/'.$v->e_id) }}" target="_blank">考題概念表</a><br><a href="{{ url('/analy/'.$v->e_id.'/concept') }}" target="_blank">觀念答對比例圖</a><br><a href="{{ url('/analy/'.$v->e_id.'/report') }}" target="_blank">完整報告</a></td>
                         </tr>
                     @endforeach
                     </tbody>

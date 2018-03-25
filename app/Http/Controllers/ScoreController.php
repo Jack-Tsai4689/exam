@@ -177,8 +177,6 @@ class ScoreController extends TopController
                 }
             }
         }
-        $menu_user = $this->menu_user;
-        $title = '成績-個人查詢';
         return view('score.tlist_search', [
             'menu_user' => $this->menu_user,
             'title' => '成績-個人查詢',

@@ -107,12 +107,6 @@
 @section('content')
 <div id="all">
 	<div id="title"><label class="f17">{{ $title }}</label></div>
-	<INPUT type="hidden" name="f_sid" id="f_sid" value="">
-    <INPUT type="hidden" name="f_minutes" id="f_minutes" value="">
-    <INPUT type="hidden" name="f_seconds" id="f_seconds" value="">
-    <INPUT type="hidden" name="f_exnumr" id="f_exnumr" value="">
-    <INPUT type="hidden" name="f_subject" id="f_subject" value="">
-    <INPUT type="hidden" name="f_bmenuname" id="f_bmenuname" value="">
 	<div class="title_intro">
 		<input type="button" class="btn w100" id="see_result" value="成績結果">
 		<input type="button" class="btn w150" id="see_concept" value="觀念答對比率圖">

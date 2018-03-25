@@ -31,7 +31,7 @@ class Exams extends Model
         $ques = $this->hasMany(ExamDetail::class, 'ed_eid','e_id')
                      ->join('pubsque', function($join){
                         $join->on('pubsque.pq_part','=','exam_details.s_id')
-                             ->on('pubsque.pq_qid','=','exam_details.ed_qid')
+                             // ->on('pubsque.pq_qid','=','exam_details.ed_qid')
                              ->on('pubsque.pq_sort','=','exam_details.ed_sort');
                      })
                      ->select('ed_eid','ed_qid','ed_ans','ed_right','ed_sort','pubsque.*')
