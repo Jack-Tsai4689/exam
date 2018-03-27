@@ -71,11 +71,11 @@
         .list td.last{
             border-right: 0px;
         }
-        .list div.que {
+        .list .que {
             margin: 5px;
-            background-color: gray;
+            /*background-color: gray;*/
             height: 30px;
-
+            max-width: 1000px;
         }
         .btn:active {
             border: 0.5px gray dashed;
@@ -163,7 +163,7 @@
         .qno_ans {
             font-size: 16px;
             vertical-align: middle;
-            width: 50px;
+            width: 100px;
         }
         .qno_ans div {
             margin-bottom: 5px;
@@ -204,7 +204,7 @@
             display: none;
         }
         .pic {
-            width: 50%;
+            width: 400px;
         }
     </style>
 </head>
@@ -323,25 +323,26 @@
 	<!-- 詳解 -->
 	<div align="center">
     @if ($Have_sub)
-        @foreach($Data as $p)
+        @foreach($Part as $i => $p)
             <div class="title_intro">
-                <div class="part">第 {{ $p->e_sort }} 大題 {{ (float)$p->e_score }}分({{ $p->sets_info()->p_percen }}%)　答對<span class="right">{{ $p->e_rnum }}</span>題　答錯<span class="wrong">{{ $p->e_wnum }}</span>題　未答<span class="none">{{ $p->e_nnum }}</span>題</div>
+                <div class="part">第 {{ ($pi+1) }} 大題 {{ (float)$p->score }}分({{ $p->percen }}%)　答對<span class="right">{{ $p->rnum }}</span>題　答錯<span class="wrong">{{ $p->wnum }}</span>題　未答<span class="none">{{ $p->nnum }}</span>題</div>
             </div>
             <div class="content">
                 <div id="cen">
                     <table class="list" cellpadding="0" cellspacing="0" width="100%">
-                        @foreach($p->sub_ques_ans() as $q)
+                        @foreach($Data[$i] as $q)
+                            @php $cont = $q->info_format() @endphp
                         <tr align="center">
-                            <td class="qno">{{ $q->qno }}</td>
-                            <td class="qno_c"><img src="{{ URL::asset($q->right_pic) }}"></td>
-                            <td class="qno_ans">{{ $q->myans }}</td>
-                            <td class="que" align="left">{!! $q->qcont !!}</td>
+                            <td class="qno">{{ $q->ed_sort }}</td>
+                            <td class="qno_c"><img src="{{ URL::asset($cont->right_pic) }}"></td>
+                            <td class="qno_ans">{{ $cont->myans }}</td>
+                            <td class="que" align="left">{!! $cont->qcont !!}</td>
                         </tr>
-                        <tr align="center" class="ans hiden">
+                        <tr align="center" class="ans">
                             <td class="qno">解答</td>
                             <td class="qno_c"></td>
-                            <td class="qno_ans">{{ $q->q_ans }}</td>
-                            <td class="que" align="left">{!! $q->acont !!}</td>
+                            <td class="qno_ans">{{ $cont->ans }}</td>
+                            <td class="que" align="left">{!! $cont->acont !!}</td>
                         </tr>
                         <tr>
                             <td colspan="5"><hr></td>
@@ -356,18 +357,27 @@
             <div id="cen">
                 <table class="list" cellpadding="0" cellspacing="0" width="100%">
                     @foreach($Data as $q)
+                        @php $cont = $q->info_format() @endphp
                     <tr align="center">
-                        <td class="qno">{{ $q->qno }}</td>
-                        <td class="qno_c"><img src="{{ URL::asset($q->right_pic) }}"></td>
-                        <td class="qno_ans">{{ $q->myans }}</td>
-                        <td class="que" align="left">{!! $q->qcont !!}</td>
+                        <td class="qno">{{ $q->ed_sort }}</td>
+                        <td class="qno_c"><img src="{{ URL::asset($cont->right_pic) }}"></td>
+                        <td class="qno_ans">{{ $cont->myans }}</td>
+                        <td class="que" align="left">{!! $cont->qcont !!}</td>
                     </tr>
                     <tr align="center" class="ans">
                         <td class="qno">解答</td>
                         <td class="qno_c"></td>
-                        <td class="qno_ans">{{ $q->q_ans }}</td>
-                        <td class="que" align="left">{!! $q->acont !!}</td>
+                        <td class="qno_ans">{{ $cont->ans }}</td>
+                        <td class="que" align="left">{!! $cont->acont !!}</td>
                     </tr>
+                    @if (!empty($cont->know))
+                    <tr align="center">
+                        <td class="qno"></td>
+                        <td class="qno_c"></td>
+                        <td class="qno_ans"></td>
+                        <td class="que" align="left">{!! $cont->know !!}</td>
+                    </tr>
+                    @endif
                     <tr>
                         <td colspan="5"><hr></td>
                     </tr>

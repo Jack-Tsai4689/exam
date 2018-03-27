@@ -26,7 +26,7 @@ class Exams extends Model
         'e_score',
         'e_status'
 	];
-    //關聯並格式化
+    //關聯並格式化 測驗結果用
     public function sub_ques_ans(){
         $ques = $this->hasMany(ExamDetail::class, 'ed_eid','e_id')
                      ->join('pubsque', function($join){

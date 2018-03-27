@@ -13,11 +13,22 @@ use App\Pubs;
 use App\Ques;
 use App\Gscs;
 use DB;
+use URL;
 
 class AnalyController extends TopController
 {
     public function __construct(){
         parent::__construct();
+    }
+    // examdetail <-> pubsque
+    private function _exam_pubs($id){
+        return ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap','pq_quetxt','pq_qm_src','pq_qs_src','pq_anstxt','pq_am_src','pq_as_src','pq_av_src','pq_know')
+                          ->join('pubsque', function($join){
+                            $join->on('exam_details.s_id','=','pubsque.pq_part')
+                                 ->on('exam_details.ed_sort','=','pubsque.pq_sort');
+                          })
+                          ->where('ed_eid', $id)
+                          ->orderby('ed_sort')->get()->all();
     }
     /*
     考題來源表
@@ -33,13 +44,7 @@ class AnalyController extends TopController
             $sub_sets = Pubs::where('p_pid', $exam->s_id)->get()->all();
             $part = array();
             foreach ($sub_exam as $si => $se) {
-                $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
-                                  ->join('pubsque', function($join){
-                                        $join->on('exam_details.s_id','=','pubsque.pq_part')
-                                             ->on('exam_details.ed_sort','=','pubsque.pq_sort');
-                                  })
-                                 ->where('ed_eid', $se->e_id)
-                                 ->orderby('ed_sort')->get()->all();
+                $ques = $this->_exam_pubs($se->e_id);
                 $info = new \stdclass;
                 $info->score = $se->e_score;
                 $info->rnum = $se->e_rnum;
@@ -48,7 +53,7 @@ class AnalyController extends TopController
                 $info->percen = $sub_sets[$si]->p_percen;
                 $qdata = array();
                 foreach ($ques as $v) {
-                    $oq = $this->Get_pub_que($v, true);
+                    $oq = $this->_Get_pub_que($v, true);
                     $tmp = new \stdclass;
                     $tmp->sort = $v->ed_sort;
                     $tmp->chap = $oq->chap_name;
@@ -66,13 +71,7 @@ class AnalyController extends TopController
                 array_push($part, $info);
             }
         }else{
-            $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
-                                  ->join('pubsque', function($join){
-                                        $join->on('exam_details.s_id','=','pubsque.pq_part')
-                                             ->on('exam_details.ed_sort','=','pubsque.pq_sort');
-                                  })
-                                 ->where('ed_eid', $eid)
-                                 ->orderby('ed_sort')->get()->all();
+            $ques = $this->_exam_pubs($eid);
             $part = new \stdclass;
             $part->score = $exam->e_score;
             $part->rnum = $exam->e_rnum;
@@ -81,7 +80,7 @@ class AnalyController extends TopController
             $part->percen = $sets_set->p_sum;
             $qdata = array();
             foreach ($ques as $v) {
-                $oq = $this->Get_pub_que($v, true);
+                $oq = $this->_Get_pub_que($v, true);
                 $tmp = new \stdclass;
                 $tmp->sort = $v->ed_sort;
                 $tmp->chap = $oq->chap_name;
@@ -132,7 +131,7 @@ class AnalyController extends TopController
                     $tmp = new \stdclass;
                     $tmp->qno = $no;//$v->ed_sort;
                     $tmp->right = $v->ed_right;
-                    $oq = $this->Get_pub_que($v, false);
+                    $oq = $this->_Get_pub_que($v, false);
                     $chap_id[] = $oq->chap;
                     $tmp->id = $oq->chap;
                     array_push($q, $tmp);
@@ -151,7 +150,7 @@ class AnalyController extends TopController
                 $tmp = new \stdclass;
                 $tmp->qno = $no;//$v->ed_sort;
                 $tmp->right = $v->ed_right;
-                $oq = $this->Get_pub_que($v, false);
+                $oq = $this->_Get_pub_que($v, false);
                 $chap_id[] = $oq->chap;
                 $tmp->id = $oq->chap;
                 array_push($q, $tmp);
@@ -215,17 +214,13 @@ class AnalyController extends TopController
         $chap_id = array();
         // $no = 0;
         if ($exam->e_sub){
-            $sub_exam = Exams::where('e_pid', $eid)->get()->all();
+            $sub_exam = array();
+            $sub = Exams::where('e_pid', $eid)->get()->all();
             $sub_sets = Pubs::where('p_pid', $exam->s_id)->get()->all();
             $part = array();
-            foreach ($sub_exam as $si => $se) {
-                $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
-                                  ->join('pubsque', function($join){
-                                        $join->on('exam_details.s_id','=','pubsque.pq_part')
-                                             ->on('exam_details.ed_sort','=','pubsque.pq_sort');
-                                  })
-                                 ->where('ed_eid', $se->s_id)
-                                 ->orderby('ed_sort')->get()->all();
+            foreach ($sub as $si => $se) {
+                $ques = $this->_exam_pubs($se->s_id);
+                $sub_exam[$si] = $ques;
                 $info = new \stdclass;
                 $info->score = $se->e_score;
                 $info->rnum = $se->e_rnum;
@@ -234,7 +229,7 @@ class AnalyController extends TopController
                 $info->percen = $sub_sets[$si]->p_percen;
                 $qdata = array();
                 foreach ($ques as $v) {
-                    $oq = $this->Get_pub_que($v, true);
+                    $oq = $this->_Get_pub_que($v, true);
                     
                     // 觀念答對比率
                     $tmp = new \stdclass;
@@ -261,14 +256,8 @@ class AnalyController extends TopController
                 array_push($part, $info);
             }
         }else{
-            $sub_exam = $exam->sub_ques_ans();
-            $ques = ExamDetail::select('s_id','ed_ans','ed_sort','ed_right','ed_qid','pq_ans','pq_num','pq_quetype','pq_degree','pq_chap')
-                                  ->join('pubsque', function($join){
-                                        $join->on('exam_details.s_id','=','pubsque.pq_part')
-                                             ->on('exam_details.ed_sort','=','pubsque.pq_sort');
-                                  })
-                                 ->where('ed_eid', $eid)
-                                 ->orderby('ed_sort')->get()->all();
+            $ques = $this->_exam_pubs($eid);
+            $sub_exam = $ques;
             $part = new \stdclass;
             $part->score = $exam->e_score;
             $part->rnum = $exam->e_rnum;
@@ -277,7 +266,7 @@ class AnalyController extends TopController
             $part->percen = $sets_set->p_sum;
             $qdata = array();
             foreach ($ques as $v) {
-                $oq = $this->Get_pub_que($v, true);
+                $oq = $this->_Get_pub_que($v, true);
                 
                 // 觀念答對比率
                 $tmp = new \stdclass;
@@ -361,7 +350,7 @@ class AnalyController extends TopController
             'Graph_id' => $exam->e_stu.'_'.$eid
         ]);
     }
-    protected function Get_pub_que($e_que, $chap){
+    private function _Get_pub_que($e_que, $chap){
         $data = new \stdclass;
         $data->ed_ans = '';
         $data->pq_ans = '';

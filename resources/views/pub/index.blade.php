@@ -90,7 +90,7 @@
 						<th width="100">考試限時</th>
 						<th width="60">狀態</th>
 						<th width="100">題目預覽</th>
-						<th class="last">動作</th>
+						<th width="200" class="last">動作</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -109,7 +109,7 @@
 					<td>{{ $v->p_limtime }}</td>
 					<td>開放中</td>
 					<td><a href="{{ url('/pub/'.$v->p_id) }}">瀏覽</a></td>
-					<td><input type="button" value="暫停"></td>
+					<td><input type="button" value="暫停">　<input type="button" value="匯入閱卷結果"></td>
 				</tr>
 				@endforeach
 				</tbody>
