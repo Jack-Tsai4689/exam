@@ -100,8 +100,8 @@
 					<td>{{ $v->p_owner }}</td>
 					<td>{{ $v->gra->name }}</td>
 					<td>{{ $v->subj->name }}</td>
-	                <td></td>
-					<td></td>
+	                <td>{{ $v->cla }}</td>
+					<td>{{ $v->clas }}</td>
 					<td></td>
 					<td>{{ ($v->p_again) ? "O":"X" }}</td>
 					<td>{!! $v->exam_day !!}</td>

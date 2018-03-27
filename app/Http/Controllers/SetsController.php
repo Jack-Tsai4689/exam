@@ -23,6 +23,7 @@ class SetsController extends TopController
     public function index()
     {   
         if (!$this->login_status)return redirect('/login');
+
         $p_gra = 0;
         $p_subj = 0;
 

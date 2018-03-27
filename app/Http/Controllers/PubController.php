@@ -11,22 +11,40 @@ use App\Pubsque;
 use App\Sets;
 use App\Setsque;
 use URL;
+
+use App\Http\Services\ApiService;
+
 class PubController extends TopController
 {
+    protected $apiService;
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function __construct(){
+    public function __construct(ApiService $apiService){
+        $this->apiService = $apiService;
         parent::__construct();
     }
     public function index()
     {
         if (!$this->login_status)return redirect('/login');
         $data = Pubs::where('p_pid',0)->paginate(10);
+
+        if (!empty($data))$this->apiService->L_init('118.163.21.147');
         foreach ($data as $k => $v) {
             $data[$k]->exam_day = (empty($v->p_begtime)) ? '不限':$data[$k]->exam_day = $v->p_begtime.'~<br>'.$v->p_endtime;
+            $class_info = Pubcas::select('pc_class','pc_classa')->where('p_id', $v->p_id)->get()->all();
+            $data[$k]->cla = '';
+            $data[$k]->clas = '';
+            if (count($class_info)>0){
+                $data[$k]->cla = $this->apiService->get_LClass_name($class_info[0]->pc_class);
+                if (count($class_info)===1){
+                    $data[$k]->clas = $this->apiService->get_LClassa_name($class_info[0]->pc_classa);
+                }else{
+                    $data[$k]->clas = '全部';
+                }
+            }
         }
         $sel = new \stdclass;
         $sel->gra = 0;
@@ -127,7 +145,12 @@ class PubController extends TopController
         $Pass = 60;
         $menu_user = $this->menu_user;
         $title = '發佈測驗';
-        return view('pub.create', compact("menu_user","title","Time","Lim","Grade","Subject","Sets","Sum","Pass","Sel"));
+
+        $this->apiService->L_init('118.163.21.147');
+        $api_ca = $this->apiService->get_LClass_info();
+        $api_cla = $this->apiService->get_LClassa_info();
+
+        return view('pub.create', compact("menu_user","title", "api_ca", "api_cla","Time","Lim","Grade","Subject","Sets","Sum","Pass","Sel"));
     }
 
     /**
@@ -182,16 +205,16 @@ class PubController extends TopController
         $again = ($req->has('f_times')) ? (int)$req->input('f_times'):2;
         $p_again = ($again===2) ? 0:1;
 
-        $c = 1;//($req->has('ca') && !empty($req->input('ca'))) ? $req->input('ca'):0;
-        $ca = 2;//($req->has('cla')) ? $req->input('ca'):"";
+        $c = ($req->has('ca') && !empty($req->input('ca'))) ? $req->input('ca'):0;
+        $ca = ($req->has('cla')) ? $req->input('ca'):"";
         $wsets = 5;//($req->has('wsets') && !empty($req->input('wsets'))) ? $req->input('wsets'):0;
-        if (!is_numeric($c) || $c===0)abort(400);
-        if (!is_numeric($ca) || $ca<0)abort(400);
-        if (!is_numeric($wsets) || $wsets<=0)abort(400);
+        if (!pret_match("/^[0-9]*$/", $c) || $c===0)abort(400);
+        if ($ca==="")abort(400);
+        if (!pret_match("/^[0-9]*$/", $ca))abort(400);
+        if (!pret_match("/^[0-9]*$/", $wsets) || $wsets<=0)abort(400);
         $c = (int)$c;
         $ca = (int)$ca;
         $wsets = (int)$wsets;
-
         //先重整一次，再發佈
         if ($sets->s_sub){
             $sub = Sets::select('s_id','s_percen')->where('s_pid', $sid)->orderby('s_part')->get()->all();
@@ -343,14 +366,30 @@ class PubController extends TopController
             /*
             找該班級所有班別，搜尋每個班別的考卷，如果有此考卷，那就要新增這個班別
             */
+            $all_LClassa = $this->apiService->get_Lclass_only($c);
+            foreach ($all_LClassa as $id) {
+                $sets_info = get_LSets_only($id);
+                foreach ($sets_info as $sv) {
+                    if ($sv->ID===$wsets){
+                        Pubcas::create([
+                            'p_id' => $pub->p_id,
+                            'pc_class' => $c,
+                            'pc_classa' => $ca,
+                            'pc_webid' => $wsets
+                        ]);
+                        continue;
+                    }
+                }
+            }
+
         }else{
             //指定班別
-            // Pubcas::create([
-            //     'p_id' => $pub->p_id,
-            //     'pc_class' => $c,
-            //     'pc_classa' => $ca,
-            //     'pc_webid' => $wsets
-            // ]);
+            Pubcas::create([
+                'p_id' => $pub->p_id,
+                'pc_class' => $c,
+                'pc_classa' => $ca,
+                'pc_webid' => $wsets
+            ]);
         }
         echo true;
     }

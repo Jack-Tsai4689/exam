@@ -130,17 +130,19 @@
             <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
                 <thead>
                     <tr>
-                        <th width="120">學號</th>
-                        <th width="120">姓名</th>                            
-                        <th width="100">得分</th>
-                        <th width="160">交卷時間</th>
-                        <th width="180" class="last">診斷報告</th>
+                        <th width="150">學號</th>
+                        <th width="150">姓名</th>
+                        <th width="300">考卷</th>                            
+                        <th width="150">得分</th>
+                        <th width="200">交卷時間</th>
+                        <th class="last">診斷報告</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach ($Data as $i => $v)    <tr align="center" class="{{ ($i%2==0) ? 'deep':'shallow' }}">
                         <td {!! $v->can_see !!}>{{ $v->e_stu }}</td>
                         <td>{{ $v->stu()->name }}</td>
+                        <td></td>
                         <td>{{ (float)$v->e_score }}</td>
                         <td>{{ $v->e_end }}</td>
                         <td class="last">@if ($v->e_status==="Y")

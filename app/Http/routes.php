@@ -123,6 +123,12 @@ Route::group(['prefix'=>'know'], function(){
 	Route::put('{id}', "KnowledgeController@update");
 	Route::get('/join', "KnowledgeController@join");
 });
+// Api串接
+Route::group(['prefix'=>'api'], function(){
+	// ajax 發佈測驗
+	Route::get('/cla', "ApiController@getLclass");
+	Route::get('/sets', "ApiController@getSets");
+});
 //基本設定 類別、科目、章節
 Route::get('basic', "BasicController@index");
 Route::post('basic', "BasicController@store");

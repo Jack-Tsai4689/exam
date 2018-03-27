@@ -149,7 +149,10 @@
                     <tr class="deep">
                         <td width="250" align="center">班級</td>
                         <td width="80%">
-                            <select name="ca" id="ca">
+                            <select name="ca" id="ca" onchange="ca_c(this.value)">
+                                @foreach($api_ca as $c)
+                                <option value="{{ $c->ID }}">{{ $c->NAME }}</option>
+                                @endforeach
                                 <option></option>
                             </select>
                         </td>
@@ -159,6 +162,9 @@
                         <td>
                             <select name="cla" id="cla">
                                 <option value="0">全部</option>
+                                @foreach($api_cla as $ca)
+                                <option value="{{ $ca->ID }}">{{ $ca->NAME }}</option>
+                                @endforeach
                             </select>
                         </td>
                     </tr>
@@ -335,6 +341,25 @@ function sets_c(v){
             $("#sets").html(html);
         }
     })
+}
+function ca_c(v){
+    let cid = Number(v);
+    $.ajax({
+        type:"GET",
+        url:"{{ url('api/cla') }}",
+        dataType:"JSON",
+        data:{'c':v},
+        success: function(rs){
+            let html = '<option value="0">全部</option>';
+            for(let i in rs){
+                html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+            }
+            $("#cla").html(html);
+        },
+        error: function(){
+
+        }
+    });
 }
 </script>
 @stop

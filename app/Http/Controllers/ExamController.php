@@ -69,6 +69,133 @@ class ExamController extends TopController
         $padding = ord($data[strlen($data) - 1]);
         return substr($data, 0, -$padding);
     }
+    // 閱卷機結果匯入DB
+    public function omr(){
+        $pid = ($req->has('pub') && !empty($req->input('pub'))) ? (int)$req->input('pub'):0;
+
+        include 'Excel/Classes/PHPExcel.php';
+        //設定要被讀取的檔案，經過測試檔名不可使用中文
+        // $file = 'excel_result/'.$_POST['ex_question'];
+        // try {
+        //     $objPHPExcel = PHPExcel_IOFactory::load($file);
+        // } catch(Exception $e) {
+        //     die('Error loading file "'.pathinfo($file,PATHINFO_BASENAME).'": '.$e->getMessage());
+        // }
+        $sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
+        $colindex=0;
+        $rowindex=0;
+        $rownull=true;
+        foreach($sheetData as $key => $col){
+            if($rowindex>=1){
+                //echo "行{$key}: "."<br>";
+                $temp="";
+                foreach ($col as $colkey => $colvalue){
+                    if($colindex > 0 && $colindex != sizeof($col))
+                        $temp.="#--";
+                    if($colindex >= 0){
+                        if($colvalue!="")
+                            $rownull=false;
+                        $temp.=$colvalue;
+                    }
+                    $colindex++;
+                }
+                if($rownull && $rowindex > 0)//如果某行完全沒有值，並且讀取到的是內容(標題為第一行,$rowindex=0)，就不在繼續讀取，節省資源。
+                    break;
+                $rownull=true;
+            
+                $text=explode("#--",$temp);
+                //某一行的所有資料
+                $my_ans = str_split($text[0],1);//個人答案
+                $right_wrong = str_split($text[1],1);//對錯
+                //$_exam = $this->_Exam_Status_Check($pid, $epart, $spart);
+                // if (!$pubs_data->p_again){
+                //     //不能重覆考
+                //     if ($_exam->status==="ed")die('您已考過此次測驗');
+                // }
+                $edata = Exams::create([
+                    'e_stu' => session('epno'),
+                    's_id' => $pid,
+                    'e_pid' => 0,
+                    'e_sub' => $pubs_data->p_sub,
+                    'e_begtime_at' => 0
+                ]);
+                $eid = $edata->e_id;
+                $qno = array();
+                $part_show = new \stdclass;
+                if ($pubs_data->p_sub){
+                    //找大題 -> 找題目，放進exams 依大題順序
+                    $pkey = 's'.$pid;
+                    if (Redis::exists($pkey)){
+                        $data = Redis::get($pkey);
+                        $part = json_decode($data);
+                    }else{
+                        $part = Pubs::where('p_pid', $pid)->orderby('p_part')->get()->all();
+                        Redis::set($pkey, json_encode($part));
+                    }
+                    foreach ($part as $pk => $pv) {
+                        //新增大題
+                        $e_part = Exams::create([
+                            'e_stu' => session('epno'),
+                            's_id' => $pv->p_id,
+                            'e_pid' => $eid,
+                            'e_sub' => 0,
+                            'e_sort' => ($pk+1),
+                            'e_begtime_at' => 0
+                        ]);
+                        $partkey = $pkey.'|p'.$pv->p_id;
+                        if (Redis::exists($partkey)){
+                            $data = Redis::get($partkey);
+                            $que = json_decode($data);
+                        }else{
+                            $que = Pubsque::where('pq_pid', $pid)
+                                      ->where('pq_part', $pv->p_id)
+                                      ->orderby('pq_sort')->get()->all();
+                            Redis::set($partkey, json_encode($que));
+                        }
+                        // 把題目寫一份到學生卷 exam_details
+                        foreach ($que as $pqk => $pqv) {
+                            $ans_right = ($right_wrong[$pqk]===".") ? 1:0;
+                            ExamDetail::create([
+                                's_id' => $pv->p_id,
+                                'ed_eid' => $e_part->e_id,
+                                'ed_sort' => $pqv->pq_sort,
+                                'ed_qid' => $pqv->pq_qid,
+                                'ed_ans' => $my_ans[$pqk],
+                                'ed_right' => $ans_right
+                            ]);
+                        }
+                    }
+                }else{
+                    $pkey = 's'.$pid.'p';
+                    if (Redis::exists($pkey)){
+                        $data = Redis::get($pkey);
+                        $que = json_decode($data);
+                    }else{
+                        $que = Pubsque::where('pq_pid', $pid)
+                                  ->where('pq_part', $pid)
+                                  ->orderby('pq_sort')->get()->all();
+                        Redis::set($pkey, json_encode($que));
+                    }
+                    
+                    // 把題目寫一份到學生卷 exam_details
+                    foreach ($que as $pqk => $pqv) {
+                        $ans_right = ($right_wrong[$pqk]===".") ? 1:0;
+                        ExamDetail::create([
+                            's_id' => $pid,
+                            'ed_eid' => $eid,
+                            'ed_sort' => $pqv->pq_sort,
+                            'ed_qid' => $pqv->pq_qid,
+                            'ed_ans' => $my_ans[$pqk],
+                            'ed_right' => $ans_right
+                        ]);
+                    }
+                }
+                //列的index歸零
+                $colindex=0;
+            }
+            $rowindex++;
+        }
+    }
     //中離記錄，接收至socket.js
     public function quit(Request $req){
         $token = $req->input('token');

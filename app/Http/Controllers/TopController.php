@@ -18,7 +18,10 @@ class TopController extends Controller
     protected $prev_page = '';
     protected $next_page = '';
     protected $group_page = '';
-    protected $curl_url = '';
+    
+    protected $web_url = null;
+    protected $L_ip = null;
+    protected $L_first_class = null;
 
     public function __construct(){
     	if (!empty(session('ident'))){
@@ -74,7 +77,7 @@ class TopController extends Controller
         $this->group_page = '<option value="1">第 1 頁</option>';
       }
     }
-    protected function url_curl($url){
+    protected function api_curl($url){
       $ch = curl_init();
       $options = array(
         CURLOPT_URL=>$address,
@@ -88,20 +91,15 @@ class TopController extends Controller
       curl_close($ch);
       return json_decode($data);
     }
-    //串接班級
-    protected function GetClass(){
-      //$this->url_curl();
-      //return;
+    // 初始化
+    protected function L_init($ip){
+      $this->L_ip = $ip;
     }
-    //串接班別
-    protected function GetClassa(){
-      //$this->url_curl();
-      //return;
-    }
-    //串接考卷
-    protected function GetSets(){
-      //$this->url_curl();
-      //return;
+    // 老師登入
+    protected function L_tea_check($acc, $pass){
+      $url = 'http://'.$this->L_ip.'/QRCode/UserLogin.aspx?token='.md5("UserLogin".urlencode(strtolower($acc)).date('Ymd')).'&UserID='.$acc.'&UserPass='.$pass;
+      $data = $this->api_curl($url);
+      return ($data->MsgID==="1") ? $data:null;
     }
     // 題型、正確答案、難度
     protected function Ques_format($v){
