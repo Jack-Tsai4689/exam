@@ -104,7 +104,7 @@ class QueController extends TopController
         }
         foreach ($que_data as $k => $v) {
             
-            $format = $this->Ques_format($v);
+            $format = $this->Ques_format($v, 'list');
             $que_data[$k]->q_quetype = $format->q_quetype;
             $que_data[$k]->q_ans = $format->q_ans;
 
@@ -484,6 +484,8 @@ class QueController extends TopController
         //  abort(400);
         //  return;
         // }
+        $cans = '';
+        $cgroup = '';
         switch ($que_type) {
             case 'S'://單選
             case 'D'://複選
@@ -535,6 +537,7 @@ class QueController extends TopController
                 $all_ans = implode(",", $ans);
                 break;
             case 'C'://配合
+                $num = 0;
                 $ans = array();
                 // 配合模式 gmatch
                 $match_mode = ($req->input('gmatch') && !empty($req->input('gmatch'))) ? trim($req->input('gmatch')):0;
@@ -554,8 +557,8 @@ class QueController extends TopController
                     $ans[] = implode(",", $tmp);
                 }
                 $all_ans = implode("|", $ans);
-                $canc = implode(",", $opt);
-                $cgroup = implode(",", $group);
+                $cans = implode("|", $opt);
+                $cgroup = implode("|", $group);
                 break;
             default:
                 abort(400);
@@ -692,7 +695,9 @@ class QueController extends TopController
             'q_know' => $know_id,
             'q_created_at' => time(),
             'q_updated_at' => time(),
-            'q_keyword' => '|'.implode('|', $key).'|'
+            'q_keyword' => '|'.implode('|', $key).'|',
+            'q_cgroup' => $cgroup,
+            'q_cans' => $cans
         ];
 //         canc
 // cgroup
@@ -714,8 +719,10 @@ class QueController extends TopController
         if ($qid<1)abort(400);
         $qdata = Ques::find($qid);
         //題型、答案
-        $format = $this->Ques_format($qdata);
-        $Quetype = $format->q_quetype.'題';
+        $format = $this->Ques_format($qdata, 'info');
+        $Quetype = $format->q_quetype;
+        $Qtype = $qdata->q_quetype;
+        $Options = ($Qtype==="C") ? $format->q_cans:'';
         $Ans = $format->q_ans;
         $Degree = $format->q_degree;
         $Grade = $qdata->gra->name;
@@ -725,7 +732,7 @@ class QueController extends TopController
 
         $qcont =  array();
         //題目文字
-        if (!empty($v->q_quetxt)) $qcont[] = nl2br(trim($qdata->q_quetxt));
+        if (!empty($qdata->q_quetxt)) $qcont[] = nl2br(trim($qdata->q_quetxt));
         //題目圖檔
         if (!empty($qdata->q_qm_src)){
             if(is_file($qdata->q_qm_src))$qcont[] = '圖：'.$qdata->q_qm_name.'<br><IMG class="pic" src="'.URL::asset($qdata->q_qm_src).'">';
@@ -790,7 +797,7 @@ class QueController extends TopController
         $Keyword = implode(", ", $key);
         $title = '題目資訊-第'.$qid.'題';
         return view("que.info", 
-            compact("qid", "title", "Owner", "Quetype", "Que_content", 
+            compact("qid", "title", "Owner", "Quetype", "Que_content", "Options", "Qtype",
                     "Know_content", "Grade", "Subject", "Chapter", "Degree", 
                     "Ans", "Ans_content", "Keyword"));
     }
@@ -822,6 +829,9 @@ class QueController extends TopController
         $que_type->R = '';
         $que_type->M = '';
         $que_type->G = '';
+        $match_type = new \stdClass;
+        $match_type->v1 = 'checked';
+        $match_type->vn = '';
         $ans_html = '';
         $option_num = '';
         $num = '';
@@ -904,6 +914,34 @@ class QueController extends TopController
                 }
                 $data['Correct_ans_math'] = $ans_math;
                 break;
+            case 'C':
+                $que_type->C = 'checked';
+                $data['now_type'] = "change_type('C');";
+                $data['opt'] = '';
+                $data['cg'] = '';
+                $cans = explode("|", $que->q_cans);
+                foreach ($cans as $i => $v) {
+                    if ($i===0){
+                        $data['opt'].= '<div><input type="checkbox" class="opt"><label class="opt_no">1. </label><input type="text" class="opt_txt" name="opttxt[]" value="'.$v.'"></div>';
+                    }else{
+                        $data['opt'].= '<div id="opt'.($i+1).'"><input type="checkbox" class="opt"><label class="opt_no">'.($i+1).'. </label><input type="text" class="opt_txt" name="opttxt[]" value="'.$v.'"></div>';
+                    }
+                }
+                $cgroup = explode("|", $que->q_cgroup);
+                $ans = explode("|", $que->q_ans);
+                foreach ($cgroup as $ci => $cv) {
+                    $data['cg'].= '<div style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別'.($ci+1).'" value="'.$cv.'"></div><div><input type="button" name="joino" class="btn_joino" data-id="'.($ci+1).'" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="'.($ci+1).'" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans'.($ci+1).'[]">';
+                    $corr_cans = explode(",", $ans[$ci]);
+                    if (count($corr_cans)>1){
+                        $match_type->v1 = '';
+                        $match_type->vn = 'checked';
+                    }
+                    foreach ($corr_cans as $cci => $ccv) {
+                        $data['cg'].= '<option value="'.($ccv-1).'">'.$ccv.'. '.$cans[$cci].'</option>';
+                    }
+                    $data['cg'].= '</select></div></div>';
+                }
+                break;
         }
         if ($que->q_know>0){
             $data['Know_cancell'] = '<input type="button" class="" name="pcancell" id="pcancell" value="取消知識點">';
@@ -918,7 +956,14 @@ class QueController extends TopController
                 $option_num.= '<option '.$num_sel.' value="'.$num_i.'">'.$num_i.'</option>';
                 $num_i++;
             }
-        }       
+        }
+        //配合題 初始化
+        if ($que->q_quetype!=="C"){
+            // 選項群
+            $data['opt'] = '<div><input type="checkbox" class="opt"><label class="opt_no">1. </label><input type="text" class="opt_txt" name="opttxt[]"></div>';
+            // 對應群
+            $data['cg'] = '<div style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別1"></div><div><input type="button" name="joino" class="btn_joino" data-id="1" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="1" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans1[]"></select></div></div>';
+        }
         //選填 選項、題數個數 初始化
         if ($que->q_quetype!=="M"){
             $num_i = 1;
@@ -1107,7 +1152,7 @@ class QueController extends TopController
         $data['Num'] = $num;
         $data['Ans'] = $ans_html;
         $data['Que_type'] = $que_type;
-        
+        $data['Match_type'] = $match_type;
 
         //難度
         $degree = new \stdClass;
@@ -1336,36 +1381,58 @@ class QueController extends TopController
             if (!empty($que->q_qm_src)){
                 if (is_file($que->q_qm_src)){ if (unlink($que->q_qm_src)){} }
             }
+            $que->q_qm_src = '';
+            $que->q_qm_name = '';
+        }
+        if (!empty($qm_src)){
             $que->q_qm_src = $qm_src;
             $que->q_qm_name = $qm_name;
         }
+
         if (empty($qsold_src)){
             if (!empty($que->q_qs_src)){
                 if (is_file($que->q_qs_src)){ if (unlink($que->q_qs_src)){} }
             }
+            $que->q_qs_src = '';
+            $que->q_qs_name = '';
+        }
+        if (!empty($qs_src)){
             $que->q_qs_src = $qs_src;
             $que->q_qs_name = $qs_name;
         }
+
         if (empty($amold_src)){
             if (!empty($que->q_am_src)){
                 if (is_file($que->q_am_src)){ if (unlink($que->q_am_src)){} }
             }
+            $que->q_am_src = '';
+            $que->q_am_name = '';
+        }
+        if (!empty($am_src)){
             $que->q_am_src = $am_src;
             $que->q_am_name = $am_name;
         }
+
         if (empty($asold_src)){
             if (!empty($que->q_as_src)){
                 if (is_file($que->q_as_src)){ if (unlink($que->q_as_src)){} }
             }
+            $que->q_as_src = '';
+            $que->q_as_name = '';
+        }
+        if (!empty($as_src)){
             $que->q_as_src = $as_src;
             $que->q_as_name = $as_name;
         }
+
         if (empty($avold_src)){
             if (!empty($que->q_av_src)){
-                if (is_file($que->q_av_src)){
-                    if (unlink($que->q_av_src)){}
-                }
+                if (is_file($que->q_av_src)){ if (unlink($que->q_av_src)){} }
             }
+            $que->q_av_src = '';
+            $que->q_av_name = '';
+        }
+        if (!empty($av_src)){
             $que->q_av_src = $av_src;
             $que->q_av_name = $av_name;
         }

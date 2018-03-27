@@ -49,6 +49,8 @@
     	#duty td {
     		padding-bottom: 0px;
     	}
+        .list > tbody > tr:nth-child(even) {background-color: #FCFCFC;}
+        .list > tbody > tr:nth-child(odd) {background-color: #F5F5F4;}
     	.list tr td{
     		margin-bottom: 10px;
     		height: 25px;
@@ -95,7 +97,7 @@
     <div class="content">
 		<div class="cen">
 			<table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
-                <tr class="deep">
+                <tr>
                     <td align="right">建立者</td>
                     <td width="80%">{{ $Owner }}</td>
                 </tr>
@@ -103,23 +105,29 @@
                     <td><label class="f17">{{ $Quetype }}</label></td>
                     <td></td>
                 </tr>
-                <tr class="deep">
+                <tr>
                     <td align="right">題目</td>
                     <td>{!! $Que_content !!}</td>
                 </tr>
-                <tr class="shallow">
-                    <td align="right">解答</td>
-                    <td width="80%">{{ $Ans }}</td>
+                @if($Qtype==="C")
+                <tr>
+                    <td align="right">選項</td>
+                    <td>{{ $Options }}</td>
                 </tr>
-                <tr class="deep">
+                @endif
+                <tr>
+                    <td align="right">解答</td>
+                    <td width="80%">{!! $Ans !!}</td>
+                </tr>
+                <tr>
                     <td align="right">知識點</td>
                     <td>{!! $Know_content !!}</td>
                 </tr>
-                <tr class="shallow">
+                <tr>
                     <td align="right">關鍵字</td>
                     <td>{{ $Keyword }}</td>
                 </tr>
-                <tr class="deep">
+                <tr>
                     <td align="right">範圍</td>
                     <td width="80%">【{{ $Grade }}】【{{ $Subject }}】【{{ $Chapter }}】【{{ $Degree }}】</td>
                 </tr>
@@ -129,7 +137,7 @@
                 </tr>
             </table>
             <table class="list oans last" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans">
-                <tr class="deep">
+                <tr>
                     <td>{!! $Ans_content !!}</td>
                 </tr>
             </table>

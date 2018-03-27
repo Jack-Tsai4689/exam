@@ -416,6 +416,10 @@ class KnowledgeController extends TopController
             if (!empty($know->k_picpath)){
                 if (is_file($know->k_picpath)){ if (unlink($know->k_picpath)){} }
             }
+            $know->k_picpath = '';
+            $know->k_pic = '';
+        }
+        if (!empty($km_src)){
             $know->k_picpath = $km_src;
             $know->k_pic = $km_name;
         }

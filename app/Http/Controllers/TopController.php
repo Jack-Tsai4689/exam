@@ -102,15 +102,15 @@ class TopController extends Controller
       return ($data->MsgID==="1") ? $data:null;
     }
     // 題型、正確答案、難度
-    protected function Ques_format($v){
+    protected function Ques_format($v, $status){
       $data = new \stdClass;
       switch ($v->q_quetype) {
         case "S": 
-          $data->q_quetype = "單選"; 
+          $data->q_quetype = "單選題"; 
           $data->q_ans = chr($v->q_ans+64);
           break;
         case "D": 
-          $data->q_quetype = "複選"; 
+          $data->q_quetype = "複選題"; 
           $ans = array();
           $ans = explode(",", $v->q_ans);
           $ans_html = array();
@@ -120,11 +120,11 @@ class TopController extends Controller
           $data->q_ans = implode(", ", $ans_html);
           break;
         case "R": 
-          $data->q_quetype = "是非"; 
+          $data->q_quetype = "是非題"; 
           $data->q_ans = ($v->q_ans==="1") ? "O":"X";
           break;
         case "M": 
-          $data->q_quetype = '選填'; 
+          $data->q_quetype = "選填題"; 
           $ans = array();
           $ans = explode(",", $v->q_ans);
           $ans_html = array();
@@ -136,7 +136,27 @@ class TopController extends Controller
             }
           }
           $data->q_ans = implode(", ", $ans_html);
-        break;
+          break;
+        case 'C':
+          $data->q_quetype = "配合題";
+          if ($status==="list")$data->q_ans = '';
+          if ($status==="info"){
+            $cans = explode("|", $v->q_cans);
+            $cgroup = explode("|", $v->q_cgroup);
+            $ans = explode("|", $v->q_ans);
+            $out = array();
+            foreach ($cgroup as $ck => $cv) {
+              $ans_single = explode(",", $ans[$ck]);
+              $tmp = array();
+              foreach ($ans_single as $sv) {
+                $tmp[] = $cans[($sv-1)];
+              }
+              $out[] = $cv.'：'.implode(", ", $tmp);
+            }
+            $data->q_cans = implode(", ", $cans);
+            $data->q_ans = implode("<br>", $out);
+          }
+          break;
       }
       //難度
       switch ($v->q_degree) {

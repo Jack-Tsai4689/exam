@@ -184,6 +184,9 @@
         .show {
             display: block;
         }
+        #opt_range > div {
+            display: inline-block;
+        }
 	</style>
 </head>
 <body>
@@ -204,6 +207,7 @@
                         <label><input type="radio" name="f_qus_type" {{ $Que_type->D }} value="D" onclick="change_type(this.value)">複選題</label>
                         <label><input type="radio" name="f_qus_type" {{ $Que_type->R }} value="R" onclick="change_type(this.value)">是非題</label>
                         <label><input type="radio" name="f_qus_type" {{ $Que_type->M }} value="M" onclick="change_type(this.value)">選填題</label>
+                        <label><input type="radio" name="f_qus_type" {{ $Que_type->C }} value="C" onclick="change_type(this.value)">配合題</label>
                         <label><input type="radio" name="f_qus_type" {{ $Que_type->G }} value="G" onclick="change_type(this.value)">題組</label>(最多10小題)
                         <font class="f12">*儲存後將無法變更題型</font>
                     </td>
@@ -309,6 +313,26 @@
                 <tr class="shallow math">
                     <td align="right">正確解答<font color="red">＊</font></td>
                     <td id="correct_ans_math">{!! $Correct_ans_math !!}</td>
+                </tr>
+                <tr class="deep match">
+                    <td align="right">配合方式</td>
+                    <td width="80%"><label><input type="radio" name="gmatch" {{ $Match_type->v1 }} class="gtype" value="1">1 v.s. 1 (1組 對應 1個選項)</label>　
+                        <label><input type="radio" name="gmatch" {{ $Match_type->vn }} class="gtype" value="2">1 v.s. 多 (1組 對應 多個選項)</label>
+                    </td>
+                </tr>
+                <tr class="shallow match">
+                    <td align="right">選項群</td>
+                    <td>
+                        <input type="button" id="more_opt" value="增加選項">　<input type="button" id="remove_opt" value="減少選項">
+                        <div id="opt_range">{!! $opt !!}</div>
+                    </td>
+                </tr>
+                <tr class="deep match">
+                    <td align="right">對應組別</td>
+                    <td>
+                        <input type="button" id="more_cgroup" value="增加組別">　<input type="button" id="remove_cgroup" value="減少組別">
+                        <div id="cgroup_range">{!! $cg !!}</div>
+                    </td>
                 </tr>
                 <tr class="deep write">
                     <td align="right">標準答案<font color="red">＊</font></td>
@@ -598,12 +622,13 @@ function change_type(ans_t){//選項設定
         $('tr[name="ans_type"]').show();
         $(".math").hide();
     }
+    if (ans_t!=="C")$(".match").hide();
+    let num, html = '';
     switch(ans_t){
         case 'S'://單選
             $('#form1 tr[name=ans_type]').css('display','table-row');
-            var num = gb('option_num').value;
-            var html = '';
-            for (var i =1; i <=num; i++) {
+            num = gb('option_num').value;
+            for (let i =1; i <=num; i++) {
                 j = String.fromCharCode(i+64);
                 html+= '<label><input name="ans[]" type="radio" value="'+i+'"><font id="ans_'+i+'">'+j+'</font></label>';
             }
@@ -611,16 +636,14 @@ function change_type(ans_t){//選項設定
             break;
         case 'D'://複選
             $('#form1 tr[name=ans_type]').css('display','table-row');
-            var num = gb('option_num').value;
-            var html = '';
-            for (var i =1; i <=num; i++) {
+            num = gb('option_num').value;
+            for (let i =1; i <=num; i++) {
                 j = String.fromCharCode(i+64);
                 html+= '<label><input name="ans[]" type="checkbox" value="'+i+'"><font id="ans_'+i+'">'+j+'</font></label>';
             }
             $('#form1  #ans_group').html(html);
             break;
         case 'R'://是非
-            var html = '';
             html+= '<label><input type="radio" name="ans[]" value="1" checked>O</label>  <label><input type="radio" name="ans[]" value="2">X</label>';
             $('#form1 tr[name=ans_type]').css('display','none');
             $('#form1 #ans_group').html(html);
@@ -630,120 +653,12 @@ function change_type(ans_t){//選項設定
             $(gb('simple')).hide();
             $(".math").show();
             break;
-    }
-    return;
-    if (ans_t=='G'){
-        $('.cen #notgp').remove();
-        $('.cen #oans').remove();
-        document.getElementById('f_qtype').value = 'G';
-        //$('#f_qtype').val('G');
-
-        //$('#gp #q1').clone(true).insertAfter($('#first'));
-        $('#gp > #more').clone(true).insertAfter($('#first'));
-        $('#gp > #more_btn').clone(true).insertAfter($('#form1 #more'));
-        return false;
-    }else{
-        if ($('#f_qtype').val()=='G'){
-            var q_l = $('.cen #notgp');
-            if (q_l.length==0){
-                $('#gpclone #notgp').clone(true).insertAfter($('#que_main'));
-                $('#gpclone #oans').clone(true).insertAfter($('.cen #notgp'));
-                $('.cen #oans').hide();
-            }
-            //$('#form1 #q1').remove();
-            $('#form1 #more').remove();
-            $('#form1 #more_btn').remove();
-        }
-    }
-    if (ans_t == 'S' || ans_t == 'R'){var ans_type = 'radio';}
-    if (ans_t == 'D'){var ans_type = 'checkbox';}
-    console.log(ans_t);
-    $('input[name="ans[]"]').each(function(){
-        //$(this).attr('type',ans_type);
-        $(this).prop('type',ans_type);
-    });
-    var simple = document.getElementById('simple');
-    var math = document.getElementsByClassName('math');
-    if (ans_t == 'M'){
-        $('tr[name="ans_type"]').hide();
-        $(simple).hide();
-        $(math).hide();
-        $('.clo').hide();
-        $('.write').hide();
-        if (ans_t=='M')$(math).show();
-        if (ans_t=='C')$('.clo').show();
-    }else{
-        if (ans_t =='W'){
-            $('.clo').hide();
-            $(math).hide();
+        case 'C':
             $('tr[name="ans_type"]').hide();
-            $(simple).hide();
-            $('.write').show();
-            return;
-        }
-        $('.write').hide();
-        $('.clo').hide();
-        $(math).hide();
-        $('tr[name="ans_type"]').show();
-        $(simple).show();
-        var ans_len = $('input[name="ans[]"]').length;
-        if (ans_t == 'R'){
-            $('#form1 tr[name=ans_type]').css('display','none');
-            $('#form1 #ans_group').html('');
-            $('#form1 #ans_group').append(
-                $('<label>').append($('<input>').attr({name:'ans[]', type: 'radio', value:'1', checked:true}),'O'),
-                $('<label>').append($('<input>').attr({name:'ans[]', type: 'radio', value:'2'}),'X')
-            );
-        }else{
-            $('#form1 tr[name=ans_type]').css('display','table-row');
-            var num = $('#form1 #option_num').val();
-            // alert(num+','+ans_len);
-            // alert(num);
-            var all = num-ans_len;
-            if (ans_len==2){
-                $('#form1 #ans_group').html('');
-                //var i=0;
-                var j ='';
-                if (ans_t=='D'){ var type = 'checkbox'; }
-                if (ans_t=='S'){ var type = 'radio'; }
-                var html = '';
-                for (var i =0; i <num; i++) {
-                    j = i+1;
-                    // if (ans_ntype==1)j = String.fromCharCode(i+65);
-                    html+= '<label><input name="ans[]" type="'+type+'" value="'+i+'"><font id="ans_'+j+'"></font></label>';
-                    // $('#form1  #ans_group').append(
-                    //     $('<label>').append( 
-                    //         $('<input>').attr({name:'ans[]', type: type, value:i}),
-                    //         $('<font>').attr('id','ans_'+j))
-                    // );
-                }
-                $('#form1  #ans_group').append(html);
-                no_display(num);
-            }else{
-                alert(ans_type);
-                switch (true){
-                    case all>0:
-                        var html = '';
-                        for (i=ans_len; i <num; i++) {
-                            j = i+1;
-                            // if (ans_ntype==1)j = String.fromCharCode(i+65);
-                            //alert(j);
-                            html+= '<label><input name="ans[]" type="'+ans_type+'" value="'+i+'"><font id="ans_"'+j+'"></font></label>';
-                            // $('#form1  #ans_group').append(
-                            //     $('<label>').append( $('<input>').attr({name:'ans[]', type: ans_type, value:i}),$('<font>').attr('id','ans_'+j))
-                            // );
-                        }
-                        $('#form1  #ans_group').append(html);
-                        no_display(num);
-                        break;
-                    case all<0:
-                        for(var i=ans_len; i>num; i--){
-                            $('#form1 > #ans_group > label:last').remove();
-                        }
-                        break;
-                }
-            }
-        }
+            $(gb('simple')).hide();
+            if (ans_t==="M")$(".math").show();
+            if (ans_t==="C")$(".match").show();
+            break;
     }
 }
 function optnum(v){//選項數擷取
@@ -1133,5 +1048,76 @@ function more_one(){
     no++;
     num++;
 }
+$("#more_opt").on('click', function(){
+    let rows = $(".opt").length;
+    let html = '<div id="opt'+(rows+1)+'"><input type="checkbox" class="opt"><label class="opt_no">'+(rows+1)+'. </label><input type="text" class="opt_txt" name="opttxt[]"></div>';
+    $("#opt_range").append(html);
+});
+$("#remove_opt").on('click', function(){
+    let rows = $(".opt").length;
+    $("#opt"+rows).remove();
+    if (rows===1)return;
+    $(".cg_ans").each(function(){
+        $(this).find("option").each(function(){
+            if (this.value==(rows-1)){
+                $(this).remove();
+            }
+        });
+    });
+});
+$("#more_cgroup").on('click', function(){
+    let rows = $(".cgroup").length;
+    let html = '<div id="cg'+(rows+1)+'" style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別'+(rows+1)+'"></div><div><input type="button" name="joino" class="btn_joino" data-id="'+(rows+1)+'" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="'+(rows+1)+'" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans'+(rows+1)+'[]"></select></div></div>';
+    $("#cgroup_range").append(html);
+});
+$("#remove_cgroup").on('click', function(){
+    let rows = $(".cgroup").length;
+    $("#cg"+rows).remove();
+});
 
+$("#cgroup_range").on('click', ".btn_joino", function(){
+    let id = $(this).data('id');
+    let ans = $('select[name="cg_ans'+id+'[]"]');
+    // let ans = $('#cg_ans'+id);
+    $(".opt:checked").each(function(){
+        let i = $(".opt").index(this);
+        let v = $(".opt_no")[i].innerHTML+$(".opt_txt")[i].value;
+        if (v=="")return;
+        let have = false;
+        ans.find("option").each(function(){
+            let nv = Number($(this).val());
+            if (nv===i){
+                have = true;
+                return false;
+            }
+        });
+        if (!have)ans.append(new Option(v, i));
+    });
+    let cg = ans.find('option');
+    cg.detach().sort(function(a,b){
+        let av = Number(a.value);
+        let bv = Number(b.value);
+        return (av > bv)?1:((av < bv)?-1:0);
+    });
+    cg.appendTo(ans);
+});
+$("#cgroup_range").on('click', ".btn_removeo", function(){
+    let id = $(this).data('id');
+    $('select[name="cg_ans'+id+'[]"]').find(":selected").remove();
+    // $('#cg_ans'+id).find(":selected").remove();
+});
+$("#opt_range").on('blur', ".opt_txt", function(){
+    let obj = this;
+    let gans = [];
+    let id = $(".opt_txt").index(obj);
+    $(".cg_ans").each(function(){
+        $(this).find("option").each(function(){
+            if (this.value==id){
+                let no = $(".opt_no")[id].innerHTML;
+                $(this).text(no+obj.value);
+                return false;
+            }
+        });
+    });
+});
 </SCRIPT>
