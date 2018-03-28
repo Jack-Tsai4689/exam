@@ -192,7 +192,7 @@
 <body>
 <div id="all">
 	<div class="title"><label class="f17">{{ $title }}</label></div>
-	<FORM name="form1" id="form1" method="POST" enctype="multipart/form-data" action="{{ url('ques/'.$Qid) }}">
+	<FORM name="form1" id="form1" method="POST" enctype="multipart/form-data" action="{{ url('ques/'.$Qid) }}" onsubmit="return form_check(this)">
     <div class="content" id="first">
 		<div class="cen">
 			<table class="list" id="que_main" border="0" width="100%" cellpadding="0" cellspacing="0">
@@ -203,12 +203,12 @@
 				<tr class="deep">
                     <td align="right">題型<font color="red">＊</font></td>
                     <td width="80%">
-                    	<label><input type="radio" name="f_qus_type" {{ $Que_type->S }} value="S" onclick="change_type(this.value)">單選題</label>
-                        <label><input type="radio" name="f_qus_type" {{ $Que_type->D }} value="D" onclick="change_type(this.value)">複選題</label>
-                        <label><input type="radio" name="f_qus_type" {{ $Que_type->R }} value="R" onclick="change_type(this.value)">是非題</label>
-                        <label><input type="radio" name="f_qus_type" {{ $Que_type->M }} value="M" onclick="change_type(this.value)">選填題</label>
-                        <label><input type="radio" name="f_qus_type" {{ $Que_type->C }} value="C" onclick="change_type(this.value)">配合題</label>
-                        <label><input type="radio" name="f_qus_type" {{ $Que_type->G }} value="G" onclick="change_type(this.value)">題組</label>(最多10小題)
+                    	<label><input type="radio" name="f_qus_type" id="typeS" {{ $Que_type->S }} value="S" onchange="change_type(this.value)">單選題</label>
+                        <label><input type="radio" name="f_qus_type" id="typeD" {{ $Que_type->D }} value="D" onchange="change_type(this.value)">複選題</label>
+                        <label><input type="radio" name="f_qus_type" id="typeR" {{ $Que_type->R }} value="R" onchange="change_type(this.value)">是非題</label>
+                        <label><input type="radio" name="f_qus_type" id="typeM" {{ $Que_type->M }} value="M" onchange="change_type(this.value)">選填題</label>
+                        <label><input type="radio" name="f_qus_type" id="typeC" {{ $Que_type->C }} value="C" onchange="change_type(this.value)">配合題</label>
+                        <label><input type="radio" name="f_qus_type" id="typeG" {{ $Que_type->G }} value="G" onchange="change_type(this.value)">題組</label>(最多10小題)
                         <font class="f12">*儲存後將無法變更題型</font>
                     </td>
                 </tr>
@@ -609,13 +609,13 @@ function num_change(v){//選填用
     }
     math.html(html);
 }
-function no_display(num){//編號切換
-    var j ='';
-    for (var i=0; i <num; i++) {
-        j = String.fromCharCode(i+65);
-        $('#ans_'+(i+1)).html(j);
-    }
-}
+// function no_display(num){//編號切換
+//     var j ='';
+//     for (var i=0; i <num; i++) {
+//         j = String.fromCharCode(i+65);
+//         $('#ans_'+(i+1)).html(j);
+//     }
+// }
 function change_type(ans_t){//選項設定
     if (ans_t!=="M"){
         $(gb('simple')).show();
@@ -665,14 +665,14 @@ function optnum(v){//選項數擷取
     var type = $('input[name="f_qus_type"]:checked').val();
     change_type(type);
 }
-function opt_num(n, v){//選項數擷取
-    var l = n.length;
-    var newn = n.substring(10);
-    var type = $('#form1').find('#q'+newn).find('#qus_type'+newn).val();
-    //var type = $('#form1 > #q'+newn+' #qus_type'+newn).val();
-    //alert(newn+','+type);
-    change_ans_type('qus_type'+newn,type);
-}
+// function opt_num(n, v){//選項數擷取
+//     var l = n.length;
+//     var newn = n.substring(10);
+//     var type = $('#form1').find('#q'+newn).find('#qus_type'+newn).val();
+//     //var type = $('#form1 > #q'+newn+' #qus_type'+newn).val();
+//     //alert(newn+','+type);
+//     change_ans_type('qus_type'+newn,type);
+// }
 $("#addpoint").on('click', function(){
     document.getElementById('que_pic').src="{{ url('/know/join') }}";
     openframe();
@@ -700,10 +700,6 @@ function close_pic(){
     $('#sets_filed').hide();
     $('#que_pic').hide();
 }
-
-
-
-
 function show_oans(elem){
     var oans = $('#'+elem);
     if (oans.css('display')=='none'){
@@ -715,23 +711,23 @@ function show_oans(elem){
     }
 }
 
-function view_part(v){
-    if(v>''){
-        var part = $('#part');
-        $.getJSON("exsets_part.php", {main:v}, function(data){
-            part.empty();
-            var len = data.data.length;
-            for(var i=0;i<len;i++){
-                part.append(
-                    $('<option>').attr('value', data.data[i]['l']).text(data.data[i]['p'])
-                );
-            }
-        });
-        document.getElementById('partd').style.display = 'inline-block';
-    }else{
-        document.getElementById('partd').style.display = 'none';
-    }
-}
+// function view_part(v){
+//     if(v>''){
+//         var part = $('#part');
+//         $.getJSON("exsets_part.php", {main:v}, function(data){
+//             part.empty();
+//             var len = data.data.length;
+//             for(var i=0;i<len;i++){
+//                 part.append(
+//                     $('<option>').attr('value', data.data[i]['l']).text(data.data[i]['p'])
+//                 );
+//             }
+//         });
+//         document.getElementById('partd').style.display = 'inline-block';
+//     }else{
+//         document.getElementById('partd').style.display = 'none';
+//     }
+// }
 // function get_data2(f_qid,f_type) {
 //     window.open("upvs_2.php?f_qid="+f_qid+"&f_type="+f_type,null,'width=700px,height=500px,resizable=yes,scrollbars=yes,status=yes');
 // }
@@ -793,15 +789,15 @@ function uans(v){
     });
 }
 
-function select_point(){//知識點
-    document.getElementById('que_pic').src="";
-    document.getElementById('que_pic').src="ex_point.php?fkey=6";
-    $('#que_pic').attr('width','100%');
-    $('#que_pic').attr('height',screen.height*0.8);
-    $('#sets_filed .set_all').css('width','90%');
-    $('#sets_filed').show();
+// function select_point(){//知識點
+//     document.getElementById('que_pic').src="";
+//     document.getElementById('que_pic').src="ex_point.php?fkey=6";
+//     $('#que_pic').attr('width','100%');
+//     $('#que_pic').attr('height',screen.height*0.8);
+//     $('#sets_filed .set_all').css('width','90%');
+//     $('#sets_filed').show();
     //var point = window.open("ex_point.php?fkey=6","ex_point","width=1240px,height=600px,resizable=yes,scrollbars=yes,status=yes");
-}
+// }
 // document.onkeydown = function(event){//鎖特定按鍵 116 F15  123 F12
 //     if (event.keyCode == 116){
 //         if (confirm('確定要重新整理?未存檔資料將可能遺失!')){
@@ -816,25 +812,52 @@ function done(){
     action = true;
 }
 function form_check(obj){
-    if (data_check()){
-        alert('請確認無誤');
-        return false;
+    // if (gb('f_grade').value=="" || gb('f_subject').value=="" || gb('f_chapterui').value==""){
+    //     alert("注意題目範圍");
+    //     return false;
+    // }
+    let error = false;
+    if (gb("typeC").checked){
+        let gcrows = Number($(".gtype:checked").val());
+        $(".cg_ans").each(function(){
+            let grows = this.options.length;
+            if (grows===0){
+                error = true;
+                alert("設定錯誤");
+                return false;
+            }
+            if (gcrows===1){
+                if (grows!=1){
+                    error = true;
+                    alert("設定錯誤");
+                    return false;
+                }
+            }
+        });
+        if (error)return false;
+        $(".cg_ans").find("option").each(function(){
+            this.selected = true;
+        });
     }
+    // if (data_check()){
+    //     alert('請確認無誤');
+    //     return false;
+    // }
 }
 function data_check(){
     var no = '';
     var error = false;
     var i = 0;
-    $('#form1 input[name="f_imgsrc[]"]').each(function(){
-        no = this.id;
-        no = no.substring(8);
-        var quetxt = $('#f_quetxt'+no).val();
-        var img = $(this).val();
-        i++;
-        if (quetxt=='' && img==''){
-            error = true;
-        }
-    });
+    // $('#form1 input[name="f_imgsrc[]"]').each(function(){
+    //     no = this.id;
+    //     no = no.substring(8);
+    //     var quetxt = $('#f_quetxt'+no).val();
+    //     var img = $(this).val();
+    //     i++;
+    //     if (quetxt=='' && img==''){
+    //         error = true;
+    //     }
+    // });
     var correct_ans = $('input[name="ans[]"]:checked').val();
     if (correct_ans==null){
         document.getElementById('ans_group_error').innerHTML = '(X) 設定答案';
@@ -848,97 +871,97 @@ function data_check(){
     }else{
         document.getElementById('chapter_error').innerHTML = '';
     }
-    if ($('input[name=f_qus_type]:checked').val()==4){
-        if (i<2){
-            error = true;
-            alert('請增加小題');
-        }
-    }
+    // if ($('input[name=f_qus_type]:checked').val()==4){
+    //     if (i<2){
+    //         error = true;
+    //         alert('請增加小題');
+    //     }
+    // }
     return error;
 }
 var originurl = opener.location.href;
 
-function ao_display(n, v){//編號切換
-    var j ='';
-    var l =n.length;
-    var newn = n.substring(8,l);
-    var num = $('#form1 > #option_num'+newn).val();
-    for (var i=0; i <num; i++) {
-        if (v==0)j = i+1;
-        if (v==1)j = String.fromCharCode(i+65);
-        //alert(j);
-        $('#form1 > #ans'+newn+'_'+(i+1)).html(j);
-    }
-}
-function change_ans_type(ans_q,ans_t){//選項設定
+// function ao_display(n, v){//編號切換
+//     var j ='';
+//     var l =n.length;
+//     var newn = n.substring(8,l);
+//     var num = $('#form1 > #option_num'+newn).val();
+//     for (var i=0; i <num; i++) {
+//         if (v==0)j = i+1;
+//         if (v==1)j = String.fromCharCode(i+65);
+//         //alert(j);
+//         $('#form1 > #ans'+newn+'_'+(i+1)).html(j);
+//     }
+// }
+// function change_ans_type(ans_q,ans_t){//選項設定
     
-    var l = ans_q.length;
-    var newn = ans_q.substring(8);
-    var ans_type = '';
-    var form1 = document.getElementById('form1');
-    //alert(ans_q+','+ans_t);
-    if (ans_t == 1 || ans_t == 3){ans_type = 'radio';}
-    if (ans_t == 2){ans_type = 'checkbox';}
-    $(form1).find('#q'+newn+' > input[name="correct_ans'+newn+'[]"]').each(function(){
-        $(this).attr('type',ans_type);
-        $(this).prop('type',ans_type);
-    });
-    var ans_len = $(form1).find('#q'+newn+' > input[name="correct_ans'+newn+'[]"]').length;
+//     var l = ans_q.length;
+//     var newn = ans_q.substring(8);
+//     var ans_type = '';
+//     var form1 = document.getElementById('form1');
+//     //alert(ans_q+','+ans_t);
+//     if (ans_t == 1 || ans_t == 3){ans_type = 'radio';}
+//     if (ans_t == 2){ans_type = 'checkbox';}
+//     $(form1).find('#q'+newn+' > input[name="correct_ans'+newn+'[]"]').each(function(){
+//         $(this).attr('type',ans_type);
+//         $(this).prop('type',ans_type);
+//     });
+//     var ans_len = $(form1).find('#q'+newn+' > input[name="correct_ans'+newn+'[]"]').length;
 
-    if (ans_t == 3){
-        $(form1).find('#q'+newn+' > tr[name=ans_type'+newn+']').css('display','none');
-        var html = '<label><input name="correct_ans'+newn+'[]" type="radio" value="1" checked>O</label><label><input name="correct_ans'+newn+'[]" type="radio" value="2" checked>X</label>';
-        $(form1).find('#q'+newn+' > #ans_group'+newn).html(html);
-        // $(form1).find('#q'+newn+' > #ans_group'+newn).append(
-        //     $('<label>').append($('<input>').attr({name:'correct_ans'+newn+'[]', type: 'radio', value:'1', checked:true}),'O'),
-        //     $('<label>').append($('<input>').attr({name:'correct_ans'+newn+'[]', type: 'radio', value:'2'}),'X')
-        // );
-    }else{
-        $('tr[name=ans_type'+newn+']').css('display','table-row');
-        var ans_ntype = $('input:radio[name="f_ansopt'+newn+'"]:checked').val();
-        var num = $('#option_num'+newn).val();
-        //alert(num+','+ans_len);
-        //alert(num);
-        var all = num-ans_len;
-        if (ans_len==2){
-            $('#form1 > #ans_group'+newn).html('');
-            var i=0;
-            var j ='';
-            var qtype = '';
-            if (ans_t==2){ qtype = 'checkbox'; }
-            if (ans_t==1){ qtype = 'radio'; }
-            for (i; i <num; i++) {
-                j = i+1;
-                // if (ans_ntype==1)j = String.fromCharCode(i+65);
-                $('#form1 > #ans_group'+newn).append(
-                    $('<label>').append( $('<input>').attr({name:'correct_ans'+newn+'[]', type: qtype, value:i}),$('<font>').attr('id','ans'+newn+'_'+j).text(j))
-                );
-            }
-            ao_display('#form1 f_ansopt'+newn,ans_ntype);
-        }else{
-            switch (true){
-                case all>0:
-                var html = '';
-                    for (i=ans_len; i <num; i++) {
-                        j = i+1;
-                        // if (ans_ntype==1)j = String.fromCharCode(i+65);
-                        html+= '<label><input name="correct_ans'+newn+'[]" type="'+ans_type+'" value="'+j+'"><font id="ans'+newn+'_'+j+'">'+j+'</font></label>';
-                        // $('#form1 > #ans_group'+newn).append(
-                        //     $('<label>').append( $('<input>').attr({name:'correct_ans'+newn+'[]', type: ans_type, value:i}),$('<font>').attr('id','ans'+newn+'_'+j).text(j))
-                        // );
-                    }
-                    $(form1).find('#ans_group'+newn).append(html);
-                    ao_display('f_ansopt'+newn,ans_ntype)
-                    break;
-                case all<0:
-                    for(var i=ans_len; i>num; i--){
-                        $(form1).find('#ans_group'+newn+' label:last').remove();
-                    }
-                    break;
-            }
-        }
-    }
-}
+//     if (ans_t == 3){
+//         $(form1).find('#q'+newn+' > tr[name=ans_type'+newn+']').css('display','none');
+//         var html = '<label><input name="correct_ans'+newn+'[]" type="radio" value="1" checked>O</label><label><input name="correct_ans'+newn+'[]" type="radio" value="2" checked>X</label>';
+//         $(form1).find('#q'+newn+' > #ans_group'+newn).html(html);
+//         // $(form1).find('#q'+newn+' > #ans_group'+newn).append(
+//         //     $('<label>').append($('<input>').attr({name:'correct_ans'+newn+'[]', type: 'radio', value:'1', checked:true}),'O'),
+//         //     $('<label>').append($('<input>').attr({name:'correct_ans'+newn+'[]', type: 'radio', value:'2'}),'X')
+//         // );
+//     }else{
+//         $('tr[name=ans_type'+newn+']').css('display','table-row');
+//         var ans_ntype = $('input:radio[name="f_ansopt'+newn+'"]:checked').val();
+//         var num = $('#option_num'+newn).val();
+//         //alert(num+','+ans_len);
+//         //alert(num);
+//         var all = num-ans_len;
+//         if (ans_len==2){
+//             $('#form1 > #ans_group'+newn).html('');
+//             var i=0;
+//             var j ='';
+//             var qtype = '';
+//             if (ans_t==2){ qtype = 'checkbox'; }
+//             if (ans_t==1){ qtype = 'radio'; }
+//             for (i; i <num; i++) {
+//                 j = i+1;
+//                 // if (ans_ntype==1)j = String.fromCharCode(i+65);
+//                 $('#form1 > #ans_group'+newn).append(
+//                     $('<label>').append( $('<input>').attr({name:'correct_ans'+newn+'[]', type: qtype, value:i}),$('<font>').attr('id','ans'+newn+'_'+j).text(j))
+//                 );
+//             }
+//             ao_display('#form1 f_ansopt'+newn,ans_ntype);
+//         }else{
+//             switch (true){
+//                 case all>0:
+//                 var html = '';
+//                     for (i=ans_len; i <num; i++) {
+//                         j = i+1;
+//                         // if (ans_ntype==1)j = String.fromCharCode(i+65);
+//                         html+= '<label><input name="correct_ans'+newn+'[]" type="'+ans_type+'" value="'+j+'"><font id="ans'+newn+'_'+j+'">'+j+'</font></label>';
+//                         // $('#form1 > #ans_group'+newn).append(
+//                         //     $('<label>').append( $('<input>').attr({name:'correct_ans'+newn+'[]', type: ans_type, value:i}),$('<font>').attr('id','ans'+newn+'_'+j).text(j))
+//                         // );
+//                     }
+//                     $(form1).find('#ans_group'+newn).append(html);
+//                     ao_display('f_ansopt'+newn,ans_ntype)
+//                     break;
+//                 case all<0:
+//                     for(var i=ans_len; i>num; i--){
+//                         $(form1).find('#ans_group'+newn+' label:last').remove();
+//                     }
+//                     break;
+//             }
+//         }
+//     }
+// }
 
 // function remove_point(){
 //     var point = document.getElementById('point_content');
@@ -962,26 +985,26 @@ function change_ans_type(ans_q,ans_t){//選項設定
 //         });
 //     }
 // }
-function remove_q(no){
-    if (confirm('確定移除?')){
-        $('#nq'+no).remove();
-        $('#q'+no).remove();
-        var no_sub = $('#form1 div label.no a');
-        no_sub.each(function(i){
-            $(this).text('第'+(i+1)+'小題');
-            num = (i+1);    
-        });
-        if (no_sub.length==0){
-            no = 1;
-            num = 1;
-        }else{
-            num++;
-        }
-        if (num<11){
-            $('#more_btn').show();
-        }
-    }
-}
+// function remove_q(no){
+//     if (confirm('確定移除?')){
+//         $('#nq'+no).remove();
+//         $('#q'+no).remove();
+//         var no_sub = $('#form1 div label.no a');
+//         no_sub.each(function(i){
+//             $(this).text('第'+(i+1)+'小題');
+//             num = (i+1);    
+//         });
+//         if (no_sub.length==0){
+//             no = 1;
+//             num = 1;
+//         }else{
+//             num++;
+//         }
+//         if (num<11){
+//             $('#more_btn').show();
+//         }
+//     }
+// }
 function oc(id){
     var cont = $('#'+id+'content');
     if (cont.css('display')=='block'){
@@ -992,87 +1015,90 @@ function oc(id){
         $('#'+id+'oc_pic').prop('src','open.png');
     }
 }
-function more_one(){
-    $('input[name="default_f_ansopt[]"]')[0].checked = true;
-    $('input[name="default_f_degree"]')[0].checked = true;
-    $('input[name="default_correct_ans[]"]')[0].checked = true;
-    $('#more').append(
-        $('<div>').prop({class:'title',id:'nq'+no}).append(
-            $('<input>').prop({type:'hidden',name:'no[]',value:no}),
-            $('<input>').prop({type:'hidden',name:'sub_qid[]'}),
-            $('<label>').prop({class:'f17 no'}).html('<a href="javascript:void(0)" onClick="oc('+no+')">第'+num+'小題</a>'),
-            $('<img>').attr({id:no+'oc_pic',class:'title_pic',src:'open.png',height:'20'}),
-            $('<label>').prop({class:'f15',style:'margin-right:10px; float:right;'}).html('<a href="javascript:void(0);" onclick="remove_q('+no+')">移除(X)</a>')
-        )
-    );
-    $('#add').clone(true).attr('id','q'+no).appendTo($('#more'));
-    var newq = $('#q'+no);
-    newq.css('display','block');
-    newq.find('.content').attr('id',no+'content');
-    newq.find('#default_qus_type').prop({name:'qus_type[]',id:'qus_type'+no}).end()
-        //設定區
-        .find('tr[name="default_ans_type"]').attr('name','ans_type'+no).end()
-        .find('input[name="default_f_ansopt[]"]').prop('name','f_ansopt'+no).end()
-        .find('#default_option_num').prop({name:'option_num[]',id:'option_num'+no}).end()
-        .find('#default_ans_group').prop('id','ans_group'+no).end()
-        .find('input[name="default_correct_ans[]"]').prop('name','correct_ans'+no+'[]').end()
-        .find('input[name="default_f_degree"]').prop('name','f_degree'+no).end()
-        //題目區
-        .find('#default_imgsrc_btn_qus').prop({id:'imgsrc_btn_qus'+no}).end()
-        .find('#default_imgsrc_btn_prequs').prop({id:'imgsrc_btn_prequs'+no}).end()
-        .find('#default_f_quetxt').prop({name:'f_quetxt[]',id:'f_quetxt'+no}).end()
-        .find('#default_f_imgsrc').prop({name:'f_imgsrc[]',id:'f_imgsrc'+no}).end()
-        //編輯區
-        .find('#default_imgsrc_content').prop({id:'q'+no+'_imgsrc_content'}).end()
-        .find('#default_imgsol_content').prop({id:'q'+no+'_imgsol_content'}).end()
-        .find('#default_imgsols_content').prop({id:'q'+no+'_imgsols_content'}).end()
-        .find('#default_imgsolv_content').prop({id:'q'+no+'_imgsolv_content'}).end()
-        //詳解區
-        .find('#default_f_anstxt').prop({name:'f_anstxt[]',id:'f_anstxt'+no}).end()
-        .find('#default_imgsol_btn_ans').prop({id:'imgsol_btn_ans'+no}).end()
-        .find('#default_imgsol_btn_preans').prop({id:'imgsol_btn_preans'+no}).end()
-		.find('#default_imgsols_btn').prop({id:'imgsols_btn'+no}).end()
-		.find('#default_imgsolv_btn').prop({id:'imgsolv_btn'+no}).end()
-        .find('#default_f_imgsol').prop({name:'f_imgsol[]',id:'f_imgsol'+no}).end()
-        .find('#default_f_imgsols').prop({name:'f_imgsols[]',id:'f_imgsols'+no}).end()
-        .find('#default_f_imgsolv').prop({name:'f_imgsolv[]',id:'f_imgsolv'+no}).end()
-        .find('#default_oans').prop({id:'oans'+no}).end()
-        .find('#default_pic_oans').prop({id:'pic_oans'+no}).end()
-        .find('#default_oans_control').attr({id:'oans_control'+no,onclick:"show_oans('oans"+no+"')"});
-    for (var i=1;i<=4;i++){
-        newq.find('#default_ans_'+i).prop('id','ans'+no+'_'+i).end();
-    }
-    if (num==10){
-        $('#more_btn').hide();
-    }
-    no++;
-    num++;
-}
+// function more_one(){
+//     $('input[name="default_f_ansopt[]"]')[0].checked = true;
+//     $('input[name="default_f_degree"]')[0].checked = true;
+//     $('input[name="default_correct_ans[]"]')[0].checked = true;
+//     $('#more').append(
+//         $('<div>').prop({class:'title',id:'nq'+no}).append(
+//             $('<input>').prop({type:'hidden',name:'no[]',value:no}),
+//             $('<input>').prop({type:'hidden',name:'sub_qid[]'}),
+//             $('<label>').prop({class:'f17 no'}).html('<a href="javascript:void(0)" onClick="oc('+no+')">第'+num+'小題</a>'),
+//             $('<img>').attr({id:no+'oc_pic',class:'title_pic',src:'open.png',height:'20'}),
+//             $('<label>').prop({class:'f15',style:'margin-right:10px; float:right;'}).html('<a href="javascript:void(0);" onclick="remove_q('+no+')">移除(X)</a>')
+//         )
+//     );
+//     $('#add').clone(true).attr('id','q'+no).appendTo($('#more'));
+//     var newq = $('#q'+no);
+//     newq.css('display','block');
+//     newq.find('.content').attr('id',no+'content');
+//     newq.find('#default_qus_type').prop({name:'qus_type[]',id:'qus_type'+no}).end()
+//         //設定區
+//         .find('tr[name="default_ans_type"]').attr('name','ans_type'+no).end()
+//         .find('input[name="default_f_ansopt[]"]').prop('name','f_ansopt'+no).end()
+//         .find('#default_option_num').prop({name:'option_num[]',id:'option_num'+no}).end()
+//         .find('#default_ans_group').prop('id','ans_group'+no).end()
+//         .find('input[name="default_correct_ans[]"]').prop('name','correct_ans'+no+'[]').end()
+//         .find('input[name="default_f_degree"]').prop('name','f_degree'+no).end()
+//         //題目區
+//         .find('#default_imgsrc_btn_qus').prop({id:'imgsrc_btn_qus'+no}).end()
+//         .find('#default_imgsrc_btn_prequs').prop({id:'imgsrc_btn_prequs'+no}).end()
+//         .find('#default_f_quetxt').prop({name:'f_quetxt[]',id:'f_quetxt'+no}).end()
+//         .find('#default_f_imgsrc').prop({name:'f_imgsrc[]',id:'f_imgsrc'+no}).end()
+//         //編輯區
+//         .find('#default_imgsrc_content').prop({id:'q'+no+'_imgsrc_content'}).end()
+//         .find('#default_imgsol_content').prop({id:'q'+no+'_imgsol_content'}).end()
+//         .find('#default_imgsols_content').prop({id:'q'+no+'_imgsols_content'}).end()
+//         .find('#default_imgsolv_content').prop({id:'q'+no+'_imgsolv_content'}).end()
+//         //詳解區
+//         .find('#default_f_anstxt').prop({name:'f_anstxt[]',id:'f_anstxt'+no}).end()
+//         .find('#default_imgsol_btn_ans').prop({id:'imgsol_btn_ans'+no}).end()
+//         .find('#default_imgsol_btn_preans').prop({id:'imgsol_btn_preans'+no}).end()
+// 		.find('#default_imgsols_btn').prop({id:'imgsols_btn'+no}).end()
+// 		.find('#default_imgsolv_btn').prop({id:'imgsolv_btn'+no}).end()
+//         .find('#default_f_imgsol').prop({name:'f_imgsol[]',id:'f_imgsol'+no}).end()
+//         .find('#default_f_imgsols').prop({name:'f_imgsols[]',id:'f_imgsols'+no}).end()
+//         .find('#default_f_imgsolv').prop({name:'f_imgsolv[]',id:'f_imgsolv'+no}).end()
+//         .find('#default_oans').prop({id:'oans'+no}).end()
+//         .find('#default_pic_oans').prop({id:'pic_oans'+no}).end()
+//         .find('#default_oans_control').attr({id:'oans_control'+no,onclick:"show_oans('oans"+no+"')"});
+//     for (var i=1;i<=4;i++){
+//         newq.find('#default_ans_'+i).prop('id','ans'+no+'_'+i).end();
+//     }
+//     if (num==10){
+//         $('#more_btn').hide();
+//     }
+//     no++;
+//     num++;
+// }
 $("#more_opt").on('click', function(){
-    let rows = $(".opt").length;
+    let rows = document.querySelectorAll(".opt").length;
     let html = '<div id="opt'+(rows+1)+'"><input type="checkbox" class="opt"><label class="opt_no">'+(rows+1)+'. </label><input type="text" class="opt_txt" name="opttxt[]"></div>';
     $("#opt_range").append(html);
 });
 $("#remove_opt").on('click', function(){
-    let rows = $(".opt").length;
-    $("#opt"+rows).remove();
+    let rows = document.querySelectorAll(".opt").length;
+    document.getElementById('opt'+rows).remove();
     if (rows===1)return;
-    $(".cg_ans").each(function(){
-        $(this).find("option").each(function(){
-            if (this.value==(rows-1)){
-                $(this).remove();
+    let cg_ans = document.querySelectorAll(".cg_ans");
+    cg_ans.forEach(function(ele){
+        for (i = ele.options.length-1; i>=0; i--){
+            let optdel = ele.options[i];
+            if (Number(optdel.value)===(rows-1)){
+                ele.remove(i);
+                continue;
             }
-        });
+        }
     });
 });
 $("#more_cgroup").on('click', function(){
-    let rows = $(".cgroup").length;
+    let rows = document.querySelectorAll(".cgroup").length;
     let html = '<div id="cg'+(rows+1)+'" style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別'+(rows+1)+'"></div><div><input type="button" name="joino" class="btn_joino" data-id="'+(rows+1)+'" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="'+(rows+1)+'" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans'+(rows+1)+'[]"></select></div></div>';
     $("#cgroup_range").append(html);
 });
 $("#remove_cgroup").on('click', function(){
-    let rows = $(".cgroup").length;
-    $("#cg"+rows).remove();
+    let rows = document.querySelectorAll(".cgroup").length;
+    document.getElementById('cg'+rows).remove();
 });
 
 $("#cgroup_range").on('click', ".btn_joino", function(){

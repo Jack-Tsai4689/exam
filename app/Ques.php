@@ -36,9 +36,10 @@ class Ques extends Model
 		'q_know',
 		'q_num',
 		'q_cgroup',
-		'q_cans'
+		'q_cans',
+		'q_cmatch'
 	];
-
+	// q_cgroup, q_cans, q_cmatch 配合題用
 	public function gra(){
 		return $this->belongsto(Gscs::class, 'q_gra')->select('g_name as name');
 	}

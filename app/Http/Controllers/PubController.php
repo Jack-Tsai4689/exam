@@ -288,7 +288,7 @@ class PubController extends TopController
                     'p_updated_at' => time(),
                 ]);
                 //題目
-                $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know')
+                $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know','q_cgroup','q_cans','q_cmatch')
                               ->where('sq_part', $s->s_id)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
@@ -319,13 +319,16 @@ class PubController extends TopController
                         'pq_chap' => $q->q_chap,
                         'pq_created_at' => time(),
                         'pq_updated_at' => time(),
-                        'pq_know' => $q->q_know
+                        'pq_know' => $q->q_know,
+                        'pq_cgroup' => $q->q_cgroup,
+                        'pq_cans' => $q->q_cans,
+                        'pq_cmatch' => $q->q_cmatch
                     ]);
                 }
             }
         }else{
             //題目
-            $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know')
+            $que = Setsque::select('sq_qid','q_ans','q_num','q_quetype','q_quetxt','q_qm_src','q_qm_name','q_qs_src','q_qs_name','q_anstxt','q_am_src','q_am_name','q_as_src','q_as_name','q_av_src','q_av_name','q_degree','q_gra','q_subj','q_chap','q_know','q_cgroup','q_cans','q_cmatch')
                               ->where('sq_sid', $sid)
                               ->join('ques', 'ques.q_id','=','setsque.sq_qid')
                               ->orderby('sq_sort')->get()->all();
@@ -356,7 +359,10 @@ class PubController extends TopController
                     'pq_chap' => $q->q_chap,
                     'pq_created_at' => time(),
                     'pq_updated_at' => time(),
-                    'pq_know' => $q->q_know
+                    'pq_know' => $q->q_know,
+                    'pq_cgroup' => $q->q_cgroup,
+                    'pq_cans' => $q->q_cans,
+                    'pq_cmatch' => $q->q_cmatch
                 ]);
             }
         }
@@ -381,7 +387,6 @@ class PubController extends TopController
                     }
                 }
             }
-
         }else{
             //指定班別
             Pubcas::create([

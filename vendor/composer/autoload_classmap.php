@@ -12,6 +12,7 @@ return array(
     'AlterKnow' => $baseDir . '/database/migrations/2018_02_01_222725_alter_know.php',
     'AlterKnowPic' => $baseDir . '/database/migrations/2018_03_07_004732_alter_know_pic.php',
     'AlterPubquesKnow' => $baseDir . '/database/migrations/2018_03_22_220819_alter_pubques_know.php',
+    'AlterPubquesTypec' => $baseDir . '/database/migrations/2018_03_28_115330_alter_pubques_typec.php',
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
     'AlterQuesImg' => $baseDir . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',

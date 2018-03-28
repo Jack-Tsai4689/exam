@@ -187,6 +187,14 @@
         #qimg_content, .qimg_content {
             display: inline-block;
         }
+        .remove_sub {
+            float: right;
+            margin-right: 5px;
+            font-size: 30px;
+            height: 27px;
+            line-height: 27px;
+            cursor: pointer;
+        }
 	</style>
 </head>
 <body>
@@ -202,7 +210,7 @@
                 </tr>
                 <tr class="shallow">
                     <td align="right">題組說明</td>
-                    <td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value=""></textarea>
+                    <td width="80%"><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value=""></textarea>
                     <br>
                         <input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG
                     <br>
@@ -220,94 +228,38 @@
                     </td>
                 </tr>
                 <tr>
-                    <td align="left" colspan="2"><label class="f17">範圍</label><font color="green">*確實設定範圍，在學生的診斷報告中，較可以準確分析學生「較強」或「較弱」是哪些</font></td>
+                    <td align="left"><label class="f17">範圍</label></td>
+                    <td><label><input type="checkbox" onclick="all_set(this)">統一設定</label></td>
                 </tr>
-                <tr class="deep">
+                <tr class="deep allgsc hiden">
                     <td align="right">年級<font color="red">＊</font></td>
-                    <td width="80%">
-                        <div class="ui-widget">
-                            <select class="f_grade" name="f_chapterui">
-                                <option value=""></option>{!! $Q_Grade !!}
-                            </select>
-                            <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
-                        </div>
-                        {{-- <select name="f_grade" id="f_grade" onchange="subj_c(this.value,'qm')">{!! $Q_Grade !!}</select> --}}
+                    <td>
+                        <select class="grade" name="grade" id="grade0" onchange="subj_c(this)">{!! $Q_Grade !!}</select>
                     </td>
                 </tr>
-                <tr class="shallow">
+                <tr class="shallow allgsc hiden">
                     <td align="right">科目<font color="red">＊</font></td>
                     <td id="subj">
-                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value,'qm')">{!! $Q_Subject !!}</select>
+                        <select class="subject" name="subject" id="subject0" onchange="chap_c(this)">{!! $Q_Subject !!}</select>
                     </td>
                 </tr>
-                <tr class="deep">
+                <tr class="deep allgsc hiden">
                     <td align="right">章節<font color="red">＊</font></td>
                     <td>
                         <div class="ui-widget">
-                            <select class="f_chapterui" name="f_chapterui">
+                            <select class="chapter" name="f_chapterui" id="chapter0">
                                 <option value=""></option>{!! $Q_Chapter !!}
                             </select>
-                            <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
+                            <label class="chapter_msg" style="margin-left:40px;"></label>
                         </div>
                     </td>
                 </TR>
-                <tr class="shallow">
-                    <TD align="right">難易度</TD>
-                    <td>
-                        <label><input type="radio" name="f_degree1[]" value="E">容易</label>
-                        <label><input type="radio" name="f_degree1[]" value="M">中等</label>
-                        <label><input type="radio" name="f_degree1[]" value="H">困難</label>
-                    </TD>
-                </TR>
+                    </td>
+                </tr>
             </table>
         </div>
     </div>
     <div id="more">
-        <div id="q0"><div class="title"><label class="f17 no">第0小題</label></div><div class="content"><div class="cen"><table class="list" border="0" width="100%" cellpadding="0" cellspacing="0"><tr><td align="left"><label class="f17">題目</label></td><td></td></tr><tr class="deep">
-                    <td align="right">題型<font color="red">＊</font></td>
-                    <td width="80%">
-                        <label><input type="radio" name="f_qus_type" id="typeS" checked value="S" onchange="change_type(this.value)">單選題</label>
-                        <label><input type="radio" name="f_qus_type" id="typeD" value="D" onchange="change_type(this.value)">複選題</label>
-                        <label><input type="radio" name="f_qus_type" id="typeR" value="R" onchange="change_type(this.value)">是非題</label>
-                    </td>
-                </tr><tr class="shallow"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow" class="ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum(this)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans0[]" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans0[]" value="2"><font id="ans_2">B</font></label></div><label id="ans_group_error" class="error_msg"></label></td></tr>
-                <tr>
-                    <td align="left" colspan="2"><label class="f17">範圍</label><font color="green">*確實設定範圍，在學生的診斷報告中，較可以準確分析學生「較強」或「較弱」是哪些</font></td>
-                </tr>
-                <tr class="deep">
-                    <td align="right">年級<font color="red">＊</font></td>
-                    <td width="80%">
-                        <select name="f_grade" id="f_grade" onchange="subj_c(this.value,'qm')">{!! $Q_Grade !!}</select>
-                    </td>
-                </tr>
-                <tr class="shallow">
-                    <td align="right">科目<font color="red">＊</font></td>
-                    <td id="subj">
-                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value,'qm')">{!! $Q_Subject !!}</select>
-                    </td>
-                </tr>
-                <tr class="deep">
-                    <td align="right">章節<font color="red">＊</font></td>
-                    <td>
-                        <div class="ui-widget">
-                            <select class="f_chapterui" name="f_chapterui">
-                                <option value=""></option>{!! $Q_Chapter !!}
-                            </select>
-                            <label id="chapter_error" class="error_msg" style="margin-left:40px;"></label>
-                        </div>
-                    </td>
-                </TR>
-                <tr class="shallow">
-                    <TD align="right">難易度</TD>
-                    <td>
-                        <label><input type="radio" name="f_degree1[]" value="E">容易</label>
-                        <label><input type="radio" name="f_degree1[]" value="M">中等</label>
-                        <label><input type="radio" name="f_degree1[]" value="H">困難</label>
-                    </TD>
-                </TR>
-                <tr><td><label class="f17 oans_control" id="oans_control0" onclick="show_oans(\'oans0\')">詳解<img class="oans_pic" id="pic_oans0" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans0"><tr class="deep"><td align="right">文字說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea></td></tr><tr class="shallow"><td align="right">圖片檔</td><td><input type="hidden" id="f_imgsol0" name="f_imgsol[]" value="">格式：JPG/PNG</td></tr><tr class="deep"><TD align="right">聲音檔</TD><td><input type="hidden" id="f_imgsols0" name="f_imgsols[]" value="">格式：MP3</TD></TR><tr class="shallow"><td align="right">影片檔</td><td><input type="hidden" id="f_imgsolv0" name="f_imgsolv[]" value="">格式：MP4</td></tr></table></div>
-            </div>
-        </div>
     </div>
     <div class="title" id="more_btn" onclick="more_one()"><font class="f17">增加小題</font></div>
     <div class="content" style="margin-bottom:50px;">
@@ -348,6 +300,11 @@
 </html>
 <script type="text/javascript">
 //change_type('S');
+let now_range;
+let set_only = false;
+function gbc(v){
+    return document.querySelectorAll(v);
+}
 function show_oans(elem){
     var oans = $('#'+elem);
     if (oans.css('display')=='none'){
@@ -377,7 +334,7 @@ window.focus();
         _createAutocomplete: function() {
             var selected = this.element.children( ":selected" ),
                 value = selected.val() ? selected.text() : "";
-            if(''!=$( "#f_chapter" ).val()&&''==value) value=$( "#f_chapter" ).val();
+            //if(''!=$( "#f_chapter" ).val()&&''==value) value=$( "#f_chapter" ).val();
             this.input = $( "<input>" )
                 .appendTo( this.wrapper )
                 .val( value )
@@ -441,7 +398,7 @@ window.focus();
             }) );
         },
         _removeIfInvalid: function( event, ui ) {
-            $( "#f_chapter" ).val(this.input.val());
+           // $( "#f_chapter" ).val(this.input.val());
         },
         _destroy: function() {
            this.wrapper.remove();
@@ -449,55 +406,100 @@ window.focus();
         }
     });
 })( jQuery );
-    
-$(function() {
-    $( ".f_chapterui" ).combobox();
-    $( ".f_grade" ).combobox();    
+// $("#more").ready(function(){
+//     $(".chapter").combobox();
+// });
+
+$("#more").ready(function() {
+    $(".chapter").combobox();
+    // $( ".f_grade" ).combobox();    
 });
 // function delete_que(){//刪除
 //     if (confirm('刪除後以上您輸入的資料都會消失，您確定要刪除嗎?')){
 //         location.href="ex_md.php?act=delete";
 //     }
 // }
+function all_set(obj){
+    set_only = obj.checked;
+    range_set();
+}
+function range_set(){
+    if (set_only){
+        $(".gsc").addClass('hiden');
+        $(".allgsc").removeClass('hiden');
+    }else{
+        $(".gsc").removeClass('hiden');
+        $(".allgsc").addClass('hiden');
+    }
+}
 var rows_m = 1;
-function subj_c(v){
+function subj_c(obj){
+    let ind = $(".grade").index(obj);
     $.ajax({
         type:"GET",
         url:"{{ url('/basic/detail') }}",
         dataType:"JSON",
-        data:{'type':'subj', 'g':v},
+        data:{'alt':'info', 'type':'subj', 'g':obj.value},
         success: function(rs){
-            $("#f_subject").html('');
+            gbc(".subject")[ind].innerHTML = '';
+            // $(".subject")[ind].innerHTML = '';
+            // gb('subject'+ind).innerHTML = '';
             let html = '';
             for(let i in rs){
                 html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
-            $("#f_subject").html(html);
-            chap_c(gb('f_subject').value);
+            gbc(".subject")[ind].innerHTML = html;
+            // $(".subject")[ind].innerHTML = html;
+            // gb('subject'+ind).innerHTML = html;
+            chap_c(gbc(".subject")[ind]);
         },
-        error: function(){
-            gb('f_subject').innerHTML = '<option value="0">無科目</optoin>';
-            gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>';
+        error: function(rs){
+            switch(rs.status){
+                case 400: alert('例外錯誤'); break;
+                case 401: alert('登入逾時，請重新登入'); break;
+                case 406: 
+                    gbc(".subject")[ind].innerHTML = '<option value="">無資料</option>'; 
+                    gbc(".chapter")[ind].innerHTML = '';
+                    $('.custom-combobox-input')[ind].value = '';
+                    gbc(".chapter_msg")[ind].innerHTML = '無資料'; 
+                    break;
+            }
         }
     });
 }
-function chap_c(v){
-    $('.custom-combobox-input').val('');
-    $('#f_chapterui').empty();
+function chap_c(obj){
+    let ind = $(".subject").index(obj);
+    $('.custom-combobox-input')[ind].value = '';
+    // $('#f_chapterui').empty();
     $.ajax({
         type:"GET",
         url:"{{ url('/basic/detail') }}",
         dataType:"JSON",
-        data:{'type':'chap', 'g':gb('f_grade').value, 's':v},
+        data:{'alt':'info', 'type':'chap', 'g':gb('grade'+ind).value, 's':obj.value},
         success: function(rs){
+            gbc(".chapter")[ind].innerHTML = '';
+            // gb('chapter'+ind).innerHTML = '';
             let html = '';
             for(let i in rs){
                 html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
-            $("#f_chapterui").html(html);
+            gbc(".chapter")[ind].innerHTML = html;
+            gbc(".chapter_msg")[ind].innerHTML = '';
+            // gb('chapter'+ind).innerHTML = html;
+            // gb('chapter'+ind+'_msg').innerHTML = ''; 
         },
-        error: function(){
-            gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>';
+        error: function(rs){
+            switch(rs.status){
+                case 400: alert('例外錯誤'); break;
+                case 401: alert('登入逾時，請重新登入'); break;
+                case 406: 
+                    gbc(".chapter")[ind].innerHTML = '';
+                    // gb('chapter'+ind).innerHTML = ''; 
+                    $('.custom-combobox-input')[ind].value = '';
+                    gbc(".chapter_msg")[ind].innerHTML = '無資料'; 
+                    // gb('chapter'+ind+'_msg').innerHTML = '無資料'; 
+                    break;
+            }
         }
     });
 }
@@ -722,29 +724,6 @@ function rem(elem,no){
         });
     }
 }
-
-var no = 1,
-    num = 2;
-function remove_q(no){
-    if (confirm('確定移除?')){
-        $('#nq'+no).remove();
-        $('#q'+no).remove();
-        var no_sub = $('#form1 div label.no a');
-        no_sub.each(function(i){
-            $(this).text('第'+(i+1)+'小題');
-            num = (i+1);    
-        });
-        if (no_sub.length==0){
-            no = 1;
-            num = 1;
-        }else{
-            num++;
-        }
-        if (num<11){
-            $('#more_btn').show();
-        }
-    }
-}
 function oc(id){
     var cont = $('#'+id+'content');
     if (cont.css('display')=='block'){
@@ -755,12 +734,27 @@ function oc(id){
         $('#'+id+'oc_pic').prop('src',"{{ URL::asset('img/open.png') }}");
     }
 }
+let sub_nums = 1;
+let sub_no = 1;
 function more_one(){
-    $("#more").append('<div id="q'+no+'"><div class="title"><label class="f17 no">第'+no+'小題</label></div><div class="content"><div class="cen"><table class="list" border="0" width="100%" cellpadding="0" cellspacing="0"><tr><td align="left"><label class="f17">題目</label></td><td></td></tr><tr class="deep"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow" class="ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum(this)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans'+no+'[]" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans'+no+'[]" value="2"><font id="ans_2">B</font></label></div><label id="ans_group_error" class="error_msg"></label></td></tr><tr class="deep math"><td align="right">選項題數<font color="red">＊</font></td><td width="80%"><select name="num" id="num" onchange="num_change(this.value)"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="shallow math"><td align="right">正確解答<font color="red">＊</font></td><td class="correct_ans_math"><div id="a1"><span>No.1</span><label><input type="radio" name="ans1" value="1">1</label><label><input type="radio" name="ans1" value="2">2</label><label><input type="radio" name="ans1" value="3">3</label><label><input type="radio" name="ans1" value="4">4</label><label><input type="radio" name="ans1" value="5">5</label><label><input type="radio" name="ans1" value="6">6</label><label><input type="radio" name="ans1" value="7">7</label><label><input type="radio" name="ans1" value="8">8</label><label><input type="radio" name="ans1" value="9">9</label><label><input type="radio" name="ans1" value="0">0</label><label><input type="radio" name="ans1" value="a">-</label><label><input type="radio" name="ans1" value="b">±</label></div></td></tr><tr><td><label class="f17 oans_control" id="oans_control'+no+'" onclick="show_oans(\'oans'+no+'\')">詳解<img class="oans_pic" id="pic_oans'+no+'" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans'+no+'"><tr class="deep"><td align="right">文字說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea></td></tr><tr class="shallow"><td align="right">圖片檔</td><td><input type="hidden" id="f_imgsol'+no+'" name="f_imgsol[]" value="">格式：JPG/PNG</td></tr><tr class="deep"><TD align="right">聲音檔</TD><td><input type="hidden" id="f_imgsols'+no+'" name="f_imgsols[]" value="">格式：MP3</TD></TR><tr class="shallow"><td align="right">影片檔</td><td><input type="hidden" id="f_imgsolv'+no+'" name="f_imgsolv[]" value="">格式：MP4</td></tr></table></div></div></div>');
-    if (no==10){
-        $('#more_btn').hide();
-    }
-    no++;
-    num++;
+    sub_no = $("#more > .qpart").length;
+    $("#more").append('<div class="qpart" id="q'+sub_nums+'"><div class="title"><label class="subno f17 no">第'+sub_no+'小題</label><span class="remove_sub">&times;</span></div><div class="content"><div class="cen"><table class="list" border="0" width="100%" cellpadding="0" cellspacing="0"><tr><td align="left"><label class="f17">題目</label></td><td></td></tr><tr class="deep"><td align="right">題型<font color="red">＊</font></td><td width="80%"><label><input type="radio" name="f_qus_type" checked value="S" onchange="change_type(this.value)">單選題</label><label><input type="radio" name="f_qus_type" value="D" onchange="change_type(this.value)">複選題</label><label><input type="radio" name="f_qus_type" value="R" onchange="change_type(this.value)">是非題</label></td></tr><tr class="deep"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br><input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br><input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow" class="ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum(this)"><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans'+sub_nums+'[]" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans'+sub_nums+'[]" value="2"><font id="ans_2">B</font></label></div><label id="ans_group_error" class="error_msg"></label></td></tr><tr class="deep math"><td align="right">選項題數<font color="red">＊</font></td><td width="80%"><select name="num" id="num" onchange="num_change(this.value)"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="shallow math"><td align="right">正確解答<font color="red">＊</font></td><td class="correct_ans_math"><div id="a1"><span>No.1</span><label><input type="radio" name="ans1" value="1">1</label><label><input type="radio" name="ans1" value="2">2</label><label><input type="radio" name="ans1" value="3">3</label><label><input type="radio" name="ans1" value="4">4</label><label><input type="radio" name="ans1" value="5">5</label><label><input type="radio" name="ans1" value="6">6</label><label><input type="radio" name="ans1" value="7">7</label><label><input type="radio" name="ans1" value="8">8</label><label><input type="radio" name="ans1" value="9">9</label><label><input type="radio" name="ans1" value="0">0</label><label><input type="radio" name="ans1" value="a">-</label><label><input type="radio" name="ans1" value="b">±</label></div></td></tr><tr class="gsc"><td align="left" colspan="2"><label class="f17">範圍</label></td></tr><tr class="deep gsc"><td align="right">年級<font color="red">＊</font></td><td width="80%"><select class="grade" name="grade" id="grade'+sub_nums+'" onchange="subj_c(this)">{!! $Q_Grade !!}</select></td></tr><tr class="shallow gsc"><td align="right">科目<font color="red">＊</font></td><td><select class="subject" name="f_subject" id="subject'+sub_nums+'" onchange="chap_c(this)">{!! $Q_Subject !!}</select></td></tr><tr class="deep gsc"><td align="right">章節<font color="red">＊</font></td><td><div class="ui-widget"><select class="chapter" id="chapter'+sub_nums+'" name="f_chapterui"><option value=""></option>{!! $Q_Chapter !!}</select><label class="chapter_msg" style="margin-left:40px;"></label></div></td></TR><tr class="shallow"><TD align="right">難易度</TD><td><label><input type="radio" name="f_degree1[]" value="E">容易</label><label><input type="radio" name="f_degree1[]" value="M">中等</label><label><input type="radio" name="f_degree1[]" value="H">困難</label></TD></TR><tr><td><label class="f17 oans_control" id="oans_control'+sub_nums+'" onclick="show_oans(\'oans'+sub_nums+'\')">詳解<img class="oans_pic" id="pic_oans'+sub_nums+'" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans'+sub_nums+'"><tr class="deep"><td align="right">文字說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea></td></tr><tr class="shallow"><td align="right">圖片檔</td><td><input type="hidden" id="f_imgsol'+sub_nums+'" name="f_imgsol[]" value="">格式：JPG/PNG</td></tr><tr class="deep"><TD align="right">聲音檔</TD><td><input type="hidden" id="f_imgsols'+sub_nums+'" name="f_imgsols[]" value="">格式：MP3</TD></TR><tr class="shallow"><td align="right">影片檔</td><td><input type="hidden" id="f_imgsolv'+sub_nums+'" name="f_imgsolv[]" value="">格式：MP4</td></tr></table></div></div></div>');
+    $(function() {
+        $('#chapter'+sub_nums).combobox();
+        range_set();
+    });    
+    if (sub_no===10)$('#more_btn').hide();
+    sub_nums++;
+
 }
+$("#more").on('click', ".remove_sub", function(){
+    if (confirm('確定移除？')){
+        let qpart = this.parentElement.parentElement;
+        sub_no--;
+        $(qpart).remove();
+        $(".subno").each(function(i){
+            this.innerHTML = '第'+(i+1)+'小題';
+        });
+    }
+});
 </SCRIPT>

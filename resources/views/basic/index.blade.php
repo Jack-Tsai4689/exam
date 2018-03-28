@@ -60,7 +60,13 @@
 			display: none;
 		}
 		.time {
-			width: 300px;
+			width: 200px;
+		}
+		.act {
+			width: 100px;
+		}
+		.owner {
+			width: 150px;
 		}
 		table .btn {
 			margin: 0px;
@@ -127,9 +133,9 @@
 				<thead>
 					<tr>
 						<th class="name">名稱</th>
-						<th class="time">更新者</th>
+						<th class="owner">更新者</th>
 						<th class="time">更新時間</th>
-						<th class="time" style="width:150px;">更名</th>
+						<th class="act">維護</th>
 						<th class="last" >新增科目</th>
 					</tr>
 				</thead>
@@ -156,14 +162,14 @@
 	</div>
 	<div class="content">
 		<div id="cen">
-			<div class="basic_sub">科目</div>
+			<div class="basic_sub">科目</div>　<font color="red" id="subj_empty"></font>
 			<table cellpadding="0" cellspacing="0" width="100%" class="list">
 				<thead>
 					<tr>
 						<th class="name">名稱</th>
-						<th class="time">更新者</th>
+						<th class="owner">更新者</th>
 						<th class="time">更新時間</th>
-						<th class="time" style="width:150px;">更名</th>
+						<th class="act">維護</th>
 						<th class="last" >新增章節</th>
 					</tr>
 				</thead>
@@ -173,16 +179,16 @@
 	</div>
 	<div class="content">
 		<div id="cen">
-			<div class="basic_sub">章節</div>
+			<div class="basic_sub">章節</div>　<font color="red" id="chap_emtpy"></font>
 				<input type="hidden" name="graid" id="cgraid" value="">
 				<input type="hidden" name="subjid" id="subjid" value="">
 			<table cellpadding="0" cellspacing="0" width="100%" class="list">
 				<thead>
 					<tr>
 						<th class="name">名稱</th>
-						<th class="time">更新者</th>
+						<th class="owner">更新者</th>
 						<th class="time">更新時間</th>
-						<th class="last" style="width:150px;">維護</th>
+						<th class="act last">維護</th>
 					</tr>
 				</thead>
 				<tbody id="chaplist"></tbody>
@@ -271,8 +277,8 @@
 @stop
 @section('script')
 <script type="text/javascript">
-var g = 0;
-var s = 0;
+let g = 0;
+let s = 0;
 function ngra(obj){
 	if (gb('graname').value=="")return false;
 	act_start();
@@ -322,6 +328,7 @@ function nsubj(obj){
 			}
 			obj.subjname.value = '';
 			alert('新增成功');
+			gb('subj_empty').innerHTML = '';
 			act_end();
 		},
 		error: function(rs){
@@ -349,6 +356,7 @@ function nchap(obj){
 				gb('chaplist').innerHTML = html;
 			}
 			alert('新增成功');
+			gb('chap_emtpy').innerHTML = '';
 			obj.chapname.value = '';
 			act_end();
 		},
@@ -366,11 +374,14 @@ $("#gralist").on("click", ".gc", function(){
 	g = $(this).data("id");
 	gb('usg').value = g;
 	gb('ucg').value = g;
+	gb('subj_empty').innerHTML = '';
+	gb('chap_emtpy').innerHTML = '';
+	s = 0;
 	act_start();
 	$.ajax({
 		type:"GET",
 		url:"{{ url('basic/detail') }}",
-		data:{'type':'subj', g:g},
+		data:{'alt':'set','type':'subj', g:g},
 		dataType:"JSON",
 		success: function(rs){
 			var html = '';
@@ -384,10 +395,15 @@ $("#gralist").on("click", ".gc", function(){
 			act_end();
 		},
 		error: function(rs){
-			if (rs.status==401)alert('登入逾時，請重新登入');
-			if (rs.status==400){
-				gb('subjlist').innerHTML = '';
-				gb('chaplist').innerHTML = '';
+			switch(rs.status){
+				case 400: alert('例外錯誤'); break;
+				case 401: alert('登入逾時，請重新登入'); break;
+				case 406:
+					gb('subjlist').innerHTML = '';
+					gb('chaplist').innerHTML = '';
+					gb('subj_empty').innerHTML = '無資料';
+					gb('chap_emtpy').innerHTML = '無資料';
+					break;
 			}
 			act_end();
 		}
@@ -399,11 +415,12 @@ $("#subjlist").on("click", ".sc", function(){
 	$(tr).addClass('select');
 	s = $(this).data("id");
 	gb('ucs').value = s;
+	gb('chap_emtpy').innerHTML = '';
 	act_start();
 	$.ajax({
 		type:"GET",
 		url:"{{ url('basic/detail') }}",
-		data:{'type':'chap', 'g':g, 's':s},
+		data:{'alt':'set','type':'chap', 'g':g, 's':s},
 		dataType:"JSON",
 		success: function(rs){
 			gb('chaplist').innerHTML = '';
@@ -415,8 +432,14 @@ $("#subjlist").on("click", ".sc", function(){
 			act_end();
 		},
 		error: function(rs){
-			if (rs.status==401)alert('登入逾時，請重新登入');
-			if (rs.status==400)gb('chaplist').innerHTML = '';
+			switch(rs.status){
+				case 400: alert('例外錯誤'); break;
+				case 401: alert('登入逾時，請重新登入'); break;
+				case 406:
+					gb('chaplist').innerHTML = '';
+					gb('chap_emtpy').innerHTML = '無資料';
+					break;
+			}
 			act_end();
 		}
 	});

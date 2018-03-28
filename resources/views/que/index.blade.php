@@ -143,8 +143,11 @@ function getsubj(v){
 			gb('subj').innerHTML = html;
 		},
 		error: function(rs){
-			if (rs.status==401)alert('登入逾時，請重新登入');
-			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+			switch(rs.status){
+				case 400: alert('例外錯誤'); break;
+				case 401: alert('登入逾時，請重新登入'); break;
+				case 406: gb('subj').innerHTML = '<option value="">無資料</option>'; break;
+			}
 		}
 	});
 }
@@ -161,14 +164,19 @@ function getchap(v){
 		dataType:"JSON",
 		success: function(rs){
 			let html = '<option value="0">全部</option>';
+			console.log(rs);
 			for (let i in rs){
+				console.log(rs[i].ID+','+rs[i].NAME);
 				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
 			}
 			gb('chap').innerHTML = html;
 		},
 		error: function(rs){
-			if (rs.status==401)alert('登入逾時，請重新登入');
-			if (rs.status==400)gb('chap').innerHTML = '<option value="">無資料</option>';
+			switch(rs.status){
+				case 400: alert('例外錯誤'); break;
+				case 401: alert('登入逾時，請重新登入'); break;
+				case 406: gb('chap').innerHTML = '<option value="">無資料</option>'; break;
+			}
 		}
 	});
 }

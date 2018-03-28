@@ -257,13 +257,13 @@
                 <tr class="deep">
                     <td align="right">年級<font color="red">＊</font></td>
                     <td width="80%">
-                        <select name="f_grade" id="f_grade" onchange="subj_c(this.value)">{!! $Q_Grade !!}</select>
+                        <select name="f_grade" id="f_grade" onchange="subj_c(this)">{!! $Q_Grade !!}</select>
                     </td>
                 </tr>
                 <tr class="shallow">
                     <td align="right">科目<font color="red">＊</font></td>
                     <td id="subj">
-                        <select name="f_subject" id="f_subject" onchange="chap_c(this.value)">{!! $Q_Subject !!}</select>
+                        <select name="f_subject" id="f_subject" onchange="chap_c(this)">{!! $Q_Subject !!}</select>
                     </td>
                 </tr>
                 <tr class="deep">
@@ -567,12 +567,12 @@ $(function() {
 // }
 let rows_m = 1;
 
-function subj_c(v){
+function subj_c(obj){
     $.ajax({
         type:"GET",
         url:"{{ url('/basic/detail') }}",
         dataType:"JSON",
-        data:{'type':'subj', 'g':v},
+        data:{'type':'subj', 'g':obj.value},
         success: function(rs){
             $("#f_subject").html('');
             let html = '';
@@ -582,20 +582,26 @@ function subj_c(v){
             $("#f_subject").html(html);
             chap_c(gb('f_subject').value);
         },
-        error: function(){
-            gb('f_subject').innerHTML = '<option value="0">無科目</optoin>';
-            gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>';
+        error: function(rs){
+            switch(rs.status){
+                case 400: alert('例外錯誤'); break;
+                case 401: alert('登入逾時，請重新登入'); break;
+                case 406:
+                    gb('f_subject').innerHTML = '<option value="0">無科目</optoin>';
+                    gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; 
+                    break;
+            }
         }
     });
 }
-function chap_c(v){
+function chap_c(obj){
     $('.custom-combobox-input').val('');
     $('#f_chapterui').empty();
     $.ajax({
         type:"GET",
         url:"{{ url('/basic/detail') }}",
         dataType:"JSON",
-        data:{'type':'chap', 'g':gb('f_grade').value, 's':v},
+        data:{'type':'chap', 'g':gb('f_grade').value, 's':obj.value},
         success: function(rs){
             let html = '';
             for(let i in rs){
@@ -603,8 +609,12 @@ function chap_c(v){
             }
             $("#f_chapterui").html(html);
         },
-        error: function(){
-            gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>';
+        error: function(rs){
+            switch(rs.status){
+                case 400: alert('例外錯誤'); break;
+                case 401: alert('登入逾時，請重新登入'); break;
+                case 406: gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; break;
+            }
         }
     });
 }
@@ -945,22 +955,33 @@ function oc(id){
     }
 }
 $("#more_opt").on('click', function(){
-    let rows = $(".opt").length;
+    let rows = document.querySelectorAll(".opt").length;
     let html = '<div id="opt'+(rows+1)+'"><input type="checkbox" class="opt"><label class="opt_no">'+(rows+1)+'. </label><input type="text" class="opt_txt" name="opttxt[]"></div>';
     $("#opt_range").append(html);
 });
 $("#remove_opt").on('click', function(){
-    let rows = $(".opt").length;
-    $("#opt"+rows).remove();
+    let rows = document.querySelectorAll(".opt").length;
+    document.getElementById('opt'+rows).remove();
+    if (rows===1)return;
+    let cg_ans = document.querySelectorAll(".cg_ans");
+    cg_ans.forEach(function(ele){
+        for (i = ele.options.length-1; i>=0; i--){
+            let optdel = ele.options[i];
+            if (Number(optdel.value)===(rows-1)){
+                ele.remove(i);
+                continue;
+            }
+        }
+    });
 });
 $("#more_cgroup").on('click', function(){
-    let rows = $(".cgroup").length;
+    let rows = document.querySelectorAll(".cgroup").length;
     let html = '<div id="cg'+(rows+1)+'" style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別'+(rows+1)+'"></div><div><input type="button" name="joino" class="btn_joino" data-id="'+(rows+1)+'" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="'+(rows+1)+'" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans'+(rows+1)+'[]"></select></div></div>';
     $("#cgroup_range").append(html);
 });
 $("#remove_cgroup").on('click', function(){
-    let rows = $(".cgroup").length;
-    $("#cg"+rows).remove();
+    let rows = document.querySelectorAll(".cgroup").length;
+    document.getElementById('cg'+rows).remove();
 });
 
 $("#cgroup_range").on('click', ".btn_joino", function(){

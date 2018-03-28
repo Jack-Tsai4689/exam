@@ -149,18 +149,34 @@ class BasicController extends TopController
         }
         return $rs;
     }
+    //簡化版 格式化
+    private function _gsclist_info($data){
+        $rs = array();
+        foreach ($data as $v) {
+            $tmp = new \stdClass;
+            $tmp->ID = $v->g_id;
+            $tmp->NAME = $v->g_name;
+            array_push($rs, $tmp);
+        }
+        return $rs;
+    }
     public function ajshow(Request $req){
         if (!$this->login_status)abort(401);
         $error = false;
         $type = ($req->has('type')) ? $req->input('type'):'';
+        $alt = ($req->has('alt') && !empty($req->input('alt'))):'';
         if (empty($type))abort(400);
         switch ($type) {
             case 'subj':
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if ($g===0)abort(400);
                 $subj_data = $this->subject($g);
-                $rs_data = $this->_gsclist_format($subj_data);
-                if (empty($rs_data))abort(400);
+                if ($alt==="info"){
+                    $rs_data = $this->_gsclist_info($subj_data);    
+                }else{
+                    $rs_data = $this->_gsclist_format($subj_data);    
+                }                
+                if (empty($rs_data))abort(406);
                 unset($subj_data);
                 break;
             case 'chap':
@@ -168,8 +184,12 @@ class BasicController extends TopController
                 $s = ($req->has('s')) ? (int)$req->input('s'):0;
                 if ($g===0 || $s===0)abort(400);
                 $chap_data = $this->chapter($g, $s);
-                $rs_data = $this->_gsclist_format($chap_data);
-                if (empty($rs_data))abort(400);
+                if ($alt==="info"){
+                    $rs_data = $this->_gsclist_info($chap_data);
+                }else{
+                    $rs_data = $this->_gsclist_format($chap_data);
+                }
+                if (empty($rs_data))abort(406);
                 unset($chap_data);
                 break;
             default:
@@ -178,7 +198,6 @@ class BasicController extends TopController
         }
         return response()->json($rs_data);
     }
-
     /**
      * Display the specified resource.
      *

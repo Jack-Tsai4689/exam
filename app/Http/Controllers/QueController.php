@@ -98,9 +98,9 @@ class QueController extends TopController
             if ($p_subj>0)$ques = $ques->where('q_subj', $p_subj);
             if ($p_chap>0)$ques = $ques->where('q_chap', $p_chap);
             if (!empty($p_keyword))$ques = $ques->where('q_keyword','like','%|'.$p_keyword.'|%');
-            $que_data = $ques->paginate(10);
+            $que_data = $ques->orderby('q_updated_at','desc')->paginate(10);
         }else{
-            $que_data = Ques::paginate(10);
+            $que_data = Ques::orderby('q_updated_at','desc')->paginate(10);
         }
         foreach ($que_data as $k => $v) {
             
@@ -486,6 +486,7 @@ class QueController extends TopController
         // }
         $cans = '';
         $cgroup = '';
+        $match_mode = 0;
         switch ($que_type) {
             case 'S'://單選
             case 'D'://複選
@@ -671,7 +672,7 @@ class QueController extends TopController
         foreach ($keyword as $v) {
             if (!empty($v))$key[] = $v;
         }
-        $save = [
+        Ques::create([
             'q_quetype' => $que_type,
             'q_quetxt' => $quetxt,
             'q_qm_src' => $qm_src,
@@ -697,13 +698,12 @@ class QueController extends TopController
             'q_updated_at' => time(),
             'q_keyword' => '|'.implode('|', $key).'|',
             'q_cgroup' => $cgroup,
-            'q_cans' => $cans
-        ];
-//         canc
-// cgroup
-        $que_data = new Ques;
-        $que_data->fill($save);
-        $que_data->save();
+            'q_cans' => $cans,
+            'q_cmatch' => $match_mode
+        ]);
+        // $que_data = new Ques;
+        // $que_data->fill($save);
+        // $que_data->save();
         echo '<script>opener.location.reload();window.close();</script>';
     }
 
@@ -830,8 +830,8 @@ class QueController extends TopController
         $que_type->M = '';
         $que_type->G = '';
         $match_type = new \stdClass;
-        $match_type->v1 = 'checked';
-        $match_type->vn = '';
+        $match_type->v1 = ($que->q_cmatch===2) ? '':'checked';
+        $match_type->vn = ($que->q_cmatch===2) ? 'checked':'';
         $ans_html = '';
         $option_num = '';
         $num = '';
@@ -932,12 +932,8 @@ class QueController extends TopController
                 foreach ($cgroup as $ci => $cv) {
                     $data['cg'].= '<div style="display: inline-block;"><div><input type="text" name="cg[]" class="cgroup" placeholder="組別'.($ci+1).'" value="'.$cv.'"></div><div><input type="button" name="joino" class="btn_joino" data-id="'.($ci+1).'" value="加入">　<input type="button" name="removeo" class="btn_removeo" data-id="'.($ci+1).'" value="移除"></div><div><select multiple class="cg_ans" name="cg_ans'.($ci+1).'[]">';
                     $corr_cans = explode(",", $ans[$ci]);
-                    if (count($corr_cans)>1){
-                        $match_type->v1 = '';
-                        $match_type->vn = 'checked';
-                    }
                     foreach ($corr_cans as $cci => $ccv) {
-                        $data['cg'].= '<option value="'.($ccv-1).'">'.$ccv.'. '.$cans[$cci].'</option>';
+                        $data['cg'].= '<option value="'.($ccv-1).'">'.$ccv.'. '.$cans[($ccv-1)].'</option>';
                     }
                     $data['cg'].= '</select></div></div>';
                 }
@@ -1196,6 +1192,10 @@ class QueController extends TopController
         $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
         $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
 
+        //配合題 init
+        $cans = '';
+        $cgroup = '';
+        $match_mode = 0;
         switch ($que_type) {
             case 'S'://單選
             case 'D'://複選
@@ -1245,6 +1245,30 @@ class QueController extends TopController
                     return;
                 }
                 $all_ans = implode(",", $ans);
+                break;
+            case 'C':
+                $num = 0;
+                $ans = array();
+                // 配合模式 gmatch
+                $match_mode = ($req->input('gmatch') && !empty($req->input('gmatch'))) ? trim($req->input('gmatch')):0;
+                if (!preg_match("/^[0-9]*$/", $match_mode))abort(400);
+                $match_mode = (int)$match_mode;
+                if ($match_mode!==1 && $match_mode!==2)abort(400);
+                // 選項群 opttxt
+                $opt = ($req->has('opttxt') && !empty($req->input('opttxt'))) ? $req->input('opttxt'):array();
+                // 對應群名稱 cg
+                $group = ($req->has('cg') && !empty($req->input('cg'))) ? $req->input('cg'):array();
+                // 正解 cg_ans[]
+                foreach ($group as $k => $v) {
+                    $tmp = $req->input('cg_ans'.($k+1));
+                    foreach ($tmp as $k => $v) {
+                        $tmp[$k] = ($v+1);
+                    }
+                    $ans[] = implode(",", $tmp);
+                }
+                $all_ans = implode("|", $ans);
+                $cans = implode("|", $opt);
+                $cgroup = implode("|", $group);
                 break;
             default:
                 abort(400);
@@ -1375,6 +1399,9 @@ class QueController extends TopController
         $que->q_num = $num;
         $que->q_know = $know_id;
         $que->q_updated_at = time();
+        $que->q_cmatch - $match_mode;
+        $que->q_cgroup = $cgroup;
+        $que->q_cans = $cans;
 
         //刪舊的或本來就沒有
         if (empty($qmold_src)){

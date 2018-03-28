@@ -35,8 +35,12 @@ class Pubsque extends Model
 		'pq_chap',
 		'pq_created_at',
 		'pq_updated_at',
-		'pq_know'
+		'pq_know',
+		'pq_cgroup',
+		'pq_cans',
+		'pq_cmatch'
     ];
+    // pq_cgroup, pq_cans, pq_cmatch 配合題用
  	public function knows(){
 		return $this->belongsto(Knows::class, 'pq_know')->select('k_name as name');
 	}
