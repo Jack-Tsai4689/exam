@@ -38,7 +38,12 @@ class Pubsque extends Model
 		'pq_know',
 		'pq_cgroup',
 		'pq_cans',
-		'pq_cmatch'
+		'pq_cmatch',
+		'pq_qm_url',
+		'pq_qs_url',
+		'pq_am_url',
+		'pq_as_url',
+		'pq_av_url'
     ];
     // pq_cgroup, pq_cans, pq_cmatch 配合題用
  	public function knows(){

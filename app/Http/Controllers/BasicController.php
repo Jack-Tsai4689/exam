@@ -164,7 +164,7 @@ class BasicController extends TopController
         if (!$this->login_status)abort(401);
         $error = false;
         $type = ($req->has('type')) ? $req->input('type'):'';
-        $alt = ($req->has('alt') && !empty($req->input('alt'))):'';
+        $alt = ($req->has('alt') && !empty($req->input('alt'))) ? trim($req->input('alt')):'';
         if (empty($type))abort(400);
         switch ($type) {
             case 'subj':

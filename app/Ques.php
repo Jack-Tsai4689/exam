@@ -37,7 +37,12 @@ class Ques extends Model
 		'q_num',
 		'q_cgroup',
 		'q_cans',
-		'q_cmatch'
+		'q_cmatch',
+		'q_qm_url',
+		'q_qs_url',
+		'q_am_url',
+		'q_as_url',
+		'q_av_url'
 	];
 	// q_cgroup, q_cans, q_cmatch 配合題用
 	public function gra(){

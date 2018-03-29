@@ -13,9 +13,9 @@ class AlterPubquesTypec extends Migration
     public function up()
     {
         Schema::table('pubsque', function (Blueprint $table) {
-            $table->string('q_cgroup', 100)->default('');
-            $table->string('q_cans', 255)->default('');
-            $table->integer('q_cmatch')->default(0);
+            $table->string('pq_cgroup', 100)->default('');
+            $table->string('pq_cans', 255)->default('');
+            $table->integer('pq_cmatch')->default(0);
         });
     }
 
@@ -27,9 +27,9 @@ class AlterPubquesTypec extends Migration
     public function down()
     {
         Schema::table('pubsque', function (Blueprint $table) {
-            $table->dropColumn('q_cgroup');
-            $table->dropColumn('q_cans');
-            $table->dropColumn('q_cmatch');
+            $table->dropColumn('pq_cgroup');
+            $table->dropColumn('pq_cans');
+            $table->dropColumn('pq_cmatch');
         });
     }
 }
