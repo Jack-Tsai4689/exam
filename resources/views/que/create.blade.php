@@ -649,52 +649,52 @@ function num_change(v){//選填用
     }
         //correct_ans_math
 }
-function uque(v){
-    if (v==="dque"){
-        $.ajax({
-            type:"POST",
-            url:"{{ url('/ques/rmpic') }}",
-            data:{'type':v},
-            dataType:"JSON",
-            success: function(rs){
-                gb('qimg_content').innerHTML = rs.html;
-                gb('qimg').src = '';
-                gb('f_qimg').value = '';
-            }
-        });
-        return;
-    }
-    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
-    $('#sets_filed').show();
-    $('#loading_status').show();
-    $("#que_pic").load(function(){
-        $('#loading_status').hide();
-        $('#que_pic').show();
-    });
-}
-function uans(v){
-    if (v==="dans"){
-        $.ajax({
-            type:"POST",
-            url:"{{ url('/ques/rmpic') }}",
-            data:{'type':v},
-            dataType:"JSON",
-            success: function(rs){
-                gb('aimg_content').innerHTML = rs.html;
-                gb('aimg').src = '';
-                gb('f_aimg').value = '';
-            }
-        });
-        return;
-    }
-    document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
-    $('#sets_filed').show();
-    $('#loading_status').show();
-    $("#que_pic").load(function(){
-        $('#loading_status').hide();
-        $('#que_pic').show();
-    });
-}
+// function uque(v){
+//     if (v==="dque"){
+//         $.ajax({
+//             type:"POST",
+//             url:"{{ url('/ques/rmpic') }}",
+//             data:{'type':v},
+//             dataType:"JSON",
+//             success: function(rs){
+//                 gb('qimg_content').innerHTML = rs.html;
+//                 gb('qimg').src = '';
+//                 gb('f_qimg').value = '';
+//             }
+//         });
+//         return;
+//     }
+//     document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
+//     $('#sets_filed').show();
+//     $('#loading_status').show();
+//     $("#que_pic").load(function(){
+//         $('#loading_status').hide();
+//         $('#que_pic').show();
+//     });
+// }
+// function uans(v){
+//     if (v==="dans"){
+//         $.ajax({
+//             type:"POST",
+//             url:"{{ url('/ques/rmpic') }}",
+//             data:{'type':v},
+//             dataType:"JSON",
+//             success: function(rs){
+//                 gb('aimg_content').innerHTML = rs.html;
+//                 gb('aimg').src = '';
+//                 gb('f_aimg').value = '';
+//             }
+//         });
+//         return;
+//     }
+//     document.getElementById('que_pic').src="{{ url('/ques/qupload') }}?type="+v;
+//     $('#sets_filed').show();
+//     $('#loading_status').show();
+//     $("#que_pic").load(function(){
+//         $('#loading_status').hide();
+//         $('#que_pic').show();
+//     });
+// }
 
 // function select_point(){//知識點
 //     document.getElementById('que_pic').src="";

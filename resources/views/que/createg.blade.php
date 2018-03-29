@@ -207,7 +207,7 @@
 			<table class="list" id="que_main" border="0" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                     <td align="left"><label class="f17">題組題目</label></td>
-                    <td><a href="{{ url('/ques/create') }}"><input type="button" value="題型改為非題組"></a><input type="hidden" name="serial" value="0"></td>
+                    <td><a href="{{ url('/ques/create') }}"><input type="button" value="放棄並以非題組新增"></a><input type="hidden" name="serial" value="0"></td>
                 </tr>
                 <tr class="shallow">
                     <td align="right">題組說明</td>
@@ -229,7 +229,7 @@
                 </tr>
                 <tr>
                     <td align="left"><label class="f17">範圍</label></td>
-                    <td><label><input type="checkbox" name="allrange" value="all" onclick="all_set(this)">統一設定</label></td>
+                    <td><label><input type="checkbox" name="allrange" value="all" onclick="all_set(this)">統一設定(不能獨立更動小題範圍)</label></td>
                 </tr>
                 <tr class="deep allgsc hiden">
                     <td align="right">類別<font color="red">＊</font></td>
@@ -270,7 +270,7 @@
                     <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
                         <tr>
                             <td align="left"><label class="f17">題目</label></td>
-                            <td><input type="hidden" name="serial" value="1"><input type="hidden" class="pserial" name="pserial"></td>
+                            <td><input type="hidden" name="serial" value="1"><input type="hidden" class="pserial" name="pserial" value="40"></td>
                         </tr>
                         <tr class="deep">
                             <td align="right">題型<font color="red">＊</font></td>
@@ -280,7 +280,7 @@
                                 <label><input type="radio" class="qus_type" name="qus_type" value="R" onchange="change_type(1, this)">是非題</label>
                             </td>
                         </tr>
-                        <tr class="deep">
+                        <tr class="shallow">
                             <td align="right">題目說明</td>
                             <td>
                                 <textarea  name="gpcontent" class="gpcontent" cols="50" rows="4" placeholder="文字、圖片、音訊，最少擇一"></textarea>
@@ -316,10 +316,10 @@
                             <td align="right">正確答案<font color="red">＊</font></td>
                             <td width="80%">
                                 <div class="ans_group">
-                                    <label><input type="radio" name="ans[]" value="1">A</label>
-                                    <label><input type="radio" name="ans[]" value="2">B</label>
-                                    <label><input type="radio" name="ans[]" value="3">C</label>
-                                    <label><input type="radio" name="ans[]" value="4">D</label>
+                                    <label><input type="radio" name="ans1[]" value="1">A</label>
+                                    <label><input type="radio" name="ans1[]" value="2">B</label>
+                                    <label><input type="radio" name="ans1[]" value="3">C</label>
+                                    <label><input type="radio" name="ans1[]" value="4">D</label>
                                 </div>
                                 <label id="ans_group_error" class="error_msg"></label>
                             </td>
@@ -386,8 +386,8 @@
     <div class="content" style="margin-bottom:50px;">
         <div class="cen" style="padding-bottom:50px;">
             <div style="text-align:left;">
-                <input type="button" class="btn w150 h30" value="存檔，出下一題" name="save_next" id="save_next">
-                <input type="button" class="btn w150 h30" value="存檔，離開" name="save_close" id="save_close" onclick="check('c')">
+                <input type="button" class="btn w150 h30" value="存檔，出下一題" name="save_next" id="save_next" onclick="create_check('n')">
+                <input type="button" class="btn w150 h30" value="存檔，離開" name="save_close" id="save_close" onclick="create_check('c')">
             </div>
         </div>
     </div>
@@ -551,7 +551,7 @@ function range_set(){
 var rows_m = 1;
 function subj_c(ind, obj){
     if (ind!=="top"){
-        $("#q"+ind+" .subject").html('');    
+        gbc("#q"+ind+" .subject")[0].innerHTML = '';
     }else{
         gb("subject_al").innerHTML = '';
     }    
@@ -566,8 +566,8 @@ function subj_c(ind, obj){
                 html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
             if (ind!=="top"){
-                $("#q"+ind+" .subject").html(html);
-                chap_c(ind, $("#q"+ind+" .subject")[0]);
+                gbc("#q"+ind+" .subject")[0].innerHTML = html;
+                chap_c(ind, gbc("#q"+ind+" .subject")[0]);
             }else{
                 gb("subject_al").innerHTML = html;
                 chap_c("top", gb("subject_al"));
@@ -579,10 +579,10 @@ function subj_c(ind, obj){
                 case 401: alert('登入逾時，請重新登入'); break;
                 case 406: 
                     if (ind!=="top"){
-                        $("#q"+ind+" .subject").html('<option value="">無資料</option>'); 
-                        $("#q"+ind+" .chapter").html('');
-                        $('#q'+ind+' input.custom-combobox-input').val();
-                        $("#q"+ind+" .chapter_msg").html('無資料');
+                        gbc("#q"+ind+" .subject")[0].innerHTML = '<option value="">無資料</option>'; 
+                        gbc("#q"+ind+" .chapter")[0].innerHTML = '';
+                        gbc('#q'+ind+' input.custom-combobox-input')[0].value = '';
+                        gbc("#q"+ind+" .chapter_msg")[0].innerHTML = '無資料';
                     }else{
                         gb("subject_al").innerHTML = '<option value="">無資料</option>'; 
                         gb("chapter_al").innerHTML = '';
@@ -596,13 +596,14 @@ function subj_c(ind, obj){
 function chap_c(ind, obj){
     let wdata;
     if (ind!=="top"){
-        $('#q'+ind+' input.custom-combobox-input').value = '';
-        wdata = {'alt':'info', 'type':'chap', 'g':$("#q"+ind+" .grade").val(), 's':obj.value};
-        $('#q'+ind+' .chapter').empty();
+        gbc('#q'+ind+' input.custom-combobox-input')[0].value = '';
+        wdata = {'alt':'info', 'type':'chap', 'g':gbc("#q"+ind+" .grade")[0].value, 's':obj.value};
+        gbc('#q'+ind+' .chapter')[0].innerHTML = '';
     }else{
+        gbc('#form_top input.custom-combobox-input')[0].value = '';
+        gb("chapter_al").innerHTML = '';
         wdata = {'alt':'info', 'type':'chap', 'g':gb("grade_al").value, 's':obj.value};
-    }
-    $("#q"+ind+" .chapter").html();
+    }    
     $.ajax({
         type:"GET",
         url:"{{ url('/basic/detail') }}",
@@ -614,8 +615,8 @@ function chap_c(ind, obj){
                 html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
             }
             if (ind!=="top"){
-                $("#q"+ind+" .chapter").html(html);
-                $("#q"+ind+" .chapter_msg").html('');
+                gbc("#q"+ind+" .chapter")[0].innerHTML = html;
+                gbc("#q"+ind+" .chapter_msg")[0].innerHTML = '';
             }else{
                 gb("chapter_al").innerHTML = html;
                 gb("chapter_al_msg").innerHTML = '';
@@ -627,9 +628,9 @@ function chap_c(ind, obj){
                 case 401: alert('登入逾時，請重新登入'); break;
                 case 406: 
                     if (ind!=="top"){
-                        $("#q"+ind+" .chapter").html();
-                        $('#q'+ind+' input.custom-combobox-input').value = '';
-                        $("#q"+ind+" .chapter_msg").html('無資料');
+                        gbc("#q"+ind+" .chapter")[0].innerHTML = '';
+                        gbc('#q'+ind+' input.custom-combobox-input')[0].value = '';
+                        gbc("#q"+ind+" .chapter_msg")[0].innerHTML = '無資料';
                     }else{
                         gb("chapter_al").innerHTML = '';    
                         gb("chapter_al_msg").innerHTML = '無資料'; 
@@ -798,14 +799,14 @@ function change_type(ind, obj){//選項設定
     switch(obj.value){
         case 'S'://單選
         case 'D'://複選
-            let num = $("#q"+ind+" .option_num").val();
+            let num = gbc("#q"+ind+" .option_num")[0].value;
             out_ans(obj.value, ind, num);
-            $("#q"+ind+" .ans_type").removeClass('hiden');
+            gbc("#q"+ind+" .ans_type")[0].classList.remove('hiden');
             break;
         case 'R'://是非
-            const html = '<label><input type="radio" name="ans'+ind+'" value="1" checked>O</label>  <label><input type="radio" name="ans'+ind+'" value="2">X</label>';
-            $("#q"+ind+" .ans_type").addClass('hiden');
-            $("#q"+ind+" .ans_group").html(html);
+            const html = '<label><input type="radio" name="ans'+ind+'[]" value="1" checked>O</label>  <label><input type="radio" name="ans'+ind+'[]" value="2">X</label>';
+            gbc("#q"+ind+" .ans_type")[0].classList.add('hiden');
+            gbc("#q"+ind+" .ans_group")[0].innerHTML = html;
             break;
     }
 }
@@ -815,7 +816,7 @@ function out_ans(type, ind, num){
         case 'S'://單選
             for (let r =1; r <=num; r++) {
                 j = String.fromCharCode(r+64);
-                html+= '<label><input name="ans'+ind+'" type="radio" value="'+r+'">'+j+'</label> ';
+                html+= '<label><input name="ans'+ind+'[]" type="radio" value="'+r+'">'+j+'</label> ';
             }
             break;
         case 'D'://複選
@@ -825,14 +826,14 @@ function out_ans(type, ind, num){
             }
             break;
     }
-    $("#q"+ind+" .ans_group").html(html);
+    gbc("#q"+ind+" .ans_group")[0].innerHTML = html;
 }
 function optnum(ind, obj){//選項數擷取
     let type = $('#q'+ind+' .qus_type:checked').val();
     out_ans(type, ind, obj.value);
 }
 let tasks = [];
-gb('save_next').onclick = function(){
+function create_check(g){
     $("form").each(function(){
         var tfid = this.id;
         tasks.push(function upq(){
@@ -840,8 +841,12 @@ gb('save_next').onclick = function(){
         });
     });
     main().then(function(value){
+        opener.location.reload();
+        if (g==="n"){location.reload();}
+        if (g==="c"){window.close();}
         //closeBlock();
     }).catch(function(error){
+        console.log(error);
         //gb('msg'+error.id).innerHTML = error.msg;
         //closeBlock();
     });
@@ -871,31 +876,25 @@ function up(obj){
             // qmpercent.innerHTML = "第"+id+"題，上傳進度："+Math.round(percent)+"%";
         }
         uajax.onloadend = function(event){
-        let data = JSON.parse(event.target.status);
-            console.log(data);
-            resolve(status);
-        // var id = obj.id.substr(1, obj.length);
-        //     switch(data){
-        //         case 404:
-        //             reject({'msg':"無資料或遭刪除",'id':id});
-        //             break;
-        //         case 413:
-        //             reject({'msg':"空間不足",'id':id});
-        //             break;
-        //         default:
-        //             var status = JSON.parse(event.target.responseText);
-        //             if (status.success){
-        //                 gb('msg'+id).innerHTML = status.msg;
-        //                 $('#q'+id).remove();
-        //             }else{
-        //                 gb('msg'+id).innerHTML = status.msg;
-        //             }
-        //             resolve(status);
-        //             break;
-        //     }
+            let status = JSON.parse(event.target.status);
+            switch(status){
+                case 400: alert('例外錯誤'); reject(status); break;
+                case 401: alert('逾時操作，請重登入'); reject(status); break;
+                case 200:
+                    let rs = JSON.parse(event.target.responseText);
+                    if (rs.type==="G"){
+                        let ps = gbc(".pserial");
+                        ps.forEach(function(ele){
+                            ele.value = rs.serial;
+                        });
+                    }
+                    resolve(status);
+                    break;
+            }
         };
         uajax.onerror = function(rs){
-            // var data = JSON.parse(rs.target.status);
+            var status = JSON.parse(rs.target.status);
+            reject(status);
             // var id = obj.id.substr(1, obj.length);
             // reject({'msg':"上傳錯誤，請確認檔案是否完整",'id':id});
         };
@@ -929,7 +928,7 @@ let sub_nums = 2;
 let sub_no = 1;
 function more_one(){
     sub_no = $("#more > form > .qpart").length+1;
-    $("#more").append('<form id="form'+sub_nums+'"><div class="qpart" id="q'+sub_nums+'"><div class="title"><label class="subno f17 no">第'+sub_no+'小題</label><span class="remove_sub">&times;</span></div><div class="content"><div class="cen"><table class="list" border="0" width="100%" cellpadding="0" cellspacing="0"><tr><td align="left"><label class="f17">題目</label></td><td><input type="hidden" name="serial" value="'+sub_nums+'"><input type="hidden" class="pserial" name="pserial"></td></tr><tr class="deep"><td align="right">題型<font color="red">＊</font></td><td width="80%"><label><input type="radio" class="qus_type" name="qus_type" checked value="S" onchange="change_type('+sub_nums+', this)">單選題</label><label><input type="radio" class="qus_type" name="qus_type" value="D" onchange="change_type('+sub_nums+', this)">複選題</label><label><input type="radio" class="qus_type" name="qus_type" value="R" onchange="change_type('+sub_nums+', this)">是非題</label></td></tr><tr class="deep"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br>圖片　<input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br>音訊　<input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum('+sub_nums+', this)"><option value="2">2</option><option value="3">3</option><option selected value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans'+sub_nums+'" value="1"><font id="ans_1">A</font></label><label><input type="radio" name="ans'+sub_nums+'" value="2">B</label><label><input type="radio" name="ans'+sub_nums+'" value="2">C</label><label><input type="radio" name="ans'+sub_nums+'" value="2">D</label></div><label id="ans_group_error" class="error_msg"></label></td></tr><tr class="gsc"><td align="left" colspan="2"><label class="f17">範圍</label></td></tr><tr class="deep gsc"><td align="right">類別<font color="red">＊</font></td><td width="80%"><select class="grade" name="grade" id="grade'+sub_nums+'" onchange="subj_c('+sub_nums+', this)">{!! $Q_Grade !!}</select></td></tr><tr class="shallow gsc"><td align="right">科目<font color="red">＊</font></td><td><select class="subject" name="subject" id="subject'+sub_nums+'" onchange="chap_c('+sub_nums+', this)">{!! $Q_Subject !!}</select></td></tr><tr class="deep gsc"><td align="right">章節<font color="red">＊</font></td><td><div class="ui-widget"><select class="chapter" id="chapter'+sub_nums+'" name="chapter"><option value=""></option>{!! $Q_Chapter !!}</select><label class="chapter_msg" style="margin-left:40px;"></label></div></td></TR><tr class="shallow"><TD align="right">難易度</TD><td><label><input type="radio" name="degree'+sub_nums+'" value="E">容易</label><label><input type="radio" name="degree'+sub_nums+'" value="M">中等</label><label><input type="radio" name="degree'+sub_nums+'" value="H">困難</label></TD></TR><tr><td><label class="f17 oans_control" id="oans_control'+sub_nums+'" onclick="show_oans(\'oans'+sub_nums+'\')">詳解<img class="oans_pic" id="pic_oans'+sub_nums+'" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans'+sub_nums+'"><tr class="deep"><td align="right">詳解說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea><div>圖片　<input type="file" name="apic" id="apic" accept=".jpg,.jpeg,.png">格式：JPG/PNG</div><div>音訊　<input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3</div><div>視訊　<input type="file" name="avideo" id="avideo" accept="video/mp4">格式：MP4</div></td></tr></table>{{ csrf_field() }}</div></div></div></form>');
+    $("#more").append('<form id="form'+sub_nums+'"><div class="qpart" id="q'+sub_nums+'"><div class="title"><label class="subno f17 no">第'+sub_no+'小題</label><span class="remove_sub">&times;</span></div><div class="content"><div class="cen"><table class="list" border="0" width="100%" cellpadding="0" cellspacing="0"><tr><td align="left"><label class="f17">題目</label></td><td><input type="hidden" name="serial" value="'+sub_nums+'"><input type="hidden" class="pserial" name="pserial"></td></tr><tr class="deep"><td align="right">題型<font color="red">＊</font></td><td width="80%"><label><input type="radio" class="qus_type" name="qus_type" checked value="S" onchange="change_type('+sub_nums+', this)">單選題</label><label><input type="radio" class="qus_type" name="qus_type" value="D" onchange="change_type('+sub_nums+', this)">複選題</label><label><input type="radio" class="qus_type" name="qus_type" value="R" onchange="change_type('+sub_nums+', this)">是非題</label></td></tr><tr class="deep"><td align="right">題目說明</td><td><textarea  name="gpcontent" id="gpcontent" cols="50" rows="4" value="" placeholder="文字說明、圖片、音訊，最少擇一"></textarea><br>圖片　<input type="file" name="qpic" id="qpic" accept=".jpg,.jpeg,.png">格式：JPG/PNG<br>音訊　<input type="file" name="qsound" id="qsound" accept="audio/mp3">格式：MP3</td></tr><tr><td align="left"><label class="f17">選項</label></td><td></td></tr><tr class="shallow ans_type"><td align="right">選項個數<font color="red">＊</font></td><td><select name="option_num" class="option_num" onchange="optnum('+sub_nums+', this)"><option value="2">2</option><option value="3">3</option><option selected value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></td></tr><tr class="deep" class="simple"><td align="right">正確答案<font color="red">＊</font></td><td width="80%"><div class="ans_group"><label><input type="radio" name="ans'+sub_nums+'[]" value="1">A</label><label><input type="radio" name="ans'+sub_nums+'[]" value="2">B</label><label><input type="radio" name="ans'+sub_nums+'[]" value="3">C</label><label><input type="radio" name="ans'+sub_nums+'[]" value="4">D</label></div><label id="ans_group_error" class="error_msg"></label></td></tr><tr class="gsc"><td align="left" colspan="2"><label class="f17">範圍</label></td></tr><tr class="deep gsc"><td align="right">類別<font color="red">＊</font></td><td width="80%"><select class="grade" name="grade" id="grade'+sub_nums+'" onchange="subj_c('+sub_nums+', this)">{!! $Q_Grade !!}</select></td></tr><tr class="shallow gsc"><td align="right">科目<font color="red">＊</font></td><td><select class="subject" name="subject" id="subject'+sub_nums+'" onchange="chap_c('+sub_nums+', this)">{!! $Q_Subject !!}</select></td></tr><tr class="deep gsc"><td align="right">章節<font color="red">＊</font></td><td><div class="ui-widget"><select class="chapter" id="chapter'+sub_nums+'" name="chapter"><option value=""></option>{!! $Q_Chapter !!}</select><label class="chapter_msg" style="margin-left:40px;"></label></div></td></TR><tr class="shallow"><TD align="right">難易度</TD><td><label><input type="radio" name="degree'+sub_nums+'" value="E">容易</label><label><input type="radio" name="degree'+sub_nums+'" value="M">中等</label><label><input type="radio" name="degree'+sub_nums+'" value="H">困難</label></TD></TR><tr><td><label class="f17 oans_control" id="oans_control'+sub_nums+'" onclick="show_oans(\'oans'+sub_nums+'\')">詳解<img class="oans_pic" id="pic_oans'+sub_nums+'" src="{{ URL::asset('img/close.png') }}" height="20"></label></td><td></td></tr></table><table class="list oans" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans'+sub_nums+'"><tr class="deep"><td align="right">詳解說明</td><td width="80%"><textarea  name="f_anstxt" cols="50" rows="4" value=""></textarea><div>圖片　<input type="file" name="apic" id="apic" accept=".jpg,.jpeg,.png">格式：JPG/PNG</div><div>音訊　<input type="file" name="asound" id="asound" accept="audio/mp3">格式：MP3</div><div>視訊　<input type="file" name="avideo" id="avideo" accept="video/mp4">格式：MP4</div></td></tr></table>{{ csrf_field() }}</div></div></div></form>');
     $(function() {
         $('#chapter'+sub_nums).combobox();
         range_set();

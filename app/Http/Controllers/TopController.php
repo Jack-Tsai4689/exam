@@ -157,6 +157,10 @@ class TopController extends Controller
             $data->q_ans = implode("<br>", $out);
           }
           break;
+        case 'G':
+          $data->q_quetype = '題組';
+          $data->q_ans = '';
+          break;
       }
       //難度
       switch ($v->q_degree) {

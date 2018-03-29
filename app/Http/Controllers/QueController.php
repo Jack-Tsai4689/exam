@@ -98,29 +98,27 @@ class QueController extends TopController
             if ($p_subj>0)$ques = $ques->where('q_subj', $p_subj);
             if ($p_chap>0)$ques = $ques->where('q_chap', $p_chap);
             if (!empty($p_keyword))$ques = $ques->where('q_keyword','like','%|'.$p_keyword.'|%');
-            $que_data = $ques->orderby('q_updated_at','desc')->paginate(10);
+            $que_data = $ques->where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
         }else{
-            $que_data = Ques::orderby('q_updated_at','desc')->paginate(10);
+            $que_data = Ques::where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
         }
         foreach ($que_data as $k => $v) {
-            
             $format = $this->Ques_format($v, 'list');
-            $que_data[$k]->q_quetype = $format->q_quetype;
-            $que_data[$k]->q_ans = $format->q_ans;
-
+            
             $cont =  array();
             //題目文字
             if (!empty($v->q_quetxt)) $cont[] = '<div>'.nl2br(trim($v->q_quetxt)).'</div>';
+            $qm_type = ($v->q_quetype==="G") ? '題組':'題目';
             //題目圖檔
             if (!empty($v->q_qm_src)){
-                if(is_file($v->q_qm_src))$cont[] = '<div>題目圖片：'.$v->q_qm_name.'</div><IMG class="pic" src="'.URL::asset($v->q_qm_src).'">';
+                if(is_file($v->q_qm_src))$cont[] = '<div>'.$qm_type.'圖片：'.$v->q_qm_name.'</div><IMG class="pic" src="'.URL::asset($v->q_qm_src).'">';
             }
             //題目聲音檔
             if (!empty($v->q_qs_src)){
                 if(is_file($v->q_qs_src)){
-                    $cont[] = '<div>題目音訊：'.$v->q_qs_name.'</div>';
+                    $cont[] = '<div>'.$qm_type.'音訊：'.$v->q_qs_name.'</div>';
                 }else{
-                    $cont[] = '<div>題目音訊：'.$v->q_qs_name.'　(<font color="red">遺失</font>)</div>';
+                    $cont[] = '<div>'.$qm_type.'音訊：'.$v->q_qs_name.'　(<font color="red">遺失</font>)</div>';
                 }
             }
             $acont = array();
@@ -152,13 +150,29 @@ class QueController extends TopController
             }
             $que_data[$k]->cont = implode("", $cont);
             //難度
-            $que_data[$k]->q_degree = $format->q_degree;
+            
             $que_data[$k]->q_update = date('Y/m/d H:i:s', $v->q_updated_at);
             $que_data[$k]->q_know = ($v->q_know!==0) ? $v->knows->name:'';
-
-            $que_data[$k]->q_gra = $v->gra->name;
-            $que_data[$k]->q_subj = $v->subj->name;
-            $que_data[$k]->q_chap = $v->chap->name;
+            $mix = false;
+            if ($v->q_quetype==="G"){
+                $sub_rows = Ques::where('q_pid', $v->q_id)->count();
+                $format->q_quetype.= "(".$sub_rows.")";
+                $que_data[$k]->q_degree = '混合';
+                if ($v->q_gra===0)$mix = true;
+            }else{
+                $que_data[$k]->q_degree = $format->q_degree;
+            }
+            if ($mix){
+                $que_data[$k]->q_gra = '混合';
+                $que_data[$k]->q_subj = '混合';
+                $que_data[$k]->q_chap = '混合';
+            }else{
+                $que_data[$k]->q_gra = $v->gra->name;
+                $que_data[$k]->q_subj = $v->subj->name;
+                $que_data[$k]->q_chap = $v->chap->name;
+            }
+            $que_data[$k]->q_quetype = $format->q_quetype;
+            $que_data[$k]->q_ans = $format->q_ans;
         }
         
         $page_info = $this->page_info(
@@ -454,39 +468,18 @@ class QueController extends TopController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $req)
-    {
-        if (!$this->login_status)return redirect('/login');
-
-        /*
-        file()
-        ->getClientOriginalName() 原始名稱
-        ->getClientOriginalExtension() 副檔名
-        ->getSize() 檔案大小 位元組
-        ->getMimeType() mime類型  mp3=>audio/mpeg
-        ->save(路徑,檔名)
-        */
-        $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
-        $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
-        $keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
-        $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
-        $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
-        $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
-        $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
-        $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
-        $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
-        //$qimg = ($req->has('f_qimg') && !empty($req->input('f_qimg'))) ? trim($req->input('f_qimg')):'';
-        //$aimg = ($req->has('f_aimg') && !empty($req->input('f_aimg'))) ? trim($req->input('f_aimg')):'';
-        $qpath = '';
-        $apath = '';
-
-        // if ($graid===0 || $subjid===0 || $chapid===0){
-        //  abort(400);
-        //  return;
-        // }
+    // 答案存檔格式化
+    private function _ans_store_format($req, $typeG = false){
+        $data = new \stdClass;
         $cans = '';
         $cgroup = '';
         $match_mode = 0;
+        $all_ans = '';
+        if ($typeG){
+            $que_type = trim($req->input('qus_type'));
+        }else{
+            $que_type = trim($req->input('f_qus_type'));    
+        }        
         switch ($que_type) {
             case 'S'://單選
             case 'D'://複選
@@ -496,7 +489,12 @@ class QueController extends TopController
                 }else{
                     $num = ($req->has('option_num') && (int)$req->input('option_num')>1) ? (int)$req->input('option_num'):2;  
                 }
-                $ans = ($req->has('ans') && is_array($req->input('ans'))) ? $req->input('ans'):array();
+                if ($typeG){
+                    $sno = (int)$req->input('serial');
+                    $ans = ($req->has('ans'.$sno) && is_array($req->input('ans'.$sno))) ? $req->input('ans'.$sno):array();
+                }else{
+                    $ans = ($req->has('ans') && is_array($req->input('ans'))) ? $req->input('ans'):array();    
+                }                
                 //複選 => 1↑
                 //單選 or 是非 => only 1
                 if (($que_type==="D" && count($ans)<2) || ($que_type!=="D" && count($ans)!==1)){
@@ -566,107 +564,102 @@ class QueController extends TopController
                 return;
                 break;
         }
+        $data = new \stdClass;
+        $data->num = $num;
+        $data->cans = $cans;
+        $data->cgroup = $cgroup;
+        $data->match_mode = $match_mode;
+        $data->all_ans = $all_ans;
+        return $data;
+    }
+    public function store(Request $req)
+    {
+        if (!$this->login_status)return redirect('/login');
+
+        /*
+        file()
+        ->getClientOriginalName() 原始名稱
+        ->getClientOriginalExtension() 副檔名
+        ->getSize() 檔案大小 位元組
+        ->getMimeType() mime類型  mp3=>audio/mpeg
+        ->save(路徑,檔名)
+        */
+        $que_type = ($req->has('f_qus_type') && !empty($req->input('f_qus_type'))) ? trim($req->input('f_qus_type')):'';
+        $quetxt = ($req->has('f_quetxt') && !empty($req->input('f_quetxt'))) ? trim($req->input('f_quetxt')):'';
+        $keyword = ($req->has('fk') && !empty($req->input('fk'))) ? $req->input('fk'):array();
+        $graid = ($req->has('f_grade') && (int)$req->input('f_grade')>0) ? (int)$req->input('f_grade'):0;
+        $subjid = ($req->has('f_subject') && (int)$req->input('f_subject')>0) ? (int)$req->input('f_subject'):0;
+        $chapid = ($req->has('f_chapterui') && (int)$req->input('f_chapterui')>0) ? (int)$req->input('f_chapterui'):0;
+        $know_id = ($req->has('f_pid') && (int)$req->input('f_pid')>0) ? (int)$req->input('f_pid'):0;
+        $degree = ($req->has('f_degree') && !empty($req->input('f_degree'))) ? trim($req->input('f_degree')):"E";
+        $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
+        //$qimg = ($req->has('f_qimg') && !empty($req->input('f_qimg'))) ? trim($req->input('f_qimg')):'';
+        //$aimg = ($req->has('f_aimg') && !empty($req->input('f_aimg'))) ? trim($req->input('f_aimg')):'';
+
+        // if ($graid===0 || $subjid===0 || $chapid===0){
+        //  abort(400);
+        //  return;
+        // }
+        $allow_que_type = array('S','D','R','C','M');
+        if (!in_array($que_type, $allow_que_type))abort(400);
+        // 答案format
+        $rs = $this->_ans_store_format($req);
         //上傳check
         
         if (!is_dir('uploads'))mkdir('uploads',777);
         if (!is_dir('uploads/que'))mkdir('uploads/que',777);
         // const DIR = "uploads/que";
-        //題目圖片
-        $qm_src = '';
-        $qm_name = '';
-        $qm_file = $req->file('qpic');
-        if ($qm_file!=null){
-            $file_error = false;
-            if ($req->hasFile('qpic')){
-                $mime = $qm_file->getMimeType();
-                $all_mime = array('image/jpg','image/jpeg','image/png');
-                if (!in_array($mime, $all_mime))$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($qm_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
-                    $qm_src = UPLOAD_DIR.'/'.$file;
-                    $qm_file->move(UPLOAD_DIR, $file);
-                    $qm_name = $qm_file->getClientOriginalName();
+
+        $file = array(
+            // 題目圖片
+            'qpic' => array(
+                'allow_mime' => array('image/jpg','image/jpeg','image/png'),
+                'src' => '',
+                'name' => ''
+            ),
+            // 題目音訊
+            'qsound' => array(
+                'allow_mime' => array('audio/mpeg'),
+                'src' => '',
+                'name' => ''
+            ),
+            // 詳解圖片
+            'apic' => array(
+                'allow_mime' => array('image/jpg','image/jpeg','image/png'),
+                'src' => '',
+                'name' => ''
+            ),
+            // 詳解音訊
+            'asound' => array(
+                'allow_mime' => array('audio/mpeg'),
+                'src' => '',
+                'name' => ''
+            ),
+            // 詳解視訊
+            'avideo' => array(
+                'allow_mime' => array('video/mp4'),
+                'src' => '',
+                'name' => ''
+            )
+        );
+        foreach ($file as $i => $f) {
+            $up_file = $req->file($i);
+            if ($up_file!=null){
+                $file_error = false;
+                if ($req->file($i)){
+                    $mime = $up_file->getMimeType();
+                    if (!in_array($mime, $f['allow_mime']))$file_error = true;
+                    if (!$file_error){
+                        //上傳
+                        $uuid = md5(uniqid(rand(), true));
+                        $doc = $uuid.'.'.$up_file->getClientOriginalExtension();
+                        $file[$i]['src'] = UPLOAD_DIR.'/'.$doc;
+                        $up_file->move(UPLOAD_DIR, $doc);
+                        $file[$i]['name'] = $up_file->getClientOriginalName();
+                    }
+
                 }
             }
-        }
-        //題目聲音
-        $qs_src = '';
-        $qs_name = '';
-        $qs_file = $req->file('qsound');
-        if ($qs_file!=null){
-            $file_error = false;
-            if ($req->hasFile('qsound')) {
-                $mime = $qs_file->getMimeType();
-                if ($mime!='audio/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($qs_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
-                    $qs_src = UPLOAD_DIR.'/'.$file;
-                    $qs_file->move(UPLOAD_DIR, $file);
-                    $qs_name = $qs_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解圖片
-        $am_src = '';
-        $am_name = '';
-        $am_file = $req->file('apic');
-        if ($am_file!=null){
-            $file_error = false;
-            if ($req->hasFile('apic')) {
-                $mime = $am_file->getMimeType();
-                $all_mime = array('image/jpg','image/jpeg','image/png');
-                if (!in_array($mime, $all_mime))$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($am_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$am_file->getClientOriginalExtension();
-                    $am_src = UPLOAD_DIR.'/'.$file;
-                    $am_file->move(UPLOAD_DIR, $file);
-                    $am_name = $am_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解聲音
-        $as_src = '';
-        $as_name = '';
-        $as_file = $req->file('asound');
-        if ($as_file!=null){
-            $file_error = false;
-            if ($req->hasFile('asound')) {
-                $mime = $as_file->getMimeType();
-                if ($mime!='audio/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($as_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$as_file->getClientOriginalExtension();
-                    $as_src = UPLOAD_DIR.'/'.$file;
-                    $as_file->move(UPLOAD_DIR, $file);
-                    $as_name = $as_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解影片
-        $av_src = '';
-        $av_name = '';
-        $av_file = $req->file('avideo');
-        if ($av_file!=null){
-            $file_error = false;
-            if ($req->hasFile('avideo')) {
-                $mime = $av_file->getMimeType();
-                if ($mime!='video/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($av_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$av_file->getClientOriginalExtension();
-                    $av_src = UPLOAD_DIR.'/'.$file;
-                    $av_file->move(UPLOAD_DIR, $file);
-                    $av_name = $av_file->getClientOriginalName();
-                }
-            }           
         }
         $key = array();
         foreach ($keyword as $v) {
@@ -675,19 +668,19 @@ class QueController extends TopController
         Ques::create([
             'q_quetype' => $que_type,
             'q_quetxt' => $quetxt,
-            'q_qm_src' => $qm_src,
-            'q_qm_name' => $qm_name,
-            'q_qs_src' => $qs_src,
-            'q_qs_name' => $qs_name,
-            'q_num' => $num,
-            'q_ans' => $all_ans,
+            'q_qm_src' => $file['qpic']['src'],
+            'q_qm_name' => $file['qpic']['name'],
+            'q_qs_src' => $file['qsound']['src'],
+            'q_qs_name' => $file['qsound']['name'],
+            'q_num' => $rs->num,
+            'q_ans' => $rs->all_ans,
             'q_anstxt' => $anstxt,
-            'q_am_src' => $am_src,
-            'q_am_name' => $am_name,
-            'q_as_src' => $as_src,
-            'q_as_name' => $as_name,
-            'q_av_src' => $av_src,
-            'q_av_name' => $av_name,
+            'q_am_src' => $file['apic']['src'],
+            'q_am_name' => $file['apic']['name'],
+            'q_as_src' => $file['asound']['src'],
+            'q_as_name' => $file['asound']['name'],
+            'q_av_src' => $file['avideo']['src'],
+            'q_av_name' => $file['avideo']['name'],
             'q_owner' => $this->login_user,
             'q_degree' => $degree,
             'q_gra' => $graid,
@@ -697,82 +690,86 @@ class QueController extends TopController
             'q_created_at' => time(),
             'q_updated_at' => time(),
             'q_keyword' => '|'.implode('|', $key).'|',
-            'q_cgroup' => $cgroup,
-            'q_cans' => $cans,
-            'q_cmatch' => $match_mode
+            'q_cgroup' => $rs->cgroup,
+            'q_cans' => $rs->cans,
+            'q_cmatch' => $rs->match_mode
         ]);
         // $que_data = new Ques;
         // $que_data->fill($save);
         // $que_data->save();
         echo '<script>opener.location.reload();window.close();</script>';
     }
+    // 儲存題組
     public function store_group(Request $req){
-        $serial = ($req->has('serial')) trim($req->input('serial')):"";
+        $serial = ($req->has('serial')) ? trim($req->input('serial')):"";
         $graid = 0;
         $subjid = 0;
         $chapid = 0;
         $know_id = 0;
+        $json = array(
+            'serial' => 0,
+            'type' => ''
+        );
+        $q_allset = 0;
         // 大題
         if ($serial==="0"){
             // 題組說明
             $quetxt = ($req->has('gpcontent') && !empty($req->input('gpcontent'))) ? trim($req->input("gpcontent")):'';
             // 範圍統一說明
-            $allset = ($req->has('allset') && !empty($req->input('allset'))) ? trim($req->input('allset')):'';
+            $allset = ($req->has('allrange') && !empty($req->input('allrange'))) ? trim($req->input('allrange')):'';
             if ($allset==="all"){
+                $q_allset = 1;
                 $graid = ($req->has('grade_al') && !empty($req->input('grade_al'))) ? trim($req->input('grade_al')):0;
                 $subjid = ($req->has('subject_al') && !empty($req->input('subject_al'))) ? trim($req->input('subject_al')):0;
                 $chapid = ($req->has('chapter_al') && !empty($req->input('chapter_al'))) ? trim($req->input('chapter_al')):0;
                 if (!preg_match("/^[0-9]*$/", $graid) ||
                     !preg_match("/^[0-9]*$/", $subjid) ||
                     !preg_match("/^[0-9]*$/", $chapid))abort(400);
+                $graid = (int)$graid;
+                $subjid = (int)$subjid;
+                $chapid = (int)$chapid;
                 if ($graid<1 || $subjid<1 || $chapid<1)abort(400);
             }
-            // 題組圖片
-            $qpart_img_src = '';
-            $qpart_img_name = '';
-            $qm_file = $req->file('qpic');
-            if ($qm_file!=null){
-                $file_error = false;
-                if ($req->hasFile('qpic')){
-                    $mime = $qm_file->getMimeType();
-                    $all_mime = array('image/jpg','image/jpeg','image/png');
-                    if (!in_array($mime, $all_mime))$file_error = true;
-                    if (!$file_error){
-                        //上傳
-                        $uuid = md5($qm_file->getClientOriginalName().time());
-                        $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
-                        $qpart_img_src = UPLOAD_DIR.'/'.$file;
-                        $qm_file->move(UPLOAD_DIR, $file);
-                        $qpart_img_name = $qm_file->getClientOriginalName();
+            $file = array(
+                // 題組圖片
+                'qpic' => array(
+                    'allow_mime' => array('image/jpg','image/jpeg','image/png'),
+                    'src' => '',
+                    'name' => ''
+                ),
+                // 題組音訊
+                'qsound' => array(
+                    'allow_mime' => array('audio/mpeg'),
+                    'src' => '',
+                    'name' => ''
+                )
+            );
+            foreach ($file as $i => $f) {
+                $up_file = $req->file($i);
+                if ($up_file!=null){
+                    $file_error = false;
+                    if ($req->file($i)){
+                        $mime = $up_file->getMimeType();
+                        if (!in_array($mime, $f['allow_mime']))$file_error = true;
+                        if (!$file_error){
+                            //上傳
+                            $uuid = md5(uniqid(rand(), true));
+                            $doc = $uuid.'.'.$up_file->getClientOriginalExtension();
+                            $file[$i]['src'] = UPLOAD_DIR.'/'.$doc;
+                            $up_file->move(UPLOAD_DIR, $doc);
+                            $file[$i]['name'] = $up_file->getClientOriginalName();
+                        }
+
                     }
                 }
-            }
-            //題目聲音
-            $qpart_sound_src = '';
-            $qpart_sound_name = '';
-            $qs_file = $req->file('qsound');
-            if ($qs_file!=null){
-                $file_error = false;
-                if ($req->hasFile('qsound')) {
-                    $mime = $qs_file->getMimeType();
-                    if ($mime!='audio/mpeg')$file_error = true;
-                    if (!$file_error){
-                        //上傳
-                        $uuid = md5($qs_file->getClientOriginalName().time());
-                        $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
-                        $qpart_sound_src = UPLOAD_DIR.'/'.$file;
-                        $qs_file->move(UPLOAD_DIR, $file);
-                        $qpart_sound_name = $qs_file->getClientOriginalName();
-                    }
-                }           
             }
             $qinsert = Ques::create([
                 'q_quetype' => 'G',
                 'q_quetxt' => $quetxt,
-                'q_qm_src' => $qpart_img_src,
-                'q_qm_name' => $qpart_img_name,
-                'q_qs_src' => $qpart_sound_src,
-                'q_qs_name' => $qpart_sound_name,
+                'q_qm_src' => $file['qpic']['src'],
+                'q_qm_name' => $file['qpic']['name'],
+                'q_qs_src' => $file['qsound']['src'],
+                'q_qs_name' => $file['qsound']['name'],
                 'q_num' => 0,
                 'q_ans' => '',
                 'q_anstxt' => '',
@@ -793,108 +790,126 @@ class QueController extends TopController
                 'q_keyword' => '||',
                 'q_cgroup' => '',
                 'q_cans' => '',
-                'q_cmatch' => ''
+                'q_cmatch' => '',
+                'q_gsc_allset' => $q_allset
             ]);
             $json['serial'] = $qinsert->q_id;
-        }
+            $json['type'] = "G";
+            return response()->json($json);
+            return;
+        }else{
+            // 小題
+            if (!preg_match("/^[0-9]*$/", $serial))abort(400);
+            $sno = (int)$serial;
+            $q_pid = ($req->has('pserial') && !empty($req->input('pserial'))) ? trim($req->input('pserial')):0;
+            if (!preg_match("/^[0-9]*$/", $q_pid))abort(400);
+            // 題組id
+            $q_pid = (int)$q_pid;
+            if ($q_pid<1)abort(400);
+            // 題型
+            $que_type = ($req->has('qus_type') && !empty($req->input('qus_type'))) ? trim($req->input('qus_type')):'';
+            // 題組說明
+            $quetxt = ($req->has('gpcontent') && !empty($req->input('gpcontent'))) ? trim($req->input("gpcontent")):'';
+            $graid = ($req->has('grade') && !empty($req->input('grade'))) ? trim($req->input('grade')):0;
+            $subjid = ($req->has('subject') && !empty($req->input('subject'))) ? trim($req->input('subject')):0;
+            $chapid = ($req->has('chapter') && !empty($req->input('chapter'))) ? trim($req->input('chapter')):0;
+            $degree = ($req->has('degree'.$sno) && !empty($req->input('degree'.$sno))) ? trim($req->input('degree'.$sno)):"E";
+            $anstxt = ($req->has('f_anstxt') && !empty($req->input('f_anstxt'))) ? trim($req->input('f_anstxt')):'';
 
+            $qus = Ques::find($q_pid);
+            if ($qus->q_quetype!=="G")abort(400);
+            if ($qus->q_gsc_allset){
+                $graid = $qus->q_gra;
+                $subjid = $qus->q_subj;
+                $chapid = $qus->q_chap;
+            }
+            unset($qus);
+            $rs = $this->_ans_store_format($req, true);
 
-        //題目圖片
-        $qm_src = '';
-        $qm_name = '';
-        $qm_file = $req->file('qpic');
-        if ($qm_file!=null){
-            $file_error = false;
-            if ($req->hasFile('qpic')){
-                $mime = $qm_file->getMimeType();
-                $all_mime = array('image/jpg','image/jpeg','image/png');
-                if (!in_array($mime, $all_mime))$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($qm_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
-                    $qm_src = UPLOAD_DIR.'/'.$file;
-                    $qm_file->move(UPLOAD_DIR, $file);
-                    $qm_name = $qm_file->getClientOriginalName();
+            $file = array(
+                // 題目圖片
+                'qpic' => array(
+                    'allow_mime' => array('image/jpg','image/jpeg','image/png'),
+                    'src' => '',
+                    'name' => ''
+                ),
+                // 題目音訊
+                'qsound' => array(
+                    'allow_mime' => array('audio/mpeg'),
+                    'src' => '',
+                    'name' => ''
+                ),
+                // 詳解圖片
+                'apic' => array(
+                    'allow_mime' => array('image/jpg','image/jpeg','image/png'),
+                    'src' => '',
+                    'name' => ''
+                ),
+                // 詳解音訊
+                'asound' => array(
+                    'allow_mime' => array('audio/mpeg'),
+                    'src' => '',
+                    'name' => ''
+                ),
+                // 詳解視訊
+                'avideo' => array(
+                    'allow_mime' => array('video/mp4'),
+                    'src' => '',
+                    'name' => ''
+                )
+            );
+            foreach ($file as $i => $f) {
+                $up_file = $req->file($i);
+                if ($up_file!=null){
+                    $file_error = false;
+                    if ($req->file($i)){
+                        $mime = $up_file->getMimeType();
+                        if (!in_array($mime, $f['allow_mime']))$file_error = true;
+                        if (!$file_error){
+                            //上傳
+                            // $uuid = md5($up_file->getClientOriginalName().time());
+                            $uuid = md5(uniqid(rand(), true));
+                            $doc = $uuid.'.'.$up_file->getClientOriginalExtension();
+                            $file[$i]['src'] = UPLOAD_DIR.'/'.$doc;
+                            $up_file->move(UPLOAD_DIR, $doc);
+                            $file[$i]['name'] = $up_file->getClientOriginalName();
+                        }
+
+                    }
                 }
             }
-        }
-        //題目聲音
-        $qs_src = '';
-        $qs_name = '';
-        $qs_file = $req->file('qsound');
-        if ($qs_file!=null){
-            $file_error = false;
-            if ($req->hasFile('qsound')) {
-                $mime = $qs_file->getMimeType();
-                if ($mime!='audio/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($qs_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
-                    $qs_src = UPLOAD_DIR.'/'.$file;
-                    $qs_file->move(UPLOAD_DIR, $file);
-                    $qs_name = $qs_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解圖片
-        $am_src = '';
-        $am_name = '';
-        $am_file = $req->file('apic');
-        if ($am_file!=null){
-            $file_error = false;
-            if ($req->hasFile('apic')) {
-                $mime = $am_file->getMimeType();
-                $all_mime = array('image/jpg','image/jpeg','image/png');
-                if (!in_array($mime, $all_mime))$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($am_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$am_file->getClientOriginalExtension();
-                    $am_src = UPLOAD_DIR.'/'.$file;
-                    $am_file->move(UPLOAD_DIR, $file);
-                    $am_name = $am_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解聲音
-        $as_src = '';
-        $as_name = '';
-        $as_file = $req->file('asound');
-        if ($as_file!=null){
-            $file_error = false;
-            if ($req->hasFile('asound')) {
-                $mime = $as_file->getMimeType();
-                if ($mime!='audio/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($as_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$as_file->getClientOriginalExtension();
-                    $as_src = UPLOAD_DIR.'/'.$file;
-                    $as_file->move(UPLOAD_DIR, $file);
-                    $as_name = $as_file->getClientOriginalName();
-                }
-            }           
-        }
-        //詳解影片
-        $av_src = '';
-        $av_name = '';
-        $av_file = $req->file('avideo');
-        if ($av_file!=null){
-            $file_error = false;
-            if ($req->hasFile('avideo')) {
-                $mime = $av_file->getMimeType();
-                if ($mime!='video/mpeg')$file_error = true;
-                if (!$file_error){
-                    //上傳
-                    $uuid = md5($av_file->getClientOriginalName().time());
-                    $file = $uuid.'.'.$av_file->getClientOriginalExtension();
-                    $av_src = UPLOAD_DIR.'/'.$file;
-                    $av_file->move(UPLOAD_DIR, $file);
-                    $av_name = $av_file->getClientOriginalName();
-                }
-            }           
+            Ques::create([
+                'q_quetype' => $que_type,
+                'q_quetxt' => $quetxt,
+                'q_qm_src' => $file['qpic']['src'],
+                'q_qm_name' => $file['qpic']['name'],
+                'q_qs_src' => $file['qsound']['src'],
+                'q_qs_name' => $file['qsound']['name'],
+                'q_num' => $rs->num,
+                'q_ans' => $rs->all_ans,
+                'q_anstxt' => $anstxt,
+                'q_am_src' => $file['apic']['src'],
+                'q_am_name' => $file['apic']['name'],
+                'q_as_src' => $file['asound']['src'],
+                'q_as_name' => $file['asound']['name'],
+                'q_av_src' => $file['avideo']['src'],
+                'q_av_name' => $file['avideo']['name'],
+                'q_owner' => $this->login_user,
+                'q_degree' => $degree,
+                'q_gra' => $graid,
+                'q_subj' => $subjid,
+                'q_chap' => $chapid,
+                'q_know' => $know_id,
+                'q_created_at' => time(),
+                'q_updated_at' => time(),
+                'q_keyword' => '||',
+                'q_cgroup' => '',
+                'q_cans' => '',
+                'q_cmatch' => 0,
+                'q_pid' => $q_pid
+            ]);
+            $json['success'] = true;
+            return response()->json($json);
         }
     }
     /**
@@ -914,10 +929,21 @@ class QueController extends TopController
         $Qtype = $qdata->q_quetype;
         $Options = ($Qtype==="C") ? $format->q_cans:'';
         $Ans = $format->q_ans;
-        $Degree = $format->q_degree;
-        $Grade = $qdata->gra->name;
-        $Subject = $qdata->subj->name;
-        $Chapter = $qdata->chap->name;
+        $mix = false;
+        if ($Qtype==="G"){
+            $Degree = '混合';
+            if (!$qdata->q_gsc_allset)$mix = true;
+        }
+        if ($mix){
+            $Grade  = '混合';
+            $Subject = '混合';
+            $Chapter = '混合';
+        }else{
+            $Degree = $format->q_degree;
+            $Grade = $qdata->gra->name;
+            $Subject = $qdata->subj->name;
+            $Chapter = $qdata->chap->name;
+        }
         $Owner = $qdata->q_owner;
 
         $qcont =  array();
@@ -986,6 +1012,11 @@ class QueController extends TopController
         }
         $Keyword = implode(", ", $key);
         $title = '題目資訊-第'.$qid.'題';
+        $sub_que = array();
+        if ($Qtype==="G"){
+            $sub_que = $qdata->typeG_data();
+        }
+        
         return view("que.info", 
             compact("qid", "title", "Owner", "Quetype", "Que_content", "Options", "Qtype",
                     "Know_content", "Grade", "Subject", "Chapter", "Degree", 

@@ -35,16 +35,17 @@ class Ques extends Model
 		'q_keyword',
 		'q_know',
 		'q_num',
-		'q_cgroup',
-		'q_cans',
-		'q_cmatch',
+		'q_cgroup', // 配合題用
+		'q_cans', // 配合題用
+		'q_cmatch', // 配合題用
 		'q_qm_url',
 		'q_qs_url',
 		'q_am_url',
 		'q_as_url',
-		'q_av_url'
+		'q_av_url',
+		'q_pid', // 題組用
+		'q_gsc_allset' // 題組用
 	];
-	// q_cgroup, q_cans, q_cmatch 配合題用
 	public function gra(){
 		return $this->belongsto(Gscs::class, 'q_gra')->select('g_name as name');
 	}
@@ -56,5 +57,12 @@ class Ques extends Model
 	}
 	public function knows(){
 		return $this->belongsto(Knows::class, 'q_know')->select('k_name as name');
+	}
+	// public function typeG_subs(){
+	// 	return $this->hasMany($this, 'q_pid','q_id')->count();
+	// }
+	// 題組小題 題目
+	public function typeG_data(){
+		return $this->hasMany($this, 'q_pid', 'q_id')->select('*')->get()->all();
 	}
 }

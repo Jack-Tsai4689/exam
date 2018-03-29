@@ -37,15 +37,15 @@
     		margin-left: 5px;
     		margin-right: 5px;
     	}
-    	.deep {
+    	/*.deep {
     		background-color: #F5F5F4;
     	}
     	.shallow {
     		background-color: #FCFCFC;
-    	}
-    	.shallow td{
+    	}*/
+/*    	.shallow td{
     		padding: 10px 0px 10px 0px;
-    	}
+    	}*/
     	#duty td {
     		padding-bottom: 0px;
     	}
@@ -94,6 +94,8 @@
 <body>
 <div id="all">
 	<div class="title"><label class="f17">題目資訊-第{{ $qid }}題</label></div>
+    {{-- 非題組 --}}
+    @if($Qtype!=="G") 
     <div class="content">
 		<div class="cen">
 			<table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
@@ -143,6 +145,72 @@
             </table>
         </div>
     </div>
+    @else
+    {{-- 大題 --}}
+    <div class="content">
+        <div class="cen">
+            <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="right">建立者</td>
+                    <td width="80%">{{ $Owner }}</td>
+                </tr>
+                <tr>
+                    <td><label class="f17">{{ $Quetype }}</label></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">說明</td>
+                    <td>{!! $Que_content !!}</td>
+                </tr>
+                <tr>
+                    <td align="right">知識點</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">範圍</td>
+                    <td width="80%">【{{ $Grade }}】【{{ $Subject }}】【{{ $Chapter }}】【{{ $Degree }}】</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @foreach($Sub_data)
+    <div class="title"><label class="subno f17 no">第1小題</label><span class="remove_sub">&times;</span></div>
+    <div class="content">
+        <div class="cen">
+            <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td align="right">建立者</td>
+                    <td width="80%">{{ $Owner }}</td>
+                </tr>
+                <tr>
+                    <td><label class="f17">{{ $Quetype }}</label></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">說明</td>
+                    <td>{!! $Que_content !!}</td>
+                </tr>
+                <tr>
+                    <td align="right">知識點</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">範圍</td>
+                    <td width="80%">【{{ $Grade }}】【{{ $Subject }}】【{{ $Chapter }}】【{{ $Degree }}】</td>
+                </tr>
+                <tr>
+                    <td><label class="f17 oans_control" onclick="show_oans('oans')"><img id="oans_pic" src="{{ URL::asset('img/close.png')}}" height="20">詳解</label></td>
+                    <td></td>
+                </tr>
+            </table>
+            <table class="list oans last" border="0" width="100%" cellpadding="0" cellspacing="0" id="oans">
+                <tr>
+                    <td>{!! $Ans_content !!}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @endif
     <div class="content" style="margin-bottom:50px;">
         <div class="cen" style="padding-bottom:50px;">
             <div style="text-align:left;">

@@ -285,7 +285,6 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'AlterStus' => __DIR__ . '/../..' . '/database/migrations/2018_02_06_174855_alter_stus.php',
         'BasicTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_172034_basic_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
-        'CreateQuesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_30_163833_create_ques_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
         'EmployesTable' => __DIR__ . '/../..' . '/database/migrations/2018_01_28_173056_employes_table.php',

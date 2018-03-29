@@ -23,7 +23,6 @@ return array(
     'AlterStus' => $baseDir . '/database/migrations/2018_02_06_174855_alter_stus.php',
     'BasicTable' => $baseDir . '/database/migrations/2018_01_28_172034_basic_table.php',
     'CreatePasswordResetsTable' => $baseDir . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
-    'CreateQuesTable' => $baseDir . '/database/migrations/2018_01_30_163833_create_ques_table.php',
     'CreateUsersTable' => $baseDir . '/database/migrations/2014_10_12_000000_create_users_table.php',
     'DatabaseSeeder' => $baseDir . '/database/seeds/DatabaseSeeder.php',
     'EmployesTable' => $baseDir . '/database/migrations/2018_01_28_173056_employes_table.php',

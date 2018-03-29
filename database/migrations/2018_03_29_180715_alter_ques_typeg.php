@@ -14,6 +14,7 @@ class AlterQuesTypeg extends Migration
     {
         Schema::table('ques', function (Blueprint $table) {
             $table->integer('q_pid')->default(0);
+            $table->integer('q_gsc_allset')->default(0);
         });
     }
 
@@ -26,6 +27,7 @@ class AlterQuesTypeg extends Migration
     {
         Schema::table('ques', function (Blueprint $table) {
             $table->dropColumn('q_pid');
+            $table->dropColumn('q_gsc_allset');
         });
     }
 }
