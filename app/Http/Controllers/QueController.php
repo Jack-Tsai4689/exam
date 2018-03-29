@@ -706,7 +706,197 @@ class QueController extends TopController
         // $que_data->save();
         echo '<script>opener.location.reload();window.close();</script>';
     }
+    public function store_group(Request $req){
+        $serial = ($req->has('serial')) trim($req->input('serial')):"";
+        $graid = 0;
+        $subjid = 0;
+        $chapid = 0;
+        $know_id = 0;
+        // 大題
+        if ($serial==="0"){
+            // 題組說明
+            $quetxt = ($req->has('gpcontent') && !empty($req->input('gpcontent'))) ? trim($req->input("gpcontent")):'';
+            // 範圍統一說明
+            $allset = ($req->has('allset') && !empty($req->input('allset'))) ? trim($req->input('allset')):'';
+            if ($allset==="all"){
+                $graid = ($req->has('grade_al') && !empty($req->input('grade_al'))) ? trim($req->input('grade_al')):0;
+                $subjid = ($req->has('subject_al') && !empty($req->input('subject_al'))) ? trim($req->input('subject_al')):0;
+                $chapid = ($req->has('chapter_al') && !empty($req->input('chapter_al'))) ? trim($req->input('chapter_al')):0;
+                if (!preg_match("/^[0-9]*$/", $graid) ||
+                    !preg_match("/^[0-9]*$/", $subjid) ||
+                    !preg_match("/^[0-9]*$/", $chapid))abort(400);
+                if ($graid<1 || $subjid<1 || $chapid<1)abort(400);
+            }
+            // 題組圖片
+            $qpart_img_src = '';
+            $qpart_img_name = '';
+            $qm_file = $req->file('qpic');
+            if ($qm_file!=null){
+                $file_error = false;
+                if ($req->hasFile('qpic')){
+                    $mime = $qm_file->getMimeType();
+                    $all_mime = array('image/jpg','image/jpeg','image/png');
+                    if (!in_array($mime, $all_mime))$file_error = true;
+                    if (!$file_error){
+                        //上傳
+                        $uuid = md5($qm_file->getClientOriginalName().time());
+                        $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
+                        $qpart_img_src = UPLOAD_DIR.'/'.$file;
+                        $qm_file->move(UPLOAD_DIR, $file);
+                        $qpart_img_name = $qm_file->getClientOriginalName();
+                    }
+                }
+            }
+            //題目聲音
+            $qpart_sound_src = '';
+            $qpart_sound_name = '';
+            $qs_file = $req->file('qsound');
+            if ($qs_file!=null){
+                $file_error = false;
+                if ($req->hasFile('qsound')) {
+                    $mime = $qs_file->getMimeType();
+                    if ($mime!='audio/mpeg')$file_error = true;
+                    if (!$file_error){
+                        //上傳
+                        $uuid = md5($qs_file->getClientOriginalName().time());
+                        $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
+                        $qpart_sound_src = UPLOAD_DIR.'/'.$file;
+                        $qs_file->move(UPLOAD_DIR, $file);
+                        $qpart_sound_name = $qs_file->getClientOriginalName();
+                    }
+                }           
+            }
+            $qinsert = Ques::create([
+                'q_quetype' => 'G',
+                'q_quetxt' => $quetxt,
+                'q_qm_src' => $qpart_img_src,
+                'q_qm_name' => $qpart_img_name,
+                'q_qs_src' => $qpart_sound_src,
+                'q_qs_name' => $qpart_sound_name,
+                'q_num' => 0,
+                'q_ans' => '',
+                'q_anstxt' => '',
+                'q_am_src' => '',
+                'q_am_name' => '',
+                'q_as_src' => '',
+                'q_as_name' => '',
+                'q_av_src' => '',
+                'q_av_name' => '',
+                'q_owner' => $this->login_user,
+                'q_degree' => '',
+                'q_gra' => $graid,
+                'q_subj' => $subjid,
+                'q_chap' => $chapid,
+                'q_know' => 0,
+                'q_created_at' => time(),
+                'q_updated_at' => time(),
+                'q_keyword' => '||',
+                'q_cgroup' => '',
+                'q_cans' => '',
+                'q_cmatch' => ''
+            ]);
+            $json['serial'] = $qinsert->q_id;
+        }
 
+
+        //題目圖片
+        $qm_src = '';
+        $qm_name = '';
+        $qm_file = $req->file('qpic');
+        if ($qm_file!=null){
+            $file_error = false;
+            if ($req->hasFile('qpic')){
+                $mime = $qm_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($qm_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qm_file->getClientOriginalExtension();
+                    $qm_src = UPLOAD_DIR.'/'.$file;
+                    $qm_file->move(UPLOAD_DIR, $file);
+                    $qm_name = $qm_file->getClientOriginalName();
+                }
+            }
+        }
+        //題目聲音
+        $qs_src = '';
+        $qs_name = '';
+        $qs_file = $req->file('qsound');
+        if ($qs_file!=null){
+            $file_error = false;
+            if ($req->hasFile('qsound')) {
+                $mime = $qs_file->getMimeType();
+                if ($mime!='audio/mpeg')$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($qs_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$qs_file->getClientOriginalExtension();
+                    $qs_src = UPLOAD_DIR.'/'.$file;
+                    $qs_file->move(UPLOAD_DIR, $file);
+                    $qs_name = $qs_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解圖片
+        $am_src = '';
+        $am_name = '';
+        $am_file = $req->file('apic');
+        if ($am_file!=null){
+            $file_error = false;
+            if ($req->hasFile('apic')) {
+                $mime = $am_file->getMimeType();
+                $all_mime = array('image/jpg','image/jpeg','image/png');
+                if (!in_array($mime, $all_mime))$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($am_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$am_file->getClientOriginalExtension();
+                    $am_src = UPLOAD_DIR.'/'.$file;
+                    $am_file->move(UPLOAD_DIR, $file);
+                    $am_name = $am_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解聲音
+        $as_src = '';
+        $as_name = '';
+        $as_file = $req->file('asound');
+        if ($as_file!=null){
+            $file_error = false;
+            if ($req->hasFile('asound')) {
+                $mime = $as_file->getMimeType();
+                if ($mime!='audio/mpeg')$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($as_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$as_file->getClientOriginalExtension();
+                    $as_src = UPLOAD_DIR.'/'.$file;
+                    $as_file->move(UPLOAD_DIR, $file);
+                    $as_name = $as_file->getClientOriginalName();
+                }
+            }           
+        }
+        //詳解影片
+        $av_src = '';
+        $av_name = '';
+        $av_file = $req->file('avideo');
+        if ($av_file!=null){
+            $file_error = false;
+            if ($req->hasFile('avideo')) {
+                $mime = $av_file->getMimeType();
+                if ($mime!='video/mpeg')$file_error = true;
+                if (!$file_error){
+                    //上傳
+                    $uuid = md5($av_file->getClientOriginalName().time());
+                    $file = $uuid.'.'.$av_file->getClientOriginalExtension();
+                    $av_src = UPLOAD_DIR.'/'.$file;
+                    $av_file->move(UPLOAD_DIR, $file);
+                    $av_name = $av_file->getClientOriginalName();
+                }
+            }           
+        }
+    }
     /**
      * Display the specified resource.
      *

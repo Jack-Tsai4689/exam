@@ -108,6 +108,7 @@ Route::group(['prefix'=>'ques'], function(){
 	//新增題組題型
 	Route::get('/createg', "QueController@create_group");
 	Route::post('/', "QueController@store");
+	Route::post('/createg', "QueController@store_group");
 	Route::get('{id}/edit', "QueController@edit");
 	Route::get('/imp', "QueController@join");
 	Route::get('{id}',"QueController@show");
