@@ -179,19 +179,23 @@
         <div class="cen">
             <table class="list" border="0" width="100%" cellpadding="0" cellspacing="0">
                 <tr>
-                    <td align="right">建立者</td>
-                    <td width="80%">{{ $Owner }}</td>
-                </tr>
-                <tr>
                     <td><label class="f17">{{ $Quetype }}</label></td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td align="right">說明</td>
+                    <td align="right">題目</td>
                     <td>{!! $Que_content !!}</td>
                 </tr>
                 <tr>
+                    <td align="right">解答</td>
+                    <td width="80%">{!! $Ans !!}</td>
+                </tr>
+                <tr>
                     <td align="right">知識點</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td align="right">關鍵字</td>
                     <td></td>
                 </tr>
                 <tr>
