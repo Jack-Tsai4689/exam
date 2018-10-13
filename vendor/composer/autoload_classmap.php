@@ -15,7 +15,6 @@ return array(
     'AlterPubquesTypec' => $baseDir . '/database/migrations/2018_03_28_115330_alter_pubques_typec.php',
     'AlterPubquesUrl' => $baseDir . '/database/migrations/2018_03_28_225013_alter_pubques_url.php',
     'AlterQues' => $baseDir . '/database/migrations/2018_02_01_162142_alter_ques.php',
-    'AlterQuesImg' => $baseDir . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
     'AlterQuesKnow' => $baseDir . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
     'AlterQuesTypec' => $baseDir . '/database/migrations/2018_03_26_021315_alter_ques_typec.php',
     'AlterQuesTypeg' => $baseDir . '/database/migrations/2018_03_29_180715_alter_ques_typeg.php',

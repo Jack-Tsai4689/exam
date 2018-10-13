@@ -167,6 +167,11 @@ class BasicController extends TopController
         $alt = ($req->has('alt') && !empty($req->input('alt'))) ? trim($req->input('alt')):'';
         if (empty($type))abort(400);
         switch ($type) {
+            case 'grade':
+                $grade_data = $this->grade();
+                $rs_data = $this->_gsclist_format($grade_data);
+                unset($grade_data);
+                break;
             case 'subj':
                 $g = ($req->has('g')) ? (int)$req->input('g'):0;
                 if ($g===0)abort(400);

@@ -7,6 +7,9 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=9; IE=8; IE=7" />
 	<link rel="stylesheet" type="text/css" href="{{ URL::asset('/css/reset.css') }}">
 	<link rel="stylesheet" type="text/css" href="{{ URL::asset('/css/main.css') }}">
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.16/vue.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-async-data/1.0.2/vue-async-data.min.js"></script>
 	@yield('style')
 </head>
 <body>

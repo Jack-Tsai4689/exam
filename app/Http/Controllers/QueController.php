@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
+use App\Repositories\QuesRepository;
+
 use App\Ques;
 use URL;
 //use Auth;
@@ -18,9 +20,11 @@ class QueController extends TopController
      *
      * @return \Illuminate\Http\Response
      */
-    
-    public function __construct(){
+    protected $quesRepository;
+
+    public function __construct(QuesRepository $quesRepository){
         parent::__construct();
+        $this->quesRepository = $quesRepository;
     }
     public function index()
     {
@@ -64,35 +68,11 @@ class QueController extends TopController
                 }
             }
         }
-
-        $gra_html = '';
-        $subj_html = '';
-        $chap_html = '';
-        $grade_data = $this->grade();
-        if (!empty($grade_data)){
-            foreach ($grade_data as $v) {
-                $sel_gra = ($p_gra===$v->g_id) ? 'selected':'';
-                $gra_html.= '<option '.$sel_gra.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
-            }
-        }
-        if ($p_gra>0){
-            $query_search = true;
-            $subject_data = $this->subject($p_gra);
-            foreach ($subject_data as $v) {
-                $sel_subj = ($p_subj===$v->g_id) ? 'selected':'';
-                $subj_html.= '<option '.$sel_subj.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
-            }
-        }
-        if ($p_subj>0){
-            $query_search = true;
-            $chapter_data = $this->chapter($p_gra, $p_subj);
-            foreach ($chapter_data as $v) {
-                $sel_chap = ($p_chap===$v->g_id) ? 'selected':'';
-                $chap_html.= '<option '.$sel_chap.' value="'.$v->g_id.'">'.$v->g_name.'</option>';
-            }
-        }
+        if ($p_gra>0)$query_search = true;
+        if ($p_subj>0)$query_search = true;
         if ($query_search){
-            $ques = new Ques;
+            //$ques = new Ques;
+            $ques = $this->quesRepository;
             if ($p_degree>"")$ques = $ques->where('q_degree', $p_degree);
             if ($p_gra>0)$ques = $ques->where('q_gra', $p_gra);
             if ($p_subj>0)$ques = $ques->where('q_subj', $p_subj);
@@ -100,7 +80,9 @@ class QueController extends TopController
             if (!empty($p_keyword))$ques = $ques->where('q_keyword','like','%|'.$p_keyword.'|%');
             $que_data = $ques->where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
         }else{
-            $que_data = Ques::where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
+            $que_data = $this->quesRepository->where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
+            
+            // $que_data = Ques::where('q_pid',0)->orderby('q_updated_at','desc')->paginate(10);
         }
         foreach ($que_data as $k => $v) {
             $format = $this->Ques_format($v, 'list');
@@ -185,15 +167,18 @@ class QueController extends TopController
         $pfunc->next = $this->next_page;
         $pfunc->pg = $this->group_page;
         
+        $sel_gsc = new \stdClass;
+        $sel_gsc->gra = $p_gra;
+        $sel_gsc->subj = $p_subj;
+        $sel_gsc->chap = $p_chap;
         $data = [
             'menu_user' => $this->menu_user,
             'title' => '我的題庫',
             'Data' => $que_data,
-            'Grade' => $gra_html,
-            'Subject' => $subj_html,
-            'Chapter' => $chap_html,
+            'sel' => $sel_gsc,
             'Degree' => $sel_Degree,
             'Page' => $pfunc,
+            'pg' => $que_data->currentPage(),
             'Num' => $que_data->total(),
             'Qkeyword' => $p_keyword
         ];

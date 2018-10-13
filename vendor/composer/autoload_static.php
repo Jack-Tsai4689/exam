@@ -277,7 +277,6 @@ class ComposerStaticInit0819cfc5ba42b98920862a7c5ca39049
         'AlterPubquesTypec' => __DIR__ . '/../..' . '/database/migrations/2018_03_28_115330_alter_pubques_typec.php',
         'AlterPubquesUrl' => __DIR__ . '/../..' . '/database/migrations/2018_03_28_225013_alter_pubques_url.php',
         'AlterQues' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_162142_alter_ques.php',
-        'AlterQuesImg' => __DIR__ . '/../..' . '/database/migrations/2018_02_07_121305_alter_ques_img.php',
         'AlterQuesKnow' => __DIR__ . '/../..' . '/database/migrations/2018_02_01_170916_alter_ques_know.php',
         'AlterQuesTypec' => __DIR__ . '/../..' . '/database/migrations/2018_03_26_021315_alter_ques_typec.php',
         'AlterQuesTypeg' => __DIR__ . '/../..' . '/database/migrations/2018_03_29_180715_alter_ques_typeg.php',

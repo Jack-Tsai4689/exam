@@ -228,22 +228,18 @@ function getsubj(v){
 		gb("subj").innerHTML = '<option value="0">全部</option>';
 		return;
 	}
-	$.ajax({
-		type:"GET",
-		url:"{{ url('basic/detail') }}",
-		data:{'type':'subj', g:v},
-		dataType:"JSON",
-		success: function(rs){
-			let html = '<option value="0">全部</option>';
-			for (let i in rs){
-				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
-			}
-			gb('subj').innerHTML = html;
-		},
-		error: function(rs){
-			if (rs.status==401)alert('登入逾時，請重新登入');
-			if (rs.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
+	axios.get("{{ url('basic/detail') }}", {
+		params: { type: 'subj', g:v }
+	}).then(function(res){
+		let rs = res.data;
+		let html = '<option value="0">全部</option>';
+		for (let i in rs){
+			html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
 		}
+		gb('subj').innerHTML = html;
+	}).catch(function(rs){
+		if (rs.response.status==401)alert('登入逾時，請重新登入');
+		if (rs.response.status==400)gb('subj').innerHTML = '<option value="">無資料</option>';
 	});
 }
 $("#cond").on('click', function(){

@@ -7,6 +7,7 @@
 	<link rel="stylesheet" type="text/css" href="{{ URL::asset('/css/main.css') }}">
     <script type="text/javascript" src="{{ URL::asset('/js/ui/jquery-ui-1.10.3/ui/jquery-ui.js') }}"></script>
     <link rel="stylesheet" type="text/css" href="{{ URL::asset('/js/ui/jquery-ui-1.10.3/themes/base/jquery-ui.css') }}">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
     	function gb(v){
     		return document.getElementById(v);

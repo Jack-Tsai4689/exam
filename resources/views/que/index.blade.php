@@ -28,21 +28,22 @@
 		<div><input type="button" class="btn f16 w150" name="" id="" value="新增題目" onclick='window.open("{{ url('/ques/create') }}","_blank","width=800,height=600,resizable=yes,scrollbars=yes,location=no");' >&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" class="btn f16 w150" name="" id="" value="Excel匯入(敬請期待)"></div>
 		{{-- <label class="f16" id="choice_fie"><a href="javascript:void(0)" onclick="open_field();">選擇欄位</a></label> --}}
 	</div>
+	<div id="app"></div>
 	<div class="title_intro condition">
-		<div>
+		<div id="condit">
 			<div style="width:80px; display:inline-block; position: relative; margin-left:5px;">範圍條件</div>
-			類別：
-			<select name="gra" onchange="getsubj(this.value)">
-				<option value="0">全部</option>{!! $Grade !!}
-			</select>　
+			{{-- 類別：
+			<select name="gra" @change="g_subject" v-model="grade">
+				<option v-for="grade in grades" :value="grade.ID">@{{grade.NAME}}</option>
+			</select>
 			科目：
-			<select name="subj" id="subj" onchange="getchap(this.value)">
-				<option value="0">全部</option>{!! $Subject !!}
+			<select name="subj" @change="g_chap" v-model="subject">
+				<option v-for="subj in subjects" :value="subj.ID">@{{subj.NAME}}</option>
 			</select>　
 			章節：
-			<select name="chap" id="chap">
-				<option value="0">全部</option>{!! $Chapter !!}
-			</select>　
+			<select name="chap" v-model="chapter">
+				<option v-for="chap in chapters" :value="chap.ID">@{{chap.NAME}}</option>
+			</select>　 --}}
 			難度：
 			<select name="degree">
 				<option value=""  {{ $Degree->A}} >全部</option>
@@ -50,8 +51,8 @@
 				<option value="M" {{ $Degree->M}} >中等</option>
 				<option value="H" {{ $Degree->H}} >困難</option>
 				</select>
-			　<input type="button" id="cond" value="篩選">
-			<input type="hidden" name="page" id="urlpage" value="">
+			　<input type="button" value="篩選" @click="query">
+			<input type="hidden" name="page" value="@{{pg}}">
 		</div>
 	</div>
 	</form>
@@ -89,7 +90,7 @@
 		<label class="all_rows">共 {{ $Num }} 筆資料</label>
 		<div class="each">
 			{!! $Page->prev !!}
-			<select id="pagegroup" onchange="gp(this.value)">{!! $Page->pg !!}</select>
+			<select id="pagegroup" @change="query" v-model="pg">{!! $Page->pg !!}</select>
 			{!! $Page->next !!}
 		</div>
 	</div>
@@ -97,98 +98,108 @@
 @stop
 @section('script')
 <script type="text/javascript">
-function open_edit(value){
-	var func = $('#edit_func_'+value);
-	if (func.hasClass('show')){
-		func.removeClass('show');
-	}else{
-		$('div[name=edit_group]').removeClass('show');
-		func.addClass('show');
-	}
-}
-var i='';
-function check_all(obj,cName){
-    var checkboxs = document.getElementsByName(cName);
-    for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
-}
-function search_confirm(){
-  var search = $('#q').val();
-  var pattern = new RegExp("[`~!@#$^&()=|{}':;'-+,\\[\\].<>/?~！@#￥……&*（）——|{}【】『；：」「'。，、？]");
-  var rs = "";
-  for (var i = 0; i < search.length; i++) { 
-      rs += search.substr(i, 1).replace(pattern, ''); 
-  } 
-  if (search.trim()!='')ques_find();
-}
+// function open_edit(value){
+// 	var func = $('#edit_func_'+value);
+// 	if (func.hasClass('show')){
+// 		func.removeClass('show');
+// 	}else{
+// 		$('div[name=edit_group]').removeClass('show');
+// 		func.addClass('show');
+// 	}
+// }
+// var i='';
+// function check_all(obj,cName){
+//     var checkboxs = document.getElementsByName(cName);
+//     for(var i=0;i<checkboxs.length;i++){checkboxs[i].checked = obj.checked;}
+// }
+// function search_confirm(){
+//   var search = $('#q').val();
+//   var pattern = new RegExp("[`~!@#$^&()=|{}':;'-+,\\[\\].<>/?~！@#￥……&*（）——|{}【】『；：」「'。，、？]");
+//   var rs = "";
+//   for (var i = 0; i < search.length; i++) { 
+//       rs += search.substr(i, 1).replace(pattern, ''); 
+//   } 
+//   if (search.trim()!='')ques_find();
+// }
 
 let g = 0;
-function getsubj(v){
-	g = v;
-	gb("subj").innerHTML = '<option value="">搜尋中</option>';
-	if (v==="0"){
-		gb("subj").innerHTML = '<option value="0">全部</option>';
-		gb("chap").innerHTML = '<option value="0">全部</option>';
-		return;
-	}
-	$.ajax({
-		type:"GET",
-		url:"{{ url('basic/detail') }}",
-		data:{'type':'subj', g:v},
-		dataType:"JSON",
-		success: function(rs){
-			let html = '<option value="0">全部</option>';
-			for (let i in rs){
-				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
-			}
-			gb('subj').innerHTML = html;
-		},
-		error: function(rs){
-			switch(rs.status){
-				case 400: alert('例外錯誤'); break;
-				case 401: alert('登入逾時，請重新登入'); break;
-				case 406: gb('subj').innerHTML = '<option value="">無資料</option>'; break;
-			}
-		}
-	});
-}
-function getchap(v){
-	gb("chap").innerHTML = '<option value="">搜尋中</option>';
-	if (v==="0"){
-		gb("chap").innerHTML = '<option value="0">全部</option>';
-		return;
-	}
-	$.ajax({
-		type:"GET",
-		url:"{{ url('basic/detail') }}",
-		data:{'type':'chap', 'g':g, 's':v},
-		dataType:"JSON",
-		success: function(rs){
-			let html = '<option value="0">全部</option>';
-			console.log(rs);
-			for (let i in rs){
-				console.log(rs[i].ID+','+rs[i].NAME);
-				html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
-			}
-			gb('chap').innerHTML = html;
-		},
-		error: function(rs){
-			switch(rs.status){
-				case 400: alert('例外錯誤'); break;
-				case 401: alert('登入逾時，請重新登入'); break;
-				case 406: gb('chap').innerHTML = '<option value="">無資料</option>'; break;
-			}
-		}
-	});
-}
-$("#cond").on('click', function(){
-	ques_find();
+Vue.component('Select', {
+  props: ['value', 'options'],
+  computed:{
+    index: {
+      get(){
+        return this.value;
+      },
+      set(val){
+        this.$emit('input', val);
+      },
+    },
+  },
+  template: `
+    <select v-model="index">
+      <option v-for="item in options" :value="item.ID">
+        @{{item.NAME}}
+      </option>
+    </select>
+  `,
 });
-function gp(p){
-	gb('urlpage').value = p;
-	ques_find();
-}
-function ques_find(){
-	location.href = '{{ url('/ques') }}?'+$("#form1").serialize();
-}
+
+new Vue({
+	el: "#app",
+	data: {
+		all: [{ID:0, NAME:'nodata'}],
+		grades: [],
+		gradeidx: 0,
+		subjidx: 0,
+		chapidx: 0,
+	},
+	asyncCcomputed:{
+		subjects(){
+			return new Promise(resolve => {
+				axios.get("{{ url('basic/detail')}}", {
+					params: {type:"subj", g:this.gradeidx}
+				}).then(res => {
+					return res.data;
+				}).catch(res => {
+					return this.all;
+				});
+			});
+		},
+		chap(){
+			if (this.subjidx===0)return this.all;
+			axios.get("{{ url('basic/detail')}}", {
+				params: {type:"chap", g:this.gradeidx, s:this.subjidx}
+			}).then((res) => {
+				return res.data;
+			}).catch(res => {
+				return this.all;
+			});
+		},
+	},
+	watch: {
+		gradeidx(){
+			this.subjidx = 0;
+		},
+		subjidx(){
+			this.chapidx = 0;
+		},
+	},
+	template: `
+	<div>
+		<Select v-model="gradeidx" :options="grades"></Select>
+		<Select v-model="subjidx" :options="subjects"></Select>
+		<Select v-model="chapidx" :options="chap"></Select>
+	</div>
+	`,
+	mounted(){
+		axios.get("{{ url('basic/detail')}}", {
+				params: {type:"grade"}
+			}).then(grade => {
+				this.grades = grade.data;
+			}).catch(res => {
+				this.grades = this.all;
+			});
+	}
+});
 </script>
 @stop

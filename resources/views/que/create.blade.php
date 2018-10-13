@@ -568,53 +568,45 @@ $(function() {
 let rows_m = 1;
 
 function subj_c(obj){
-    $.ajax({
-        type:"GET",
-        url:"{{ url('/basic/detail') }}",
-        dataType:"JSON",
-        data:{'type':'subj', 'g':obj.value},
-        success: function(rs){
-            $("#f_subject").html('');
-            let html = '';
-            for(let i in rs){
-                html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
-            }
-            $("#f_subject").html(html);
-            chap_c(gb('f_subject').value);
-        },
-        error: function(rs){
-            switch(rs.status){
-                case 400: alert('例外錯誤'); break;
-                case 401: alert('登入逾時，請重新登入'); break;
-                case 406:
-                    gb('f_subject').innerHTML = '<option value="0">無科目</optoin>';
-                    gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; 
-                    break;
-            }
+    axios.get("{{ url('/basic/detail') }}", {
+        params: {'type':'subj', 'g':obj.value}
+    }).then(function(res){
+        let rs = res.data;
+        $("#f_subject").html('');
+        let html = '';
+        for(let i in rs){
+            html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+        }
+        $("#f_subject").html(html);
+        chap_c(gb('f_subject'));
+    }).catch(function(rs){
+        switch(rs.response.status){
+            case 400: alert('例外錯誤'); break;
+            case 401: alert('登入逾時，請重新登入'); break;
+            case 406:
+                gb('f_subject').innerHTML = '<option value="0">無科目</optoin>';
+                gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; 
+                break;
         }
     });
 }
 function chap_c(obj){
     $('.custom-combobox-input').val('');
     $('#f_chapterui').empty();
-    $.ajax({
-        type:"GET",
-        url:"{{ url('/basic/detail') }}",
-        dataType:"JSON",
-        data:{'type':'chap', 'g':gb('f_grade').value, 's':obj.value},
-        success: function(rs){
-            let html = '';
-            for(let i in rs){
-                html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
-            }
-            $("#f_chapterui").html(html);
-        },
-        error: function(rs){
-            switch(rs.status){
-                case 400: alert('例外錯誤'); break;
-                case 401: alert('登入逾時，請重新登入'); break;
-                case 406: gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; break;
-            }
+    axios.get("{{ url('/basic/detail') }}", {
+        params: { type:'chap', g:gb('f_grade').value, s:obj.value}
+    }).then(function(res){
+        let rs = res.data;
+        let html = '';
+        for(let i in rs){
+            html+= '<option value="'+rs[i].ID+'">'+rs[i].NAME+'</option>';
+        }
+        $("#f_chapterui").html(html);
+    }).catch(function(rs){
+        switch(rs.response.status){
+            case 400: alert('例外錯誤'); break;
+            case 401: alert('登入逾時，請重新登入'); break;
+            case 406: gb('f_chapterui').innerHTML = '<option value="0">無章節</optoin>'; break;
         }
     });
 }
